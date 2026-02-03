@@ -9,6 +9,7 @@ use App\Http\Controllers\User\BookingController;
 use App\Http\Controllers\User\HewanSayaController;
 use App\Http\Controllers\User\KonsultasiController;
 use App\Http\Controllers\User\ProfilController;
+use App\Http\Controllers\Petugas\InputLogController;
 use App\Http\Controllers\User\CekStatusController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicController;
@@ -118,10 +119,12 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     Route::post('/notifications/mark-all-read', [AdminDashboardController::class, 'markAllAsRead'])
         ->name('notifications.mark-all-read');
-
-
     Route::get('/notifications/count', [AdminDashboardController::class, 'getNotificationCount'])
         ->name('notifications.count');
+
+     // Master Kegiatan (Tambahkan ini)
+    Route::resource('master-kegiatan', \App\Http\Controllers\Admin\MasterKegiatanController::class)
+        ->except(['show']);
 });
 
 // ======================
@@ -129,13 +132,23 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 // =====================
 
 Route::middleware(['auth', 'petugas'])->prefix('petugas')->name('petugas.')->group(function () {
+    
+    // Dashboard
     Route::get('/dashboard', [App\Http\Controllers\Petugas\DashboardController::class, 'index'])->name('dashboard');
+    
+    // Input Log Kegiatan (Sistem Fleksibel Baru)
     Route::get('/input-log/{booking}', [App\Http\Controllers\Petugas\InputLogController::class, 'show'])->name('input-log.show');
     Route::post('/input-log/{booking}', [App\Http\Controllers\Petugas\InputLogController::class, 'store'])->name('input-log.store');
+    Route::delete('/input-log/{log}', [App\Http\Controllers\Petugas\InputLogController::class, 'destroyLog'])->name('input-log.destroy-log');
+    
+    // Notifications
     Route::get('/notifications', [App\Http\Controllers\Petugas\NotificationController::class, 'index'])->name('notifications.index');
     Route::get('/notifications/{notification}/read', [App\Http\Controllers\Petugas\NotificationController::class, 'markAsRead'])->name('notifications.mark-read');
+    
+    // Profile
     Route::get('/profile', [App\Http\Controllers\Petugas\ProfileController::class, 'index'])->name('profile.index');
 });
+
 
 // ======================
 // ROUTE USER

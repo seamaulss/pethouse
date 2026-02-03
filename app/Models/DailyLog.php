@@ -12,33 +12,20 @@ class DailyLog extends Model
     protected $fillable = [
         'booking_id',
         'petugas_id',
+        'kegiatan_id',
         'tanggal',
-        'makan_pagi',
-        'jam_makan_pagi',
-        'makan_siang',
-        'jam_makan_siang',
-        'makan_malam',
-        'jam_makan_malam',
-        'minum',
-        'jam_minum',
-        'jalan_jalan',
-        'jam_jalan_jalan',
-        'buang_air',
+        'waktu',
+        'keterangan',
+        'jumlah',
+        'satuan',
+        'status_pelaksanaan',
         'catatan'
     ];
 
     protected $casts = [
         'tanggal' => 'date',
-        'makan_pagi' => 'boolean',
-        'makan_siang' => 'boolean',
-        'makan_malam' => 'boolean',
-        'minum' => 'boolean',
-        'jalan_jalan' => 'boolean',
-        'jam_makan_pagi' => 'datetime:H:i',
-        'jam_makan_siang' => 'datetime:H:i',
-        'jam_makan_malam' => 'datetime:H:i',
-        'jam_minum' => 'datetime:H:i',
-        'jam_jalan_jalan' => 'datetime:H:i',
+        'waktu' => 'datetime:H:i',
+        'status_pelaksanaan' => 'string'
     ];
 
     // Relasi dengan booking
@@ -53,36 +40,22 @@ class DailyLog extends Model
         return $this->belongsTo(User::class, 'petugas_id');
     }
 
+    // Relasi dengan master kegiatan
+    public function kegiatan()
+    {
+        return $this->belongsTo(MasterKegiatan::class, 'kegiatan_id');
+    }
+
     // Accessor untuk format jam yang lebih mudah
-    public function getJamMakanPagiFormattedAttribute()
+    public function getWaktuFormattedAttribute()
     {
-        return $this->jam_makan_pagi ? date('H:i', strtotime($this->jam_makan_pagi)) : null;
+        return $this->waktu ? date('H:i', strtotime($this->waktu)) : null;
     }
 
-    public function getJamMakanSiangFormattedAttribute()
+    // Scope untuk hari tertentu
+    public function scopePadaTanggal($query, $tanggal)
     {
-        return $this->jam_makan_siang ? date('H:i', strtotime($this->jam_makan_siang)) : null;
-    }
-
-    public function getJamMakanMalamFormattedAttribute()
-    {
-        return $this->jam_makan_malam ? date('H:i', strtotime($this->jam_makan_malam)) : null;
-    }
-
-    public function getJamMinumFormattedAttribute()
-    {
-        return $this->jam_minum ? date('H:i', strtotime($this->jam_minum)) : null;
-    }
-
-    public function getJamJalanJalanFormattedAttribute()
-    {
-        return $this->jam_jalan_jalan ? date('H:i', strtotime($this->jam_jalan_jalan)) : null;
-    }
-
-    // Scope untuk hari ini
-    public function scopeHariIni($query)
-    {
-        return $query->where('tanggal', today()->toDateString());
+        return $query->where('tanggal', $tanggal);
     }
 
     // Scope untuk petugas tertentu
@@ -95,5 +68,11 @@ class DailyLog extends Model
     public function scopeForBooking($query, $bookingId)
     {
         return $query->where('booking_id', $bookingId);
+    }
+
+    // Scope untuk urut waktu
+    public function scopeUrutWaktu($query)
+    {
+        return $query->orderBy('waktu', 'desc');
     }
 }

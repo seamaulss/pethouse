@@ -24,8 +24,13 @@ class DashboardController extends Controller
         ->where('is_read', 0)
         ->count();
 
-        // Ambil booking dengan status in_progress
+        // AMBIL BOOKING YANG SEDANG in_progress DAN PETUGAS_ID SESUAI ATAU NULL
         $bookings = Booking::where('status', 'in_progress')
+            ->where(function($query) use ($petugasId) {
+                $query->where('petugas_id', $petugasId)
+                      ->orWhereNull('petugas_id');
+            })
+            ->with(['user', 'layanan'])  // LOAD RELASI UNTUK EFFISIENSI
             ->orderBy('tanggal_masuk', 'desc')
             ->get();
 

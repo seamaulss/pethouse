@@ -84,6 +84,17 @@ $adminName = Auth::user()->username;
             @endif
         </a>
 
+        <!-- Master Kegiatan -->
+        <a href="{{ route('admin.master-kegiatan.index') }}" class="group flex items-center px-4 py-3.5 rounded-2xl transition-all duration-300 {{ str_contains($currentRoute, 'admin.master-kegiatan') ? 'bg-gradient-to-r from-teal-500 to-teal-600 text-white font-semibold shadow-lg shadow-teal-500/30' : 'text-gray-700 hover:bg-teal-50 hover:text-teal-700' }}">
+            <div class="w-10 h-10 flex items-center justify-center rounded-xl {{ str_contains($currentRoute, 'admin.master-kegiatan') ? 'bg-white bg-opacity-20' : 'bg-purple-50 group-hover:bg-purple-100' }} transition-all duration-300">
+                <i class="fas fa-tasks text-lg {{ str_contains($currentRoute, 'admin.master-kegiatan') ? 'text-white' : 'text-purple-600' }}"></i>
+            </div>
+            <span class="ml-3 font-medium">Master Kegiatan</span>
+            @if(str_contains($currentRoute, 'admin.master-kegiatan'))
+            <i class="fas fa-chevron-right ml-auto text-sm"></i>
+            @endif
+        </a>
+
         <!-- Hero Slider -->
         <a href="{{ route('admin.hero.index') }}" class="group flex items-center px-4 py-3.5 rounded-2xl transition-all duration-300 {{ str_contains($currentRoute, 'admin.hero') ? 'bg-gradient-to-r from-teal-500 to-teal-600 text-white font-semibold shadow-lg shadow-teal-500/30' : 'text-gray-700 hover:bg-teal-50 hover:text-teal-700' }}">
             <div class="w-10 h-10 flex items-center justify-center rounded-xl {{ str_contains($currentRoute, 'admin.hero') ? 'bg-white bg-opacity-20' : 'bg-indigo-50 group-hover:bg-indigo-100' }} transition-all duration-300">
@@ -94,7 +105,7 @@ $adminName = Auth::user()->username;
             <i class="fas fa-chevron-right ml-auto text-sm"></i>
             @endif
         </a>
-        
+
         <!-- Testimoni -->
         <a href="{{ route('admin.testimoni.index') }}" class="group flex items-center px-4 py-3.5 rounded-2xl transition-all duration-300 {{ str_contains($currentRoute, 'admin.testimoni') ? 'bg-gradient-to-r from-teal-500 to-teal-600 text-white font-semibold shadow-lg shadow-teal-500/30' : 'text-gray-700 hover:bg-teal-50 hover:text-teal-700' }}">
             <div class="w-10 h-10 flex items-center justify-center rounded-xl {{ str_contains($currentRoute, 'admin.testimoni') ? 'bg-white bg-opacity-20' : 'bg-teal-50 group-hover:bg-teal-100' }} transition-all duration-300">

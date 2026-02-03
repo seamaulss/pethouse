@@ -1,6 +1,6 @@
 @extends('petugas.layouts.app')
 
-@section('title', 'Petugas - Update Harian')
+@section('title', 'Petugas - Input Log Kegiatan')
 
 @section('content')
 <div class="max-w-6xl mx-auto py-8">
@@ -8,7 +8,7 @@
     <div class="bg-white p-6 rounded-2xl shadow-xl mb-6">
         <div class="flex flex-col md:flex-row justify-between items-center mb-6">
             <h1 class="text-3xl font-bold text-teal-600 mb-4 md:mb-0">
-                🐾 Update Harian {{ $booking->nama_hewan }}
+                📝 Log Kegiatan {{ $booking->nama_hewan }}
             </h1>
             
             <!-- Form Pilih Tanggal -->
@@ -61,11 +61,7 @@
             <div class="bg-amber-50 p-4 rounded-lg">
                 <p class="text-sm text-amber-600">Status Log</p>
                 <p class="font-semibold">
-                    @if($log)
-                        <span class="text-green-600">✓ Sudah diisi</span>
-                    @else
-                        <span class="text-red-600">✗ Belum diisi</span>
-                    @endif
+                    {{ $logs->count() }} kegiatan tercatat
                 </p>
                 <p class="text-sm text-gray-600">
                     {{ count($filledDates) }} dari {{ count($dates) }} hari sudah diisi
@@ -102,8 +98,10 @@
         </div>
     </div>
 
-    <!-- Form Input Log -->
-    <div class="bg-white p-8 rounded-2xl shadow-xl">
+    <!-- Form Input Log Baru -->
+    <div class="bg-white p-8 rounded-2xl shadow-xl mb-6">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">➕ Tambah Kegiatan Baru</h2>
+        
         @if(session('success'))
             <div class="bg-green-100 text-green-700 p-4 rounded mb-6 text-center font-semibold">
                 {{ session('success') }}
@@ -116,82 +114,133 @@
             <!-- Hidden field untuk tanggal -->
             <input type="hidden" name="tanggal" value="{{ $selectedDate }}">
             
-            @php
-                $activities = [
-                    'makan_pagi'  => ['label' => 'Makan Pagi', 'jam' => 'jam_makan_pagi', 'icon' => '☀️'],
-                    'makan_siang' => ['label' => 'Makan Siang', 'jam' => 'jam_makan_siang', 'icon' => '🕛'],
-                    'makan_malam' => ['label' => 'Makan Malam', 'jam' => 'jam_makan_malam', 'icon' => '🌙'],
-                    'minum'       => ['label' => 'Minum', 'jam' => 'jam_minum', 'icon' => '💧'],
-                    'jalan_jalan' => ['label' => 'Jalan-jalan', 'jam' => 'jam_jalan_jalan', 'icon' => '🏃'],
-                ];
-            @endphp
-
-            @foreach($activities as $name => $a)
-                @php
-                    // Checkbox logic dengan old input
-                    $checked = '';
-                    if (old($name) !== null) {
-                        $checked = old($name) ? 'checked' : '';
-                    } else if ($log && $log->$name) {
-                        $checked = 'checked';
-                    }
-                    
-                    // Time logic dengan old input
-                    $jamVal = '';
-                    if (old($a['jam']) !== null) {
-                        $jamVal = old($a['jam']);
-                    } else if ($log && $log->{$a['jam']}) {
-                        $jamVal = \Carbon\Carbon::parse($log->{$a['jam']})->format('H:i');
-                    }
-                @endphp
-                
-                <div class="flex items-center gap-4 bg-gray-50 p-4 rounded-xl hover:bg-gray-100 transition">
-                    <input type="checkbox" name="{{ $name }}" {{ $checked }} class="w-5 h-5 text-teal-600">
-                    <span class="flex-1 text-lg">{{ $a['icon'] }} {{ $a['label'] }}</span>
-                    <input type="time" name="{{ $a['jam'] }}" value="{{ $jamVal }}"
-                           class="border rounded-lg px-3 py-2 w-32">
-                </div>
-            @endforeach
-
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label class="font-semibold block mb-2">Buang Air</label>
-                    <select name="buang_air" class="w-full border rounded-lg px-4 py-3">
-                        @php
-                            $options = ['belum', 'normal', 'diare', 'sembelit'];
-                            $selectedBuangAir = old('buang_air', $log->buang_air ?? 'belum');
-                        @endphp
-                        
-                        @foreach($options as $option)
-                            <option value="{{ $option }}" {{ $selectedBuangAir == $option ? 'selected' : '' }}>
-                                {{ ucfirst($option) }}
+                    <label class="font-semibold block mb-2">Jenis Kegiatan *</label>
+                    <select name="kegiatan_id" class="w-full border rounded-lg px-4 py-3" required>
+                        <option value="">-- Pilih Kegiatan --</option>
+                        @foreach($masterKegiatan as $kegiatan)
+                            <option value="{{ $kegiatan->id }}">
+                                {{ $kegiatan->nama_kegiatan }}
+                                @if($kegiatan->deskripsi)
+                                    - {{ $kegiatan->deskripsi }}
+                                @endif
                             </option>
                         @endforeach
                     </select>
                 </div>
-
+                
                 <div>
-                    <label class="font-semibold block mb-2">Catatan Harian</label>
-                    <textarea name="catatan" class="w-full border rounded-lg p-4 h-full" rows="3" 
-                              placeholder="Catatan khusus untuk hari ini...">{{ old('catatan', $log->catatan ?? '') }}</textarea>
+                    <label class="font-semibold block mb-2">Waktu Kegiatan *</label>
+                    <input type="time" name="waktu" value="{{ date('H:i') }}" 
+                           class="w-full border rounded-lg px-4 py-3" required>
                 </div>
             </div>
-
-            <div class="flex justify-between items-center pt-6 border-t">
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    @if($log)
-                        <p class="text-sm text-gray-600">
-                            Terakhir diupdate: {{ $log->updated_at->format('d M Y H:i') }}
-                        </p>
-                    @endif
+                    <label class="font-semibold block mb-2">Jumlah</label>
+                    <input type="text" name="jumlah" 
+                           class="w-full border rounded-lg px-4 py-3" 
+                           placeholder="Contoh: 1 mangkuk, 2 tablet">
                 </div>
                 
+                <div>
+                    <label class="font-semibold block mb-2">Satuan</label>
+                    <input type="text" name="satuan" 
+                           class="w-full border rounded-lg px-4 py-3" 
+                           placeholder="Contoh: mangkuk, tablet, ml">
+                </div>
+            </div>
+            
+            <div>
+                <label class="font-semibold block mb-2">Keterangan</label>
+                <textarea name="keterangan" class="w-full border rounded-lg p-4" rows="2" 
+                          placeholder="Contoh: Makan lahap, habis 1 mangkuk"></textarea>
+            </div>
+            
+            <div>
+                <label class="font-semibold block mb-2">Catatan Tambahan</label>
+                <textarea name="catatan" class="w-full border rounded-lg p-4" rows="3" 
+                          placeholder="Catatan khusus..."></textarea>
+            </div>
+            
+            <div class="flex justify-end">
                 <button type="submit" 
                         class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-8 rounded-xl text-lg transition">
-                    💾 Simpan Update untuk {{ \Carbon\Carbon::parse($selectedDate)->format('d M') }}
+                    💾 Simpan Kegiatan
                 </button>
             </div>
         </form>
+    </div>
+    
+    <!-- Daftar Log Hari Ini -->
+    <div class="bg-white p-8 rounded-2xl shadow-xl">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">
+            📋 Kegiatan {{ \Carbon\Carbon::parse($selectedDate)->format('d M Y') }}
+            <span class="text-sm font-normal text-gray-600">({{ $logs->count() }} kegiatan)</span>
+        </h2>
+        
+        @if($logs->count() > 0)
+            <div class="space-y-4">
+                @foreach($logs as $log)
+                    <div class="border-l-4 border-teal-500 bg-gray-50 p-4 rounded-r-lg">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="font-bold text-lg flex items-center">
+                                    @if($log->kegiatan->icon)
+                                        <i class="fas fa-{{ $log->kegiatan->icon }} mr-2"></i>
+                                    @endif
+                                    {{ $log->kegiatan->nama_kegiatan }}
+                                    <span class="ml-2 text-sm bg-{{ $log->kegiatan->warna }}-100 text-{{ $log->kegiatan->warna }}-800 px-2 py-1 rounded">
+                                        {{ \Carbon\Carbon::parse($log->waktu)->format('H:i') }}
+                                    </span>
+                                </h3>
+                                
+                                @if($log->keterangan)
+                                    <p class="text-gray-700 mt-1">{{ $log->keterangan }}</p>
+                                @endif
+                                
+                                @if($log->jumlah)
+                                    <p class="text-gray-600 text-sm mt-1">
+                                        Jumlah: <span class="font-semibold">{{ $log->jumlah }}</span>
+                                        @if($log->satuan)
+                                            {{ $log->satuan }}
+                                        @endif
+                                    </p>
+                                @endif
+                                
+                                @if($log->catatan)
+                                    <p class="text-gray-600 text-sm mt-2 border-t pt-2">
+                                        <strong>Catatan:</strong> {{ $log->catatan }}
+                                    </p>
+                                @endif
+                                
+                                <p class="text-gray-500 text-xs mt-2">
+                                    Dicatat oleh: {{ $log->petugas->username ?? 'Petugas' }}
+                                </p>
+                            </div>
+                            
+                            <form action="{{ route('petugas.input-log.destroy-log', $log->id) }}" 
+                                  method="POST" 
+                                  onsubmit="return confirm('Yakin hapus log ini?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="text-red-500 hover:text-red-700">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        @else
+            <div class="text-center py-12">
+                <div class="text-6xl mb-4">📝</div>
+                <p class="text-xl text-gray-600">Belum ada kegiatan yang dicatat untuk hari ini.</p>
+                <p class="text-gray-500">Mulai dengan menambahkan kegiatan pertama di atas.</p>
+            </div>
+        @endif
     </div>
     
     <!-- Navigasi ke hari lain -->

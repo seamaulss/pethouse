@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 02, 2026 at 03:47 PM
+-- Generation Time: Feb 03, 2026 at 05:34 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -59,10 +59,7 @@ CREATE TABLE `booking` (
 --
 
 INSERT INTO `booking` (`id`, `user_id`, `petugas_id`, `jenis_hewan_id`, `layanan_id`, `kode_booking`, `nama_pemilik`, `email`, `nomor_wa`, `nama_hewan`, `jenis_hewan`, `ukuran_hewan`, `tanggal_masuk`, `tanggal_keluar`, `dp_dibayar`, `bukti_dp`, `catatan`, `alasan_perpanjangan`, `alasan_cancel`, `tanggal_perpanjangan`, `status`, `total_harga`, `created_at`, `updated_at`) VALUES
-(8, 3, NULL, NULL, 1, 'BOOK-2026-0003', 'Felix', 'felix@gmail.com', '62895413890707', 'Muso', 'Anjing', 'Sedang', '2026-01-30', '2026-02-02', 'Ya', 'bukti_dp/dTy2aG6USnSB9x5ncog9aSnbPEhxYzTcTbBPEHGb.png', 'cek', NULL, '\n\n[PEMBATALAN DIAJUKAN]\nAlasan: Maaf min, kepencet\nDibatalkan pada: 30/01/2026 00:20', NULL, 'pembatalan', 510000.00, '2026-01-29 17:17:08', '2026-01-29 18:02:05'),
-(12, 6, NULL, NULL, 1, 'BOOK-2026-0004', 'Arkan', 'arkan@gmail.com', '6289506700308', 'NginX', 'Anjing', 'Kecil', '2026-02-02', '2026-02-03', 'Ya', 'bukti_dp/svzZxKnsiovRHJxBaD6867cIsj0NooqSfPEwSGau.png', 'min', NULL, '\n\n[PEMBATALAN DIAJUKAN]\nAlasan: min aku gajadi berubah pikiran\nDibatalkan pada: 02/02/2026 13:30\nTotal yang sudah dibayar: Rp 170.000', NULL, 'pembatalan', 170000.00, '2026-02-02 06:29:54', '2026-02-02 06:30:49'),
-(13, 7, 2, NULL, 1, 'BOOK-2026-0005', 'NginX', 'nginx@gmail.com', '6285942173668', 'Black', 'Kucing', 'Kecil', '2026-02-02', '2026-02-04', 'Ya', 'bukti_dp/LHxwWu7Yb8gDfIRMUZX4DdbcPkEYBSPfrgB2EhJE.png', 'Min aku mau liburan', NULL, NULL, NULL, 'in_progress', 170000.00, '2026-02-02 06:40:01', '2026-02-02 06:45:30'),
-(14, 7, 2, NULL, 1, 'BOOK-2026-0006', 'NginX', 'nginx@gmail.com', '6289506700308', 'b', 'Anjing', 'Sedang', '2026-02-02', '2026-02-06', 'Ya', 'bukti_dp/7Ze1fIqbjONaeE0xi5w52QzMDejnRGwjYJWwKWfD.png', 'cek', NULL, NULL, NULL, 'in_progress', 170000.00, '2026-02-02 07:40:04', '2026-02-02 07:41:39');
+(15, 6, 2, NULL, 1, 'BOOK-2026-0001', 'Arkan', 'arkan@gmail.com', '6289506700308', 'Muso', 'Anjing', 'Kecil', '2026-02-03', '2026-02-04', 'Ya', 'bukti_dp/DYYtcYWKwTdqT5Y8fyW0MfV8n6YC1vqJ6PoJIbVo.png', 'Makanan favorite pizza', NULL, NULL, NULL, 'in_progress', 170000.00, '2026-02-03 03:55:15', '2026-02-03 03:56:35');
 
 -- --------------------------------------------------------
 
@@ -121,23 +118,25 @@ CREATE TABLE `daily_logs` (
   `id` bigint(20) UNSIGNED NOT NULL,
   `booking_id` bigint(20) UNSIGNED NOT NULL,
   `petugas_id` bigint(20) UNSIGNED NOT NULL,
+  `kegiatan_id` bigint(20) UNSIGNED DEFAULT NULL,
   `tanggal` date NOT NULL,
-  `jam_kegiatan` time NOT NULL,
-  `makan_pagi` tinyint(1) NOT NULL DEFAULT 0,
-  `makan_siang` tinyint(1) NOT NULL DEFAULT 0,
-  `makan_malam` tinyint(1) NOT NULL DEFAULT 0,
-  `minum` tinyint(1) NOT NULL DEFAULT 0,
-  `jalan_jalan` tinyint(1) NOT NULL DEFAULT 0,
-  `buang_air` enum('belum','normal','diare','sembelit') NOT NULL DEFAULT 'belum',
+  `waktu` time NOT NULL,
   `catatan` text DEFAULT NULL,
-  `jam_makan_pagi` time DEFAULT NULL,
-  `jam_makan_siang` time DEFAULT NULL,
-  `jam_makan_malam` time DEFAULT NULL,
-  `jam_minum` time DEFAULT NULL,
-  `jam_jalan_jalan` time DEFAULT NULL,
+  `keterangan` text DEFAULT NULL,
+  `jumlah` varchar(50) DEFAULT NULL,
+  `satuan` varchar(20) DEFAULT NULL,
+  `status_pelaksanaan` enum('selesai','terlewat','ditunda') NOT NULL DEFAULT 'selesai',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `daily_logs`
+--
+
+INSERT INTO `daily_logs` (`id`, `booking_id`, `petugas_id`, `kegiatan_id`, `tanggal`, `waktu`, `catatan`, `keterangan`, `jumlah`, `satuan`, `status_pelaksanaan`, `created_at`, `updated_at`) VALUES
+(8, 15, 2, 1, '2026-02-03', '10:57:00', NULL, 'Makan Pagi', '1 Mangkuk', 'Mangkuk', 'selesai', '2026-02-03 03:57:57', '2026-02-03 03:57:57'),
+(9, 15, 2, 2, '2026-02-03', '10:59:00', NULL, NULL, '1 Mangkuk', '1 Mangkuk', 'selesai', '2026-02-03 04:00:16', '2026-02-03 04:00:16');
 
 -- --------------------------------------------------------
 
@@ -323,6 +322,38 @@ INSERT INTO `layanan_harga` (`id`, `layanan_id`, `jenis_hewan_id`, `harga_per_ha
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `master_kegiatan`
+--
+
+CREATE TABLE `master_kegiatan` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `nama_kegiatan` varchar(100) NOT NULL,
+  `deskripsi` text DEFAULT NULL,
+  `icon` varchar(50) DEFAULT NULL,
+  `warna` varchar(20) DEFAULT NULL,
+  `urutan` int(11) NOT NULL DEFAULT 0,
+  `aktif` enum('ya','tidak') NOT NULL DEFAULT 'ya',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `master_kegiatan`
+--
+
+INSERT INTO `master_kegiatan` (`id`, `nama_kegiatan`, `deskripsi`, `icon`, `warna`, `urutan`, `aktif`, `created_at`, `updated_at`) VALUES
+(1, 'Makan', 'Pemberian makanan', 'utensils', 'success', 1, 'ya', '2026-02-03 02:05:53', '2026-02-03 02:05:53'),
+(2, 'Minum', 'Pemberian minum', 'glass-water', 'primary', 2, 'ya', '2026-02-03 02:05:53', '2026-02-03 02:05:53'),
+(3, 'Jalan-jalan', 'Jalan-jalan di area sekitar', 'person-walking', 'warning', 3, 'ya', '2026-02-03 02:05:53', '2026-02-03 02:05:53'),
+(4, 'Pemberian Obat', 'Pemberian obat/vitamin', 'pills', 'danger', 4, 'ya', '2026-02-03 02:05:53', '2026-02-03 02:05:53'),
+(5, 'Grooming', 'Perawatan tubuh (mandi, sikat bulu)', 'spray-can-sparkles', 'info', 5, 'ya', '2026-02-03 02:05:53', '2026-02-03 02:05:53'),
+(6, 'Bermain', 'Waktu bermain dengan mainan', 'dice', 'secondary', 6, 'ya', '2026-02-03 02:05:53', '2026-02-03 02:05:53'),
+(7, 'Istirahat', 'Waktu tidur/istirahat', 'bed', 'dark', 7, 'ya', '2026-02-03 02:05:53', '2026-02-03 02:05:53'),
+(8, 'Buang Air', 'Catatan buang air', 'toilet', 'warning', 8, 'ya', '2026-02-03 02:05:53', '2026-02-03 02:05:53');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `migrations`
 --
 
@@ -358,7 +389,8 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (19, '2026_01_22_185707_add_extension_cancel_fields_to_booking_table', 1),
 (20, '2026_01_26_163420_add_type_to_notifications_table', 2),
 (21, '2026_01_30_010143_add_total_harga_to_booking_table', 3),
-(22, '2026_02_02_144858_create_kegiatan_table', 4);
+(22, '2026_02_02_144858_create_kegiatan_table', 4),
+(23, '2026_02_03_090422_create_master_kegiatan_table', 5);
 
 -- --------------------------------------------------------
 
@@ -384,24 +416,11 @@ CREATE TABLE `notifications` (
 --
 
 INSERT INTO `notifications` (`id`, `user_id`, `role_target`, `title`, `message`, `booking_id`, `type`, `is_read`, `created_at`, `updated_at`) VALUES
-(46, NULL, 'admin', 'Booking Baru', 'Booking baru dibuat oleh Felix untuk Muso (Kode: BOOK-2026-0003)', 8, 'booking', 1, '2026-01-29 17:17:08', '2026-01-29 17:37:16'),
-(47, NULL, 'admin', 'Booking Dibatalkan', 'Booking BOOK-2026-0003 dibatalkan oleh Felix', 8, 'cancel', 1, '2026-01-29 17:20:14', '2026-01-29 17:37:16'),
-(69, NULL, 'admin', 'Booking Baru', 'Booking baru dibuat oleh Arkan untuk NginX (Kode: BOOK-2026-0004)', 12, 'booking', 1, '2026-02-02 06:29:54', '2026-02-02 06:34:16'),
-(70, NULL, 'admin', 'Booking Dibatalkan', 'Booking BOOK-2026-0004 dibatalkan oleh Arkan', 12, 'cancel', 1, '2026-02-02 06:30:49', '2026-02-02 06:34:16'),
-(71, NULL, 'admin', 'Booking Baru', 'Booking baru dibuat oleh NginX untuk Black (Kode: BOOK-2026-0005)', 13, 'booking', 0, '2026-02-02 06:40:01', '2026-02-02 06:40:01'),
-(72, NULL, 'admin', 'Status Booking Berubah', 'Status booking BOOK-2026-0005 berubah dari pending menjadi diterima', 13, 'status', 0, '2026-02-02 06:45:21', '2026-02-02 06:45:21'),
-(73, 7, 'user', 'Status Booking Diperbarui', 'Booking BOOK-2026-0005 statusnya diubah menjadi Diterima', 13, 'info', 0, '2026-02-02 06:45:21', '2026-02-02 06:45:21'),
-(74, NULL, 'admin', 'Status Booking Berubah', 'Status booking BOOK-2026-0005 berubah dari diterima menjadi in_progress', 13, 'status', 0, '2026-02-02 06:45:30', '2026-02-02 06:45:30'),
-(75, 7, 'user', 'Status Booking Diperbarui', 'Booking BOOK-2026-0005 statusnya diubah menjadi Dititipkan', 13, 'info', 0, '2026-02-02 06:45:30', '2026-02-02 06:45:30'),
-(76, NULL, 'admin', 'Booking Baru', 'Booking baru dibuat oleh NginX untuk b (Kode: BOOK-2026-0006)', 14, 'booking', 0, '2026-02-02 07:40:04', '2026-02-02 07:40:04'),
-(77, NULL, 'admin', 'Status Booking Berubah', 'Status booking BOOK-2026-0006 berubah dari pending menjadi diterima', 14, 'status', 0, '2026-02-02 07:40:24', '2026-02-02 07:40:24'),
-(78, 7, 'user', 'Status Booking Diperbarui', 'Booking BOOK-2026-0006 statusnya diubah menjadi Diterima', 14, 'info', 0, '2026-02-02 07:40:24', '2026-02-02 07:40:24'),
-(79, NULL, 'admin', 'Status Booking Berubah', 'Status booking BOOK-2026-0006 berubah dari diterima menjadi in_progress', 14, 'status', 0, '2026-02-02 07:40:41', '2026-02-02 07:40:41'),
-(80, 7, 'user', 'Status Booking Diperbarui', 'Booking BOOK-2026-0006 statusnya diubah menjadi Dititipkan', 14, 'info', 0, '2026-02-02 07:40:41', '2026-02-02 07:40:41'),
-(81, NULL, 'admin', 'Booking Diperpanjang', 'Booking BOOK-2026-0006 diperpanjang oleh NginX', 14, 'extend', 0, '2026-02-02 07:41:20', '2026-02-02 07:41:20'),
-(82, NULL, 'admin', 'Status Booking Berubah', 'Status booking BOOK-2026-0006 berubah dari in_progress menjadi perpanjangan', 14, 'status', 0, '2026-02-02 07:41:20', '2026-02-02 07:41:20'),
-(83, NULL, 'admin', 'Status Booking Berubah1', 'Status booking BOOK-2026-0006 berubah dari perpanjangan menjadi in_progress', 14, 'status', 0, '2026-02-02 07:41:39', '2026-02-02 07:41:39'),
-(84, 7, 'user', 'Perpanjangan Diterima', 'Perpanjangan booking BOOK-2026-0006 telah diterima hingga 06 Feb 2026 dengan biaya tambahan Rp 0. Total harga baru: Rp 170.000', 14, 'info', 0, '2026-02-02 07:41:39', '2026-02-02 07:41:39');
+(85, NULL, 'admin', 'Booking Baru', 'Booking baru dibuat oleh Arkan untuk Muso (Kode: BOOK-2026-0001)', 15, 'booking', 1, '2026-02-03 03:55:15', '2026-02-03 04:15:24'),
+(86, NULL, 'admin', 'Status Booking Berubah', 'Status booking BOOK-2026-0001 berubah dari pending menjadi diterima', 15, 'status', 1, '2026-02-03 03:56:26', '2026-02-03 04:15:24'),
+(87, 6, 'user', 'Status Booking Diperbarui', 'Booking BOOK-2026-0001 statusnya diubah menjadi Diterima', 15, 'info', 0, '2026-02-03 03:56:26', '2026-02-03 03:56:26'),
+(88, NULL, 'admin', 'Status Booking Berubah', 'Status booking BOOK-2026-0001 berubah dari diterima menjadi in_progress', 15, 'status', 1, '2026-02-03 03:56:35', '2026-02-03 04:15:24'),
+(89, 6, 'user', 'Status Booking Diperbarui', 'Booking BOOK-2026-0001 statusnya diubah menjadi Dititipkan', 15, 'info', 0, '2026-02-03 03:56:35', '2026-02-03 03:56:35');
 
 -- --------------------------------------------------------
 
@@ -543,7 +562,8 @@ ALTER TABLE `catatan_medis`
 ALTER TABLE `daily_logs`
   ADD PRIMARY KEY (`id`),
   ADD KEY `daily_logs_booking_id_foreign` (`booking_id`),
-  ADD KEY `daily_logs_petugas_id_foreign` (`petugas_id`);
+  ADD KEY `daily_logs_petugas_id_foreign` (`petugas_id`),
+  ADD KEY `daily_logs_kegiatan_id_foreign` (`kegiatan_id`);
 
 --
 -- Indexes for table `galeri`
@@ -602,6 +622,12 @@ ALTER TABLE `layanan_harga`
   ADD KEY `layanan_harga_jenis_hewan_id_foreign` (`jenis_hewan_id`);
 
 --
+-- Indexes for table `master_kegiatan`
+--
+ALTER TABLE `master_kegiatan`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `migrations`
 --
 ALTER TABLE `migrations`
@@ -651,7 +677,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `booking`
 --
 ALTER TABLE `booking`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT for table `catatan_medis`
@@ -663,7 +689,7 @@ ALTER TABLE `catatan_medis`
 -- AUTO_INCREMENT for table `daily_logs`
 --
 ALTER TABLE `daily_logs`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `galeri`
@@ -714,16 +740,22 @@ ALTER TABLE `layanan_harga`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
+-- AUTO_INCREMENT for table `master_kegiatan`
+--
+ALTER TABLE `master_kegiatan`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+
+--
 -- AUTO_INCREMENT for table `migrations`
 --
 ALTER TABLE `migrations`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT for table `notifications`
 --
 ALTER TABLE `notifications`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=85;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=90;
 
 --
 -- AUTO_INCREMENT for table `riwayat_petugas`
@@ -776,6 +808,7 @@ ALTER TABLE `catatan_medis`
 --
 ALTER TABLE `daily_logs`
   ADD CONSTRAINT `daily_logs_booking_id_foreign` FOREIGN KEY (`booking_id`) REFERENCES `booking` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `daily_logs_kegiatan_id_foreign` FOREIGN KEY (`kegiatan_id`) REFERENCES `master_kegiatan` (`id`) ON DELETE SET NULL,
   ADD CONSTRAINT `daily_logs_petugas_id_foreign` FOREIGN KEY (`petugas_id`) REFERENCES `users` (`id`);
 
 --

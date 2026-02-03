@@ -1,223 +1,199 @@
-{{-- resources/views/admin/testimoni/index.blade.php --}}
-@extends('admin.layouts.app')
+@extends('admin.layout')
+
+@section('title', 'Manajemen Testimoni')
 
 @section('content')
-<div class="flex min-h-screen">
-    <!-- Sidebar -->
-    @include('admin.layout')
+<div class="p-6 max-w-7xl mx-auto space-y-10">
 
-    <!-- Main Content -->
-    <main class="flex-1 flex flex-col">
-        <!-- Header -->
-        <header class="bg-white border-b border-gray-200 px-6 py-4">
-            <h2 class="text-xl font-semibold text-gray-800">Manajemen Testimoni</h2>
-            <p class="text-sm text-gray-600 mt-1">
-                {{ request()->has('edit') ? 'Edit testimoni yang ada' : 'Tambah testimoni baru' }}
-            </p>
-        </header>
+    <!-- Header -->
+    <div>
+        <h1 class="text-3xl font-bold text-gray-800 flex items-center gap-3">
+            <i class="fas fa-comment-dots text-teal"></i>
+            Manajemen Testimoni
+        </h1>
+        <p class="text-gray-600 mt-2">
+            Kelola testimoni pelanggan PetHouse
+        </p>
+    </div>
 
-        <!-- Content -->
-        <div class="p-6 space-y-6">
-            <!-- Alert Messages -->
-            @if(session('success'))
-            <div class="bg-green-50 text-green-800 px-4 py-3 rounded-md">
-                {{ session('success') }}
-            </div>
-            @endif
+    <!-- Alert -->
+    @if(session('success'))
+        <div class="p-4 bg-green-100 border border-green-400 text-green-800 rounded-lg">
+            <i class="fas fa-check-circle mr-2"></i>
+            {{ session('success') }}
+        </div>
+    @endif
 
-            @if($errors->any())
-            <div class="bg-red-50 text-red-800 px-4 py-3 rounded-md">
-                <ul>
-                    @foreach($errors->all() as $error)
+    @if($errors->any())
+        <div class="p-4 bg-red-100 border border-red-400 text-red-800 rounded-lg">
+            <ul class="list-disc list-inside">
+                @foreach($errors->all() as $error)
                     <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    <!-- FORM -->
+    <div class="bg-white rounded-lg shadow">
+        <div class="p-4 border-b">
+            <h2 class="text-xl font-semibold text-gray-800">
+                {{ request()->has('edit') ? 'Edit Testimoni' : 'Tambah Testimoni Baru' }}
+            </h2>
+        </div>
+
+        <form class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6"
+              method="POST"
+              action="{{ route('admin.testimoni.store') }}"
+              enctype="multipart/form-data">
+            @csrf
+            <input type="hidden" name="id" value="{{ $edit_data->id ?? '' }}">
+
+            <!-- Nama Pemilik -->
+            <div>
+                <label class="font-medium text-gray-700">Nama Pemilik *</label>
+                <input type="text" name="nama_pemilik" required
+                       value="{{ old('nama_pemilik', $edit_data->nama_pemilik ?? '') }}"
+                       class="mt-1 w-full border rounded-lg px-3 py-2 focus:ring-teal focus:border-teal">
+            </div>
+
+            <!-- Nama Hewan -->
+            <div>
+                <label class="font-medium text-gray-700">Nama Hewan</label>
+                <input type="text" name="nama_hewan"
+                       value="{{ old('nama_hewan', $edit_data->nama_hewan ?? '') }}"
+                       class="mt-1 w-full border rounded-lg px-3 py-2">
+            </div>
+
+            <!-- Jenis Hewan -->
+            <div>
+                <label class="font-medium text-gray-700">Jenis Hewan</label>
+                <select name="jenis_hewan"
+                        class="mt-1 w-full border rounded-lg px-3 py-2">
+                    <option value="">-- Pilih --</option>
+                    @foreach($jenisHewanList as $jenis)
+                        <option value="{{ $jenis->nama }}"
+                            {{ old('jenis_hewan', $edit_data->jenis_hewan ?? '') == $jenis->nama ? 'selected' : '' }}>
+                            {{ $jenis->nama }}
+                        </option>
                     @endforeach
-                </ul>
-            </div>
-            @endif
-
-            <!-- Form Tambah/Edit -->
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h3 class="text-lg font-medium text-gray-800 mb-4">
-                    {{ request()->has('edit') ? 'Edit Testimoni' : 'Tambah Testimoni Baru' }}
-                </h3>
-
-                <form method="POST" action="{{ route('admin.testimoni.store') }}" enctype="multipart/form-data">
-                    @csrf
-                    <input type="hidden" name="id" value="{{ $edit_data->id ?? '' }}">
-
-                    <!-- Nama Pemilik -->
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700">
-                            Nama Pemilik <span class="text-red-500">*</span>
-                        </label>
-                        <input type="text" name="nama_pemilik"
-                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500"
-                            required
-                            value="{{ old('nama_pemilik', $edit_data->nama_pemilik ?? '') }}">
-                    </div>
-
-                    <!-- Nama Hewan -->
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700">Nama Hewan</label>
-                        <input type="text" name="nama_hewan"
-                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500"
-                            value="{{ old('nama_hewan', $edit_data->nama_hewan ?? '') }}">
-                    </div>
-
-                    <!-- Jenis Hewan -->
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700">Jenis Hewan</label>
-                        <select name="jenis_hewan"
-                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500">
-                            <option value="">-- Pilih --</option>
-                            @foreach($jenisHewanList as $jenis)
-                            <option value="{{ $jenis->nama }}" {{ (old('jenis_hewan', $edit_data->jenis_hewan ?? '') == $jenis->nama) ? 'selected' : '' }}>
-                                {{ $jenis->nama }}
-                            </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <!-- Isi Testimoni -->
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700">
-                            Testimoni <span class="text-red-500">*</span>
-                        </label>
-                        <textarea name="isi_testimoni" rows="3"
-                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500"
-                            required>{{ old('isi_testimoni', $edit_data->isi_testimoni ?? '') }}</textarea>
-                    </div>
-
-                    <!-- Rating -->
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700">Rating (1–5)</label>
-                        <select name="rating"
-                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500">
-                            @for($i = 5; $i >= 1; $i--)
-                            <option value="{{ $i }}" {{ (old('rating', $edit_data->rating ?? 5) == $i) ? 'selected' : '' }}>
-                                {{ str_repeat('⭐', $i) }}
-                            </option>
-                            @endfor
-                        </select>
-                    </div>
-
-                    <!-- Foto Hewan -->
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700">Foto Hewan (opsional)</label>
-                        <input type="file" name="foto_hewan" accept="image/*"
-                            class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200">
-
-                        @if(isset($edit_data) && $edit_data->foto_hewan)
-                        <div class="mt-2">
-                            <img src="{{ asset('storage/testimoni/' . $edit_data->foto_hewan) }}"
-                                alt="Foto hewan"
-                                class="w-24 h-24 object-cover rounded">
-                        </div>
-                        @endif
-                    </div>
-
-                    <!-- Status -->
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700">Status</label>
-                        <select name="status"
-                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500">
-                            <option value="aktif" {{ (old('status', $edit_data->status ?? 'aktif') == 'aktif') ? 'selected' : '' }}>Aktif</option>
-                            <option value="nonaktif" {{ (old('status', $edit_data->status ?? '') == 'nonaktif') ? 'selected' : '' }}>Nonaktif</option>
-                        </select>
-                    </div>
-
-                    <!-- Tombol Aksi -->
-                    <div class="flex items-center gap-3">
-                        <button type="submit"
-                            class="px-4 py-2 bg-primary-600 text-dark rounded-md hover:bg-primary-700 transition">
-                            {{ isset($edit_data) ? 'Perbarui' : 'Simpan' }}
-                        </button>
-
-                        @if(isset($edit_data))
-                        <a href="{{ route('admin.testimoni.index') }}"
-                            class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition">
-                            Batal
-                        </a>
-                        @endif
-                    </div>
-                </form>
+                </select>
             </div>
 
-            <!-- Daftar Testimoni -->
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-                <div class="px-6 py-4 border-b border-gray-200">
-                    <h3 class="text-lg font-medium text-gray-800">Daftar Testimoni</h3>
-                </div>
+            <!-- Rating -->
+            <div>
+                <label class="font-medium text-gray-700">Rating</label>
+                <select name="rating"
+                        class="mt-1 w-full border rounded-lg px-3 py-2">
+                    @for($i = 5; $i >= 1; $i--)
+                        <option value="{{ $i }}"
+                            {{ old('rating', $edit_data->rating ?? 5) == $i ? 'selected' : '' }}>
+                            {{ str_repeat('⭐', $i) }}
+                        </option>
+                    @endfor
+                </select>
+            </div>
 
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pemilik</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hewan</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Testimoni</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rating</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
-                            </tr>
-                        </thead>
+            <!-- Testimoni -->
+            <div class="md:col-span-2">
+                <label class="font-medium text-gray-700">Testimoni *</label>
+                <textarea name="isi_testimoni" rows="3" required
+                          class="mt-1 w-full border rounded-lg px-3 py-2">{{ old('isi_testimoni', $edit_data->isi_testimoni ?? '') }}</textarea>
+            </div>
 
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            @forelse($testimoni as $row)
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ $row->id }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">{{ $row->nama_pemilik }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
-                                    {{ $row->nama_hewan ?? '-' }} ({{ $row->jenis_hewan ?? '-' }})
-                                </td>
-                                <td class="px-6 py-4 text-sm text-gray-800">
-                                    {{ Str::limit($row->isi_testimoni, 50) }}...
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
-                                    {{ str_repeat('⭐', $row->rating) }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    @if($row->status === 'aktif')
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                        Aktif
-                                    </span>
-                                    @else
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
-                                        Nonaktif
-                                    </span>
-                                    @endif
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                    <a href="{{ route('admin.testimoni.index', ['edit' => $row->id]) }}"
-                                        class="text-blue-600 hover:text-blue-800 mr-3">
-                                        Edit
-                                    </a>
+            <!-- Foto -->
+            <div>
+                <label class="font-medium text-gray-700">Foto Hewan</label>
+                <input type="file" name="foto_hewan"
+                       class="mt-1 w-full text-sm text-gray-600">
+                @if(isset($edit_data) && $edit_data->foto_hewan)
+                    <img src="{{ asset('storage/testimoni/'.$edit_data->foto_hewan) }}"
+                         class="mt-2 w-24 h-24 object-cover rounded">
+                @endif
+            </div>
 
-                                    <form action="{{ route('admin.testimoni.destroy', $row->id) }}"
-                                        method="POST"
-                                        class="inline"
-                                        onsubmit="return confirm('Hapus testimoni ini?')">
+            <!-- Status -->
+            <div>
+                <label class="font-medium text-gray-700">Status</label>
+                <select name="status"
+                        class="mt-1 w-full border rounded-lg px-3 py-2">
+                    <option value="aktif" {{ old('status', $edit_data->status ?? 'aktif') == 'aktif' ? 'selected' : '' }}>Aktif</option>
+                    <option value="nonaktif" {{ old('status', $edit_data->status ?? '') == 'nonaktif' ? 'selected' : '' }}>Nonaktif</option>
+                </select>
+            </div>
+
+            <!-- Button -->
+            <div class="md:col-span-2 flex gap-3">
+                <button class="bg-teal text-white px-6 py-2 rounded-lg hover:bg-teal-700">
+                    {{ isset($edit_data) ? 'Perbarui' : 'Simpan' }}
+                </button>
+
+                @if(isset($edit_data))
+                    <a href="{{ route('admin.testimoni.index') }}"
+                       class="px-6 py-2 rounded-lg bg-gray-200 hover:bg-gray-300">
+                        Batal
+                    </a>
+                @endif
+            </div>
+        </form>
+    </div>
+
+    <!-- TABLE -->
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+        <div class="p-4 border-b">
+            <h2 class="text-xl font-semibold text-gray-800">Daftar Testimoni</h2>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-3">Pemilik</th>
+                        <th class="px-4 py-3">Hewan</th>
+                        <th class="px-4 py-3">Testimoni</th>
+                        <th class="px-4 py-3 text-center">Rating</th>
+                        <th class="px-4 py-3 text-center">Status</th>
+                        <th class="px-4 py-3 text-center">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y">
+                    @forelse($testimoni as $row)
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-4 py-3">{{ $row->nama_pemilik }}</td>
+                            <td class="px-4 py-3">{{ $row->nama_hewan ?? '-' }} ({{ $row->jenis_hewan ?? '-' }})</td>
+                            <td class="px-4 py-3">{{ Str::limit($row->isi_testimoni, 40) }}</td>
+                            <td class="px-4 py-3 text-center">{{ str_repeat('⭐', $row->rating) }}</td>
+                            <td class="px-4 py-3 text-center">
+                                <span class="px-3 py-1 rounded-full text-xs font-bold
+                                    {{ $row->status == 'aktif' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
+                                    {{ ucfirst($row->status) }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-3 text-center">
+                                <div class="flex justify-center gap-3">
+                                    <a href="{{ route('admin.testimoni.index', ['edit'=>$row->id]) }}"
+                                       class="text-blue-600 hover:text-blue-800">Edit</a>
+                                    <form method="POST"
+                                          action="{{ route('admin.testimoni.destroy',$row->id) }}"
+                                          onsubmit="return confirm('Hapus testimoni ini?')">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="text-red-600 hover:text-red-800">
-                                            Hapus
-                                        </button>
+                                        <button class="text-red-600 hover:text-red-800">Hapus</button>
                                     </form>
-                                </td>
-                            </tr>
-                            @empty
-                            <tr>
-                                <td colspan="7" class="px-6 py-8 text-center text-gray-500">
-                                    Belum ada testimoni.
-                                </td>
-                            </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="py-8 text-center text-gray-500">
+                                Belum ada testimoni
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
-    </main>
+    </div>
+
 </div>
 @endsection

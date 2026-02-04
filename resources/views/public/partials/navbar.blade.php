@@ -25,7 +25,6 @@ return $current_page === $page ? 'text-teal-500 font-semibold' : '';
         <a href="{{ route('galeri') }}" class="text-gray-700 hover:text-teal-500 {{ isActive('galeri', $current_page) }} transition-colors duration-200 whitespace-nowrap">Galeri</a>
         <a href="{{ route('kontak') }}" class="text-gray-700 hover:text-teal-500 {{ isActive('kontak', $current_page) }} transition-colors duration-200 whitespace-nowrap">Kontak</a>
 
-        <!-- Tombol Aksi - Menyesuaikan ukuran secara bertahap -->
         <!-- Tombol Aksi -->
         <div class="flex items-center space-x-2 sm:space-x-3 lg:space-x-4 ml-2 lg:ml-6">
 

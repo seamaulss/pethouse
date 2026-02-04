@@ -237,18 +237,27 @@ class Booking extends Model
     }
 
     /**
-     * Get harga per hari for this booking
+     * Get harga per hari for this booking - PERBAIKAN
      */
     public function getHargaPerHariAttribute()
     {
-        // Cari jenis hewan berdasarkan nama
+        // Jika ada jenis_hewan_id, gunakan itu
+        if ($this->jenis_hewan_id) {
+            $harga = \Illuminate\Support\Facades\DB::table('layanan_harga')
+                ->where('layanan_id', $this->layanan_id)
+                ->where('jenis_hewan_id', $this->jenis_hewan_id)
+                ->value('harga_per_hari');
+
+            return $harga ?? 0;
+        }
+
+        // Jika tidak ada jenis_hewan_id, cari berdasarkan string jenis_hewan
         $jenisHewan = JenisHewan::where('nama', $this->jenis_hewan)->first();
 
         if (!$jenisHewan) {
             return 0;
         }
 
-        // Cari harga dari tabel layanan_harga
         $harga = \Illuminate\Support\Facades\DB::table('layanan_harga')
             ->where('layanan_id', $this->layanan_id)
             ->where('jenis_hewan_id', $jenisHewan->id)

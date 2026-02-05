@@ -9,8 +9,9 @@ use App\Http\Controllers\User\BookingController;
 use App\Http\Controllers\User\HewanSayaController;
 use App\Http\Controllers\User\KonsultasiController;
 use App\Http\Controllers\User\ProfilController;
-use App\Http\Controllers\Petugas\InputLogController;
 use App\Http\Controllers\User\CekStatusController;
+use App\Http\Controllers\User\NotificationController;
+use App\Http\Controllers\Petugas\InputLogController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicController;
 
@@ -122,7 +123,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/notifications/count', [AdminDashboardController::class, 'getNotificationCount'])
         ->name('notifications.count');
 
-     // Master Kegiatan (Tambahkan ini)
+    // Master Kegiatan (Tambahkan ini)
     Route::resource('master-kegiatan', \App\Http\Controllers\Admin\MasterKegiatanController::class)
         ->except(['show']);
 });
@@ -132,19 +133,19 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 // =====================
 
 Route::middleware(['auth', 'petugas'])->prefix('petugas')->name('petugas.')->group(function () {
-    
+
     // Dashboard
     Route::get('/dashboard', [App\Http\Controllers\Petugas\DashboardController::class, 'index'])->name('dashboard');
-    
+
     // Input Log Kegiatan (Sistem Fleksibel Baru)
     Route::get('/input-log/{booking}', [App\Http\Controllers\Petugas\InputLogController::class, 'show'])->name('input-log.show');
     Route::post('/input-log/{booking}', [App\Http\Controllers\Petugas\InputLogController::class, 'store'])->name('input-log.store');
     Route::delete('/input-log/{log}', [App\Http\Controllers\Petugas\InputLogController::class, 'destroyLog'])->name('input-log.destroy-log');
-    
+
     // Notifications
     Route::get('/notifications', [App\Http\Controllers\Petugas\NotificationController::class, 'index'])->name('notifications.index');
     Route::get('/notifications/{notification}/read', [App\Http\Controllers\Petugas\NotificationController::class, 'markAsRead'])->name('notifications.mark-read');
-    
+
     // Profile
     Route::get('/profile', [App\Http\Controllers\Petugas\ProfileController::class, 'index'])->name('profile.index');
 });
@@ -158,7 +159,15 @@ Route::middleware(['auth', 'user'])->prefix('user')->name('user.')->group(functi
     // Dashboard User
     Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('dashboard');
 
-    // Hewan Saya - PASTIKAN INI BENAR
+    Route::prefix('notifikasi')->name('notifikasi.')->group(function () {
+        Route::get('/', [NotificationController::class, 'index'])->name('index');                
+        Route::post('/{id}/read', [NotificationController::class, 'markAsRead'])->name('read');   
+        Route::post('/read-all', [NotificationController::class, 'markAllAsRead'])->name('read-all'); 
+        Route::delete('/{id}', [NotificationController::class, 'destroy'])->name('destroy');      
+        Route::get('/get-new', [NotificationController::class, 'getNewNotifications'])->name('get-new'); 
+    });
+
+    // Hewan Saya
     Route::get('/hewan-saya', [HewanSayaController::class, 'index'])->name('hewan-saya');
     Route::get('/hewan-saya/{id}/log', [HewanSayaController::class, 'logHarian'])->name('hewan-saya.log');
 
@@ -175,7 +184,6 @@ Route::middleware(['auth', 'user'])->prefix('user')->name('user.')->group(functi
     // Detail booking
     Route::get('/booking/{id}', [BookingController::class, 'show'])->name('booking.show');
 
-
     // Konsultasi
     Route::get('/konsultasi', [KonsultasiController::class, 'create'])->name('konsultasi.create');
     Route::post('/konsultasi', [KonsultasiController::class, 'store'])->name('konsultasi.store');
@@ -187,9 +195,6 @@ Route::middleware(['auth', 'user'])->prefix('user')->name('user.')->group(functi
     Route::get('/profil', [ProfilController::class, 'index'])->name('profil');
     Route::post('/profil/update', [ProfilController::class, 'update'])->name('profil.update');
 
-    // Cek Status - PERBAIKAN: UBAH NAMA ROUTE
-    Route::get('/cek-status', [CekStatusController::class, 'index'])->name('cek-status'); // Hapus .index
-    Route::post('/cek-status', [CekStatusController::class, 'show'])->name('cek-status.show');
 });
 
 // ======================

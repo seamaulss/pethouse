@@ -7,6 +7,7 @@ use App\Models\Booking;
 use App\Models\User;
 use App\Models\JenisHewan;
 use App\Models\LayananHarga;
+use App\Models\Notification; // Tambahkan ini
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
@@ -52,7 +53,18 @@ class BookingController extends Controller
         ]);
 
         $booking = Booking::findOrFail($id);
+        $oldStatus = $booking->status;
         $status = $request->status;
+
+        // Mapping status untuk notifikasi
+        $statusMessages = [
+            'pending' => 'Menunggu Konfirmasi',
+            'diterima' => 'Diterima',
+            'in_progress' => 'Sedang Berjalan',
+            'selesai' => 'Selesai',
+            'pembatalan' => 'Dibatalkan',
+            'perpanjangan' => 'Permintaan Perpanjangan'
+        ];
 
         $data = ['status' => $status];
         
@@ -86,16 +98,49 @@ class BookingController extends Controller
 
         $booking->update($data);
 
-        // Create notification for user
+        // Buat notifikasi untuk user berdasarkan status baru
         if ($booking->user_id) {
-            \App\Models\Notification::create([
-                'user_id' => $booking->user_id,
-                'role_target' => 'user',
-                'title' => 'Status Booking Diperbarui',
-                'message' => "Booking {$booking->kode_booking} statusnya diubah menjadi " . $booking->status_text,
-                'booking_id' => $booking->id,
-                'is_read' => false
-            ]);
+            $title = "Status Booking Diperbarui";
+            
+            // Custom message berdasarkan status
+            switch($status) {
+                case 'diterima':
+                    $message = "Booking #{$booking->kode_booking} untuk {$booking->nama_hewan} telah DITERIMA. Siapkan hewan Anda untuk penitipan pada tanggal " . 
+                              Carbon::parse($booking->tanggal_masuk)->format('d M Y');
+                    $type = 'success';
+                    break;
+                    
+                case 'in_progress':
+                    $message = "Booking #{$booking->kode_booking} untuk {$booking->nama_hewan} telah DIMULAI. Anda akan menerima update harian selama penitipan.";
+                    $type = 'info';
+                    break;
+                    
+                case 'selesai':
+                    $message = "Booking #{$booking->kode_booking} untuk {$booking->nama_hewan} telah SELESAI. Hewan Anda sudah bisa diambil. Total biaya: Rp " . 
+                              number_format($booking->total_harga, 0, ',', '.');
+                    $type = 'success';
+                    break;
+                    
+                case 'pembatalan':
+                    $alasan = $request->alasan_cancel ?? 'tidak disebutkan';
+                    $message = "Booking #{$booking->kode_booking} untuk {$booking->nama_hewan} telah DIBATALKAN. Alasan: {$alasan}";
+                    $type = 'warning';
+                    break;
+                    
+                default:
+                    $message = "Status booking #{$booking->kode_booking} telah diubah dari " . 
+                              ($statusMessages[$oldStatus] ?? $oldStatus) . " menjadi " . 
+                              ($statusMessages[$status] ?? $status);
+                    $type = 'info';
+            }
+
+            Notification::createForUser(
+                $booking->user_id,
+                $title,
+                $message,
+                $booking->id,
+                $type
+            );
         }
 
         return redirect()->route('admin.booking.index')
@@ -144,17 +189,16 @@ class BookingController extends Controller
             
             // Notification to user
             if ($booking->user_id) {
-                \App\Models\Notification::create([
-                    'user_id' => $booking->user_id,
-                    'role_target' => 'user',
-                    'title' => 'Perpanjangan Diterima',
-                    'message' => "Perpanjangan booking {$booking->kode_booking} telah diterima hingga " . 
-                                Carbon::parse($request->tanggal_perpanjangan)->format('d M Y') .
-                                " dengan biaya tambahan Rp " . number_format($hargaTambahan, 0, ',', '.') .
-                                ". Total harga baru: Rp " . number_format($booking->total_harga, 0, ',', '.'),
-                    'booking_id' => $booking->id,
-                    'is_read' => false
-                ]);
+                Notification::createForUser(
+                    $booking->user_id,
+                    'Perpanjangan Diterima',
+                    "Perpanjangan booking #{$booking->kode_booking} telah DITERIMA hingga " . 
+                    Carbon::parse($request->tanggal_perpanjangan)->format('d M Y') .
+                    ". Biaya tambahan: Rp " . number_format($hargaTambahan, 0, ',', '.') .
+                    ". Total harga: Rp " . number_format($booking->total_harga, 0, ',', '.'),
+                    $booking->id,
+                    'success'
+                );
             }
             
             $message = 'Perpanjangan booking telah diterima.';
@@ -170,14 +214,13 @@ class BookingController extends Controller
             
             // Notification to user
             if ($booking->user_id) {
-                \App\Models\Notification::create([
-                    'user_id' => $booking->user_id,
-                    'role_target' => 'user',
-                    'title' => 'Perpanjangan Ditolak',
-                    'message' => "Permintaan perpanjangan booking {$booking->kode_booking} telah ditolak.",
-                    'booking_id' => $booking->id,
-                    'is_read' => false
-                ]);
+                Notification::createForUser(
+                    $booking->user_id,
+                    'Perpanjangan Ditolak',
+                    "Permintaan perpanjangan booking #{$booking->kode_booking} telah DITOLAK.",
+                    $booking->id,
+                    'warning'
+                );
             }
             
             $message = 'Perpanjangan booking telah ditolak.';
@@ -190,6 +233,18 @@ class BookingController extends Controller
     public function destroy($id)
     {
         $booking = Booking::findOrFail($id);
+        
+        // Kirim notifikasi sebelum menghapus
+        if ($booking->user_id) {
+            Notification::createForUser(
+                $booking->user_id,
+                'Booking Dihapus',
+                "Booking #{$booking->kode_booking} untuk {$booking->nama_hewan} telah dihapus dari sistem.",
+                $booking->id,
+                'warning'
+            );
+        }
+        
         $booking->delete();
 
         return redirect()->route('admin.booking.index')

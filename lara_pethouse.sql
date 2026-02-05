@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 03, 2026 at 05:34 AM
+-- Generation Time: Feb 05, 2026 at 07:47 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -59,7 +59,8 @@ CREATE TABLE `booking` (
 --
 
 INSERT INTO `booking` (`id`, `user_id`, `petugas_id`, `jenis_hewan_id`, `layanan_id`, `kode_booking`, `nama_pemilik`, `email`, `nomor_wa`, `nama_hewan`, `jenis_hewan`, `ukuran_hewan`, `tanggal_masuk`, `tanggal_keluar`, `dp_dibayar`, `bukti_dp`, `catatan`, `alasan_perpanjangan`, `alasan_cancel`, `tanggal_perpanjangan`, `status`, `total_harga`, `created_at`, `updated_at`) VALUES
-(15, 6, 2, NULL, 1, 'BOOK-2026-0001', 'Arkan', 'arkan@gmail.com', '6289506700308', 'Muso', 'Anjing', 'Kecil', '2026-02-03', '2026-02-04', 'Ya', 'bukti_dp/DYYtcYWKwTdqT5Y8fyW0MfV8n6YC1vqJ6PoJIbVo.png', 'Makanan favorite pizza', NULL, NULL, NULL, 'in_progress', 170000.00, '2026-02-03 03:55:15', '2026-02-03 03:56:35');
+(15, 6, 2, NULL, 1, 'BOOK-2026-0001', 'Arkan', 'arkan@gmail.com', '6289506700308', 'Muso', 'Anjing', 'Kecil', '2026-02-03', '2026-02-04', 'Ya', 'bukti_dp/DYYtcYWKwTdqT5Y8fyW0MfV8n6YC1vqJ6PoJIbVo.png', 'Makanan favorite pizza', NULL, NULL, NULL, 'selesai', 170000.00, '2026-02-03 03:55:15', '2026-02-04 02:51:04'),
+(16, 7, 2, NULL, 1, 'BOOK-2026-0002', 'NginX', 'nginx@gmail.com', '6289506700308', 'Misu', 'Kucing', 'Sedang', '2026-02-04', '2026-02-05', 'Tidak', NULL, 'cek', NULL, NULL, NULL, 'selesai', 85000.00, '2026-02-04 04:08:42', '2026-02-04 04:09:42');
 
 -- --------------------------------------------------------
 
@@ -186,7 +187,7 @@ CREATE TABLE `hero_slider` (
 
 INSERT INTO `hero_slider` (`id`, `gambar`, `judul`, `subjudul`, `tombol_text`, `tombol_link`, `urutan`, `created_at`, `updated_at`) VALUES
 (1, '1769409553_1767149802_Gemini_Generated_Image_g1p3t8g1p3t8g1p3.png', 'Hubungi Kami', 'Punya pertanyaan medis? Chat dokter kami sekarang melalui layanan WhatsApp responsif.', 'Darurat', 'https://wa.me/6285942173668', 1, '2026-01-25 23:39:15', '2026-01-25 23:39:15'),
-(2, '1769409635_1767668362_A man with a stethoscope around his neck is petting a dog _ Premium AI-generated image.jpg', 'Dokter Berlisensi', 'Kami menghadirkan kasih sayang yang dipadukan dengan keahlian medis dari dokter hewan berlisensi.', 'Check', 'layanan', 2, '2026-01-25 23:40:35', '2026-01-25 23:40:35'),
+(2, '1769409635_1767668362_A man with a stethoscope around his neck is petting a dog _ Premium AI-generated image.jpg', 'Dokter Berlisensi', 'Kami menghadirkan kasih sayang yang dipadukan dengan keahlian medis dari dokter hewan berlisensi.', 'Check', 'galeri', 2, '2026-01-25 23:40:35', '2026-02-03 07:31:05'),
 (3, '1769409706_1767150059_Animal Care Center of Downers Grove _ RWE Design Build.jpg', 'Lokasi Strategis', 'Berada di lokasi yang mudah ditemukan, memastikan hewan kesayangan Anda mendapatkan bantuan medis secepat mungkin saat dibutuhkan.', 'Lokasi', 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3956.852235712345!2d109.6522357!3d-7.4039689!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e7aab250dbea06f%3A0x67886a3086ca184d!2sKambing%20Kita%20Banjarnegara!5e0!3m2!1sen!2sid!4v1712345678901!', 3, '2026-01-25 23:41:46', '2026-01-25 23:41:46');
 
 -- --------------------------------------------------------
@@ -256,7 +257,8 @@ CREATE TABLE `konsultasi` (
 --
 
 INSERT INTO `konsultasi` (`id`, `user_id`, `dokter_id`, `kode_konsultasi`, `nama_pemilik`, `no_wa`, `jenis_hewan`, `topik`, `tanggal_janji`, `jam_janji`, `catatan`, `balasan_dokter`, `status`, `created_at`, `updated_at`) VALUES
-(1, 3, 4, 'KONS-2026-0001', 'Felix', '6289506700308', 'Anjing', 'demam', '2026-01-28', '12:00:00', 'cek', NULL, 'diterima', '2026-01-27 19:45:12', '2026-01-27 19:45:43');
+(1, 3, 4, 'KONS-2026-0001', 'Felix', '6289506700308', 'Anjing', 'demam', '2026-01-28', '12:00:00', 'cek', NULL, 'diterima', '2026-01-27 19:45:12', '2026-01-27 19:45:43'),
+(2, 6, NULL, 'KONS-2026-0002', 'arkan', '6289506700308', 'Kucing', 'Rabies', '2026-02-25', '13:00:00', 'rabies gigiitan maul', NULL, 'pending', '2026-02-04 13:56:11', '2026-02-04 13:56:11');
 
 -- --------------------------------------------------------
 
@@ -418,9 +420,18 @@ CREATE TABLE `notifications` (
 INSERT INTO `notifications` (`id`, `user_id`, `role_target`, `title`, `message`, `booking_id`, `type`, `is_read`, `created_at`, `updated_at`) VALUES
 (85, NULL, 'admin', 'Booking Baru', 'Booking baru dibuat oleh Arkan untuk Muso (Kode: BOOK-2026-0001)', 15, 'booking', 1, '2026-02-03 03:55:15', '2026-02-03 04:15:24'),
 (86, NULL, 'admin', 'Status Booking Berubah', 'Status booking BOOK-2026-0001 berubah dari pending menjadi diterima', 15, 'status', 1, '2026-02-03 03:56:26', '2026-02-03 04:15:24'),
-(87, 6, 'user', 'Status Booking Diperbarui', 'Booking BOOK-2026-0001 statusnya diubah menjadi Diterima', 15, 'info', 0, '2026-02-03 03:56:26', '2026-02-03 03:56:26'),
+(87, 6, 'user', 'Status Booking Diperbarui', 'Booking BOOK-2026-0001 statusnya diubah menjadi Diterima', 15, 'info', 1, '2026-02-03 03:56:26', '2026-02-05 02:43:52'),
 (88, NULL, 'admin', 'Status Booking Berubah', 'Status booking BOOK-2026-0001 berubah dari diterima menjadi in_progress', 15, 'status', 1, '2026-02-03 03:56:35', '2026-02-03 04:15:24'),
-(89, 6, 'user', 'Status Booking Diperbarui', 'Booking BOOK-2026-0001 statusnya diubah menjadi Dititipkan', 15, 'info', 0, '2026-02-03 03:56:35', '2026-02-03 03:56:35');
+(89, 6, 'user', 'Status Booking Diperbarui', 'Booking BOOK-2026-0001 statusnya diubah menjadi Dititipkan', 15, 'info', 1, '2026-02-03 03:56:35', '2026-02-05 02:43:52'),
+(90, NULL, 'admin', 'Status Booking Berubah', 'Status booking BOOK-2026-0001 berubah dari in_progress menjadi selesai', 15, 'status', 1, '2026-02-04 02:51:04', '2026-02-04 13:42:21'),
+(91, 6, 'user', 'Status Booking Diperbarui', 'Booking BOOK-2026-0001 statusnya diubah menjadi Selesai', 15, 'info', 1, '2026-02-04 02:51:05', '2026-02-05 02:43:52'),
+(92, NULL, 'admin', 'Booking Baru', 'Booking baru dibuat oleh NginX untuk Misu (Kode: BOOK-2026-0002)', 16, 'booking', 1, '2026-02-04 04:08:42', '2026-02-04 13:42:21'),
+(93, NULL, 'admin', 'Status Booking Berubah', 'Status booking BOOK-2026-0002 berubah dari pending menjadi diterima', 16, 'status', 1, '2026-02-04 04:09:20', '2026-02-04 13:42:21'),
+(94, 7, 'user', 'Status Booking Diperbarui', 'Booking BOOK-2026-0002 statusnya diubah menjadi Diterima', 16, 'info', 0, '2026-02-04 04:09:20', '2026-02-04 04:09:20'),
+(95, NULL, 'admin', 'Status Booking Berubah', 'Status booking BOOK-2026-0002 berubah dari diterima menjadi in_progress', 16, 'status', 1, '2026-02-04 04:09:37', '2026-02-04 13:42:21'),
+(96, 7, 'user', 'Status Booking Diperbarui', 'Booking BOOK-2026-0002 statusnya diubah menjadi Dititipkan', 16, 'info', 0, '2026-02-04 04:09:37', '2026-02-04 04:09:37'),
+(97, NULL, 'admin', 'Status Booking Berubah', 'Status booking BOOK-2026-0002 berubah dari in_progress menjadi selesai', 16, 'status', 1, '2026-02-04 04:09:42', '2026-02-04 13:42:21'),
+(98, 7, 'user', 'Status Booking Diperbarui', 'Booking BOOK-2026-0002 statusnya diubah menjadi Selesai', 16, 'info', 0, '2026-02-04 04:09:42', '2026-02-04 04:09:42');
 
 -- --------------------------------------------------------
 
@@ -677,7 +688,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `booking`
 --
 ALTER TABLE `booking`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `catatan_medis`
@@ -719,7 +730,7 @@ ALTER TABLE `kapasitas`
 -- AUTO_INCREMENT for table `konsultasi`
 --
 ALTER TABLE `konsultasi`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `konsultasi_balasan`
@@ -755,7 +766,7 @@ ALTER TABLE `migrations`
 -- AUTO_INCREMENT for table `notifications`
 --
 ALTER TABLE `notifications`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=90;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=99;
 
 --
 -- AUTO_INCREMENT for table `riwayat_petugas`

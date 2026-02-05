@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Booking;
 use App\Models\Konsultasi;
+use App\Models\Notification;
 
 class DashboardController extends Controller
 {
@@ -22,7 +23,24 @@ class DashboardController extends Controller
             ->latest()
             ->limit(3)
             ->get();
+        
+        // Ambil notifikasi untuk user - PASTIKAN INI DIPANGGIL!
+        $notifications = Notification::where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->take(5)
+            ->get();
             
-        return view('user.dashboard', compact('user', 'bookingCount', 'konsultasiCount', 'bookingAktif'));
+        $unreadCount = Notification::where('user_id', $user->id)
+            ->where('is_read', false)
+            ->count();
+            
+        return view('user.dashboard', compact(
+            'user', 
+            'bookingCount', 
+            'konsultasiCount', 
+            'bookingAktif', 
+            'notifications', 
+            'unreadCount'
+        ));
     }
 }

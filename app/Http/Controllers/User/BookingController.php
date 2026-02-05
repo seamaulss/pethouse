@@ -10,8 +10,9 @@ use Illuminate\Support\Facades\Storage;
 use App\Models\Booking;
 use App\Models\Layanan;
 use App\Models\JenisHewan;
-use App\Models\LayananHarga; // Tambahkan ini
+use App\Models\LayananHarga;
 use App\Models\Kapasitas;
+use App\Models\Notification; // Tambahkan ini untuk notifikasi
 use Carbon\Carbon;
 
 class BookingController extends Controller
@@ -63,7 +64,7 @@ class BookingController extends Controller
             return back()->withErrors(['kapasitas' => "Slot penuh (maksimal {$kapasitas['max']} hewan)."])->withInput();
         }
 
-        // HITUNG TOTAL HARGA - TAMBAHKAN KODE INI
+        // HITUNG TOTAL HARGA
         $tanggal_masuk_obj = Carbon::parse($validated['tanggal_masuk']);
         $tanggal_keluar_obj = Carbon::parse($validated['tanggal_keluar']);
         $durasi = $tanggal_masuk_obj->diffInDays($tanggal_keluar_obj);
@@ -96,7 +97,7 @@ class BookingController extends Controller
         // Generate kode booking
         $kode_booking = $this->generateKodeBooking();
 
-        // Simpan booking - TAMBAHKAN total_harga
+        // Simpan booking
         try {
             $booking = Booking::create([
                 'user_id' => $user->id,
@@ -116,7 +117,28 @@ class BookingController extends Controller
                 'status' => 'pending',
                 'alasan_cancel' => $validated['alasan_cancel'] ?? null,
                 'alasan_perpanjangan' => $validated['alasan_perpanjangan'] ?? null,
-                'total_harga' => $total_harga, // TAMBAHKAN INI
+                'total_harga' => $total_harga,
+            ]);
+
+            // 1. KIRIM NOTIFIKASI KE USER bahwa booking berhasil dibuat
+            Notification::create([
+                'user_id' => $user->id,
+                'role_target' => 'user',
+                'title' => 'Booking Berhasil',
+                'message' => "Booking #{$kode_booking} untuk {$validated['nama_hewan']} berhasil dibuat. Status: Menunggu Konfirmasi Admin.",
+                'booking_id' => $booking->id,
+                'type' => 'success',
+                'is_read' => false,
+            ]);
+
+            // 2. KIRIM NOTIFIKASI KE ADMIN bahwa ada booking baru
+            Notification::create([
+                'role_target' => 'admin',
+                'title' => 'Booking Baru',
+                'message' => "Booking baru #{$kode_booking} dari {$user->username} untuk {$validated['nama_hewan']} ({$validated['jenis_hewan']}).",
+                'booking_id' => $booking->id,
+                'type' => 'info',
+                'is_read' => false,
             ]);
 
             return redirect()->route('user.booking.riwayat')
@@ -255,13 +277,35 @@ class BookingController extends Controller
         // Simpan permintaan perpanjangan
         $booking->update([
             'status' => 'perpanjangan',
-            'tanggal_keluar' => $request->tanggal_keluar_baru,
             'tanggal_perpanjangan' => $request->tanggal_keluar_baru,
             'alasan_perpanjangan' => $booking->alasan_perpanjangan . "\n\n[PERPANJANGAN DIAJUKAN]\n" .
                 "Tanggal keluar baru: " . $request->tanggal_keluar_baru . "\n" .
                 "Alasan: " . ($request->alasan_perpanjangan ?? '-') . "\n" .
                 "Diajukan pada: " . now()->format('d/m/Y H:i') . "\n" .
                 "Harga tambahan: Rp " . number_format($hargaTambahan, 0, ',', '.')
+        ]);
+
+        // 1. KIRIM NOTIFIKASI KE USER bahwa permintaan perpanjangan berhasil
+        Notification::create([
+            'user_id' => Auth::id(),
+            'role_target' => 'user',
+            'title' => 'Permintaan Perpanjangan',
+            'message' => "Permintaan perpanjangan booking #{$booking->kode_booking} hingga " . 
+                        Carbon::parse($request->tanggal_keluar_baru)->format('d M Y') . " telah dikirim.",
+            'booking_id' => $booking->id,
+            'type' => 'info',
+            'is_read' => false,
+        ]);
+
+        // 2. KIRIM NOTIFIKASI KE ADMIN untuk permintaan perpanjangan
+        Notification::create([
+            'role_target' => 'admin',
+            'title' => 'Permintaan Perpanjangan',
+            'message' => "Permintaan perpanjangan booking #{$booking->kode_booking} dari " . Auth::user()->username . 
+                        " hingga " . Carbon::parse($request->tanggal_keluar_baru)->format('d M Y') . ".",
+            'booking_id' => $booking->id,
+            'type' => 'info',
+            'is_read' => false,
         ]);
 
         return redirect()->route('user.booking.riwayat')
@@ -294,6 +338,28 @@ class BookingController extends Controller
                 "Alasan: " . $request->alasan_cancel . "\n" .
                 "Dibatalkan pada: " . now()->format('d/m/Y H:i') . "\n" .
                 "Total yang sudah dibayar: Rp " . number_format($booking->total_harga, 0, ',', '.')
+        ]);
+
+        // 1. KIRIM NOTIFIKASI KE USER bahwa booking dibatalkan
+        Notification::create([
+            'user_id' => Auth::id(),
+            'role_target' => 'user',
+            'title' => 'Booking Dibatalkan',
+            'message' => "Booking #{$booking->kode_booking} telah Anda batalkan. Alasan: {$request->alasan_cancel}",
+            'booking_id' => $booking->id,
+            'type' => 'warning',
+            'is_read' => false,
+        ]);
+
+        // 2. KIRIM NOTIFIKASI KE ADMIN tentang pembatalan
+        Notification::create([
+            'role_target' => 'admin',
+            'title' => 'Booking Dibatalkan',
+            'message' => "Booking #{$booking->kode_booking} dibatalkan oleh " . Auth::user()->username . 
+                        ". Alasan: {$request->alasan_cancel}",
+            'booking_id' => $booking->id,
+            'type' => 'warning',
+            'is_read' => false,
         ]);
 
         return redirect()->route('user.booking.riwayat')
@@ -405,5 +471,22 @@ class BookingController extends Controller
         $totalBiaya = $booking->total_harga;
 
         return view('user.booking.show', compact('booking', 'durasi', 'hargaPerHari', 'totalBiaya'));
+    }
+
+    /**
+     * Helper method untuk mendapatkan teks status
+     */
+    private function getStatusText($status)
+    {
+        $statusTexts = [
+            'pending' => 'Menunggu Konfirmasi',
+            'diterima' => 'Diterima',
+            'in_progress' => 'Sedang Berjalan',
+            'selesai' => 'Selesai',
+            'pembatalan' => 'Dibatalkan',
+            'perpanjangan' => 'Permintaan Perpanjangan'
+        ];
+
+        return $statusTexts[$status] ?? $status;
     }
 }

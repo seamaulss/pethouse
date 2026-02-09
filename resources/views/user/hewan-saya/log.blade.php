@@ -295,22 +295,6 @@
                                 <span class="text-gray-600">Total Kegiatan</span>
                                 <span class="font-bold text-teal-600">{{ $logs->count() }}</span>
                             </div>
-                            <div class="flex justify-between items-center">
-                                <span class="text-gray-600">Jenis Kegiatan</span>
-                                <span class="font-bold text-teal-600">{{ $logs->pluck('kegiatan.nama_kegiatan')->unique()->count() }}</span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <span class="text-gray-600">Waktu Terlama</span>
-                                <span class="font-bold text-teal-600">
-                                    {{ $logs->min('waktu') ? \Carbon\Carbon::parse($logs->min('waktu'))->format('H:i') : '-' }}
-                                </span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <span class="text-gray-600">Waktu Terbaru</span>
-                                <span class="font-bold text-teal-600">
-                                    {{ $logs->max('waktu') ? \Carbon\Carbon::parse($logs->max('waktu'))->format('H:i') : '-' }}
-                                </span>
-                            </div>
                         </div>
                     </div>
                     

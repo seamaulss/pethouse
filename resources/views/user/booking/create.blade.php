@@ -103,13 +103,6 @@
                         ->count();
                         @endphp
 
-                        @if($latestBooking)
-                        <a href="{{ route('user.booking.show', $latestBooking->id) }}"
-                            class="flex items-center text-sm text-teal-600 hover:text-teal-700 p-2">
-                            <i class="fas fa-eye mr-2"></i> Lihat Booking Terakhir
-                        </a>
-                        @endif
-
                         @if($pendingBookings > 0)
                         <a href="{{ route('user.booking.riwayat') }}?status=pending"
                             class="flex items-center text-sm text-yellow-600 hover:text-yellow-700 p-2">
@@ -132,12 +125,6 @@
                         </a>
                         @endif
                         @endauth
-
-                        <!-- Link tetap untuk semua user -->
-                        <a href="{{ route('user.booking.riwayat') }}"
-                            class="flex items-center text-sm text-gray-600 hover:text-teal-700 p-2">
-                            <i class="fas fa-history mr-2"></i> Lihat Semua Booking
-                        </a>
 
                         <a href="{{ route('user.hewan-saya') }}"
                             class="flex items-center text-sm text-gray-600 hover:text-teal-700 p-2">

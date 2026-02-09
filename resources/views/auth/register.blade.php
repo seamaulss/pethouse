@@ -18,13 +18,28 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
-        .bg-gradient-custom {
-            background: linear-gradient(135deg, #0d9488 0%, #0891b2 100%);
-        }
-    </style>
+    .bg-regist {
+        background-image: url('{{ asset('images/login.png') }}');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+    }
+
+    /* Optional: overlay biar teks lebih kebaca */
+    .bg-regist::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.45);
+        z-index: -1;
+    }
+</style>
+
+
 </head>
 
-<body class="bg-gradient-custom min-h-screen flex items-center justify-center p-4">
+<body class="bg-regist min-h-screen flex items-center justify-center p-4">
+
 
     <div class="bg-white rounded-2xl shadow-2xl max-w-md p-8">
 

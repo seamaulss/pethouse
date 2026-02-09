@@ -178,7 +178,6 @@
     <div class="bg-white p-8 rounded-2xl shadow-xl">
         <h2 class="text-2xl font-bold text-gray-800 mb-6">
             📋 Kegiatan {{ \Carbon\Carbon::parse($selectedDate)->format('d M Y') }}
-            <span class="text-sm font-normal text-gray-600">({{ $logs->count() }} kegiatan)</span>
         </h2>
         
         @if($logs->count() > 0)

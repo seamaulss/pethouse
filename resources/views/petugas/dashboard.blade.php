@@ -83,10 +83,4 @@
     </div>
     @endif
 </div>
-
-<!-- Floating WhatsApp -->
-<a href="https://wa.me/6285942173668?text=Halo%20admin%20PetHouse,%20saya%20petugas%20dan%20butuh%20bantuan"
-    class="whatsapp-float text-4xl sm:text-5xl" target="_blank" rel="noopener" aria-label="Hubungi Admin via WhatsApp">
-    <i class="fab fa-whatsapp"></i>
-</a>
 @endsection

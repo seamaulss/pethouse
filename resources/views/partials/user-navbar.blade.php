@@ -14,11 +14,6 @@
                         </a>
                         <a href="{{ route('user.konsultasi.index') }}" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-teal-700 text-white relative">
                             <i class="fas fa-comments mr-2"></i>Konsultasi Saya
-                            @if($jml_notif > 0)
-                            <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                                {{ $jml_notif > 9 ? '9+' : $jml_notif }}
-                            </span>
-                            @endif
                         </a>
                         <a href="{{ route('user.profil') }}" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-teal-700 transition duration-200">
                             <i class="fas fa-user mr-2"></i>Profil

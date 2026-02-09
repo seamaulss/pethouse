@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\User\DashboardController as UserDashboardController;
+use App\Http\Controllers\Petugas\DashboardController as PetugasDashboardController;
 use App\Http\Controllers\Admin\HeroController;
 use App\Http\Controllers\Admin\GaleriController;
 use App\Http\Controllers\User\BookingController;
@@ -117,7 +118,6 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // NOTIFIKASI ROUTES - GUNAKAN AdminDashboardController
     Route::post('/notifications/{id}/read', [AdminDashboardController::class, 'markAsRead'])
         ->name('notifications.read');
-
     Route::post('/notifications/mark-all-read', [AdminDashboardController::class, 'markAllAsRead'])
         ->name('notifications.mark-all-read');
     Route::get('/notifications/count', [AdminDashboardController::class, 'getNotificationCount'])
@@ -133,7 +133,6 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 // =====================
 
 Route::middleware(['auth', 'petugas'])->prefix('petugas')->name('petugas.')->group(function () {
-
     // Dashboard
     Route::get('/dashboard', [App\Http\Controllers\Petugas\DashboardController::class, 'index'])->name('dashboard');
 

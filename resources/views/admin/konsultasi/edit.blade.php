@@ -113,7 +113,7 @@
                                 <div>
                                     <span class="font-medium">Balasan Dokter:</span><br>
                                     <p class="mt-2 bg-teal-50 p-4 rounded-xl border border-teal-200">
-                                        {{ nl2br(e($konsultasi->balasan_dokter)) }}
+                                        {{ (e($konsultasi->balasan_dokter)) }}
                                     </p>
                                 </div>
                             @endif

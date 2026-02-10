@@ -39,8 +39,8 @@ class DashboardController extends Controller
             ->where('dp_dibayar', 'Ya')
             ->count();
 
-        // 3. Pending Konsultasi
-        $pendingKonsultasi = Konsultasi::where('status', 'pending')->count();
+        // 3. Selesai Konsultasi
+        $selesaiKonsultasi = Konsultasi::where('status', 'selesai')->count();
 
         // 4. Pendapatan Bulan Ini
         $pendapatanBulanIni = $this->hitungPendapatanBulanIni($startOfMonth, $endOfMonth);
@@ -96,7 +96,7 @@ class DashboardController extends Controller
             ->get();
 
         return view('admin.dashboard', compact(
-            'adminName', 'totalBookingBulanIni', 'hewanDititipkanSekarang', 'pendingKonsultasi', 
+            'adminName', 'totalBookingBulanIni', 'hewanDititipkanSekarang', 'selesaiKonsultasi', 
             'pendapatanBulanIni', 'occupancyRate', 'testimoniBaru', 'notifCount', 
             'recentActivity', 'totalHewanSelesaiBulanIni', 'rataRataLamaInap', 
             'jenisHewanStats', 'kapasitasTotal', 'recentNotifications'

@@ -27,10 +27,6 @@
                             <i class="fas fa-home mr-3"></i>
                             Dashboard
                         </a>
-                        <a href="{{ route('dokter.cek-status') }}" class="flex items-center px-6 py-3 text-gray-800 hover:bg-teal-50 hover:text-teal-600 transition">
-                            <i class="fas fa-search mr-3"></i>
-                            Cek Status Konsultasi
-                        </a>
                         <a href="{{ route('dokter.catatan-medis.index') }}" class="flex items-center px-6 py-3 text-gray-800 hover:bg-teal-50 hover:text-teal-600 transition">
                             <i class="fas fa-notes-medical mr-3"></i>
                             Catatan Medis

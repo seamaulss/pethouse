@@ -109,8 +109,8 @@
     ],
     [
     'icon' => 'fa-stethoscope',
-    'title' => 'Konsultasi Pending',
-    'value' => $pendingKonsultasi,
+    'title' => 'Konsultasi Selesai',
+    'value' => $selesaiKonsultasi,
     'color' => 'amber',
     'bg' => 'from-amber-400 to-amber-500'
     ],

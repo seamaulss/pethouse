@@ -3,14 +3,107 @@
 @section('title', 'Petugas - Dashboard')
 
 @section('content')
-<!-- Konten Utama -->
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+
+    {{-- HEADER UTAMA --}}
     <div data-aos="fade-up">
         <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-800 mb-4 text-center sm:text-left">
             <i class="fas fa-dog mr-3 text-teal-600"></i>
-            Hewan yang Sedang Dititipkan
+            Dashboard Petugas
         </h1>
-        <p class="text-lg sm:text-xl text-gray-600 mb-10 text-center sm:text-left">
+    </div>
+
+    @if(isset($recentNotifications) && $recentNotifications->count() > 0)
+    <div class="mb-10 bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden" data-aos="fade-up">
+        <div class="bg-gradient-to-r from-teal-500 to-teal-600 px-6 py-4">
+            <h2 class="text-white text-xl font-bold flex items-center">
+                <i class="fas fa-bell mr-3"></i>
+                Notifikasi Terbaru
+                @if($unreadCount > 0)
+                <span class="ml-3 bg-red-500 text-white px-3 py-1 rounded-full text-sm">
+                    {{ $unreadCount }} belum dibaca
+                </span>
+                @endif
+            </h2>
+        </div>
+        <div class="divide-y divide-gray-100">
+            @foreach($recentNotifications as $notif)
+            <div class="px-6 py-4 hover:bg-gray-50 transition flex items-start {{ !$notif->is_read ? 'bg-blue-50' : '' }}">
+                {{-- Ikon berdasarkan tipe notifikasi --}}
+                <div class="flex-shrink-0 mr-4">
+                    @if($notif->type == 'assignment')
+                        <span class="w-10 h-10 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-xl">
+                            <i class="fas fa-user-plus"></i>
+                        </span>
+                    @elseif($notif->type == 'status')
+                        <span class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xl">
+                            <i class="fas fa-sync-alt"></i>
+                        </span>
+                    @elseif($notif->type == 'extend')
+                        <span class="w-10 h-10 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-xl">
+                            <i class="fas fa-calendar-plus"></i>
+                        </span>
+                    @elseif($notif->type == 'completed')
+                        <span class="w-10 h-10 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-xl">
+                            <i class="fas fa-check-circle"></i>
+                        </span>
+                    @elseif($notif->type == 'cancel')
+                        <span class="w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-xl">
+                            <i class="fas fa-times-circle"></i>
+                        </span>
+                    @else
+                        <span class="w-10 h-10 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center text-xl">
+                            <i class="fas fa-bell"></i>
+                        </span>
+                    @endif
+                </div>
+
+                {{-- Konten notifikasi --}}
+                <div class="flex-1">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="font-semibold text-gray-800 {{ !$notif->is_read ? 'text-teal-700' : '' }}">
+                                {{ $notif->title }}
+                            </h3>
+                            <p class="text-gray-600 text-sm mt-1">
+                                {{ $notif->message }}
+                            </p>
+                        </div>
+                        <span class="text-xs text-gray-400 whitespace-nowrap ml-4">
+                            {{ $notif->created_at->diffForHumans() }}
+                        </span>
+                    </div>
+
+                    {{-- Tombol tandai dibaca (hanya untuk yg belum dibaca) --}}
+                    @if(!$notif->is_read)
+                    <div class="mt-2">
+                        <a href="{{ route('petugas.notifications.markAsRead', $notif->id) }}"
+                           class="text-xs bg-white border border-teal-500 text-teal-600 px-3 py-1 rounded-full hover:bg-teal-50 transition">
+                            Tandai sudah dibaca
+                        </a>
+                    </div>
+                    @endif
+                </div>
+            </div>
+            @endforeach
+        </div>
+
+        {{-- Link ke halaman semua notifikasi --}}
+        <div class="px-6 py-3 bg-gray-50 text-right">
+            <a href="{{ route('petugas.notifications.index') }}"
+               class="text-teal-600 hover:text-teal-800 font-medium text-sm">
+                Lihat semua notifikasi →
+            </a>
+        </div>
+    </div>
+    @endif
+
+    <div data-aos="fade-up">
+        <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-4">
+            <i class="fas fa-paw mr-3 text-teal-600"></i>
+            Hewan yang Sedang Dititipkan
+        </h2>
+        <p class="text-lg sm:text-xl text-gray-600 mb-10">
             Pantau dan update kondisi harian hewan kesayangan pelanggan.
         </p>
     </div>
@@ -48,9 +141,9 @@
                     // Normalisasi nomor WA
                     $wa_clean = preg_replace('/[^\d]/', '', $booking->nomor_wa);
                     if (substr($wa_clean, 0, 1) === '0') {
-                    $wa_clean = '62' . substr($wa_clean, 1);
+                        $wa_clean = '62' . substr($wa_clean, 1);
                     } elseif (substr($wa_clean, 0, 2) !== '62') {
-                    $wa_clean = '62' . $wa_clean;
+                        $wa_clean = '62' . $wa_clean;
                     }
                     @endphp
                     <a href="https://wa.me/{{ $wa_clean }}?text=Halo%20Bapak/Ibu%20{{ urlencode($booking->nama_pemilik) }},%20ini%20update%20dari%20PetHouse%20untuk%20{{ urlencode($booking->nama_hewan) }}"
@@ -82,5 +175,6 @@
         </p>
     </div>
     @endif
+
 </div>
 @endsection

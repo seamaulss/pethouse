@@ -11,12 +11,12 @@
                 <ul class="space-y-4 text-sm sm:text-base">
                     <li class="flex items-center justify-center md:justify-start">
                         <i class="fas fa-location-dot text-pink-300 mr-3 text-lg"></i>
-                        <span>Jl. Mawar No. 10,<br>Kota Anda (Contoh: Banjarnegara)</span>
+                        <span>Jl. Tampomas,<br>Kota Banjarnegara</span>
                     </li>
                     <li class="flex items-center justify-center md:justify-start">
                         <i class="fab fa-whatsapp text-green-300 mr-3 text-xl"></i>
-                        <a href="https://wa.me/6285942173668" target="_blank" class="hover:underline">
-                            0859-4217-3668
+                        <a href="https://wa.me/6289506700308" target="_blank" class="hover:underline">
+                            0895-0670-0308
                         </a>
                     </li>
                     <li class="flex items-center justify-center md:justify-start">
@@ -35,7 +35,7 @@
                     Ikuti Kami
                 </h3>
                 <div class="flex justify-center md:justify-start space-x-6 text-3xl">
-                    <a href="#" class="hover:text-pink-300 transition transform hover:scale-110">
+                    <a href="https://www.instagram.com/arkanmaulidhana/" class="hover:text-pink-300 transition transform hover:scale-110" target="_blank">
                         <i class="fab fa-instagram"></i>
                     </a>
                     <a href="#" class="hover:text-pink-300 transition transform hover:scale-110">
@@ -44,7 +44,7 @@
                     <a href="https://wa.me/6285942173668" target="_blank" class="hover:text-green-300 transition transform hover:scale-110">
                         <i class="fab fa-whatsapp"></i>
                     </a>
-                    <a href="#" class="hover:text-pink-300 transition transform hover:scale-110">
+                    <a href="#" class="hover:text-pink-300 transition transform hover:scale-110" target="_blank">
                         <i class="fab fa-tiktok"></i>
                     </a>
                 </div>
@@ -64,10 +64,7 @@
                         <span class="font-medium">Senin - Sabtu:</span>
                         <span class="ml-3">08.00 - 18.00 WIB</span>
                     </li>
-                    <li class="flex items-center justify-center md:justify-start">
-                        <span class="font-medium">Minggu:</span>
-                        <span class="ml-3">09.00 - 16.00 WIB</span>
-                    </li>
+
                     <li class="text-pink-300 mt-4 flex items-center justify-center md:justify-start">
                         <i class="fas fa-phone-alt mr-3"></i>
                         Layanan darurat 24 jam via WhatsApp
@@ -82,8 +79,6 @@
     <div class="bg-teal-800/70 text-center py-5 text-sm sm:text-base border-t border-teal-500/30">
         <p class="flex items-center justify-center">
             © {{ date('Y') }} <span class="font-bold mx-2">PetHouse</span> 
-            <i class="fas fa-paw text-pink-300 mx-2"></i> 
-            All Rights Reserved with Love
         </p>
     </div>
 </footer>

@@ -46,6 +46,24 @@ class Booking extends Model
         'tanggal_perpanjangan' => 'date',
     ];
 
+    protected function createNotificationForPetugas($title, $message, $type, $petugasId = null)
+    {
+        // Jika petugasId null, notifikasi dikirim ke SEMUA petugas (via user_id = null atau 0)
+        // Sesuaikan dengan logika notifikasi di aplikasi Anda
+        $targetUserId = $petugasId ?? 0;  // 0 atau null artinya semua petugas
+
+        Notification::create([
+            'user_id'      => $targetUserId,
+            'role_target'  => 'petugas',
+            'title'        => $title,
+            'message'      => $message,
+            'type'         => $type,
+            'reference_id' => $this->id,
+            'reference_type' => 'booking',
+            'is_read'      => 0,
+        ]);
+    }
+
     // Relationships
     public function layanan()
     {
@@ -131,6 +149,53 @@ class Booking extends Model
                         ' berubah dari ' . $oldStatus . ' menjadi ' . $newStatus,
                     $booking->id,
                     'status'
+                );
+            }
+        });
+
+        // NOTIFIKASI UNTUK PETUGAS        
+
+        static::updated(function ($booking) {
+            $original = $booking->getOriginal();
+            $changes = $booking->getChanges();
+
+            // 1. Jika petugas_id diisi (penugasan petugas)
+            if ($booking->isDirty('petugas_id') && !is_null($booking->petugas_id)) {
+                $booking->createNotificationForPetugas(
+                    'Anda Ditugaskan',
+                    "Anda ditugaskan menangani booking {$booking->kode_booking} - {$booking->nama_hewan} milik {$booking->nama_pemilik}",
+                    'assignment',
+                    $booking->petugas_id
+                );
+            }
+
+            // 3. Jika tanggal keluar diperpanjang
+            if ($booking->isDirty('tanggal_keluar') && $booking->tanggal_keluar > $original['tanggal_keluar']) {
+                $booking->createNotificationForPetugas(
+                    'Booking Diperpanjang',
+                    "Booking {$booking->kode_booking} - {$booking->nama_hewan} diperpanjang sampai {$booking->tanggal_keluar->format('d/m/Y')}.",
+                    'extend',
+                    $booking->petugas_id
+                );
+            }
+
+            // 4. Jika status berubah menjadi 'selesai'
+            if ($booking->isDirty('status') && $booking->status === 'selesai') {
+                $booking->createNotificationForPetugas(
+                    'Booking Selesai',
+                    "Booking {$booking->kode_booking} - {$booking->nama_hewan} telah selesai. Terima kasih atas kerjanya!",
+                    'completed',
+                    $booking->petugas_id
+                );
+            }
+
+            // 5. Jika status berubah menjadi 'pembatalan'
+            if ($booking->isDirty('status') && $booking->status === 'pembatalan') {
+                $booking->createNotificationForPetugas(
+                    'Booking Dibatalkan',
+                    "Booking {$booking->kode_booking} - {$booking->nama_hewan} dibatalkan.",
+                    'cancel',
+                    $booking->petugas_id
                 );
             }
         });

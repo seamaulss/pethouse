@@ -13,27 +13,39 @@ class DashboardController extends Controller
     public function index()
     {
         $petugasId = Auth::id();
-        
-        // Hitung notifikasi yang belum dibaca
-        $unreadCount = Notification::where(function($query) use ($petugasId) {
-            $query->where('user_id', $petugasId)
-                  ->orWhereNull('user_id')
-                  ->orWhere('user_id', 0);
-        })
-        ->where('role_target', 'petugas')
-        ->where('is_read', 0)
-        ->count();
 
-        // AMBIL BOOKING YANG SEDANG in_progress DAN PETUGAS_ID SESUAI ATAU NULL
+        // Hitung notifikasi belum dibaca
+        $unreadCount = Notification::where(function ($query) use ($petugasId) {
+            $query->where('user_id', $petugasId)
+                ->orWhereNull('user_id')
+                ->orWhere('user_id', 0);
+        })
+            ->where('role_target', 'petugas')
+            ->where('is_read', 0)
+            ->count();
+
+        // Ambil 5 notifikasi terbaru (yang belum dibaca lebih dulu)
+        $recentNotifications = Notification::where(function ($query) use ($petugasId) {
+            $query->where('user_id', $petugasId)
+                ->orWhereNull('user_id')
+                ->orWhere('user_id', 0);
+        })
+            ->where('role_target', 'petugas')
+            ->orderBy('is_read', 'asc')
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get();
+
+        // Booking aktif (sudah ada)
         $bookings = Booking::where('status', 'in_progress')
-            ->where(function($query) use ($petugasId) {
+            ->where(function ($query) use ($petugasId) {
                 $query->where('petugas_id', $petugasId)
-                      ->orWhereNull('petugas_id');
+                    ->orWhereNull('petugas_id');
             })
-            ->with(['user', 'layanan'])  // LOAD RELASI UNTUK EFFISIENSI
+            ->with(['user', 'layanan'])
             ->orderBy('tanggal_masuk', 'desc')
             ->get();
 
-        return view('petugas.dashboard', compact('unreadCount', 'bookings'));
+        return view('petugas.dashboard', compact('unreadCount', 'recentNotifications', 'bookings'));
     }
 }

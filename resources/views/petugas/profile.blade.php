@@ -9,34 +9,52 @@
         Profil Petugas
     </h1>
 
-    <!-- Info Petugas -->
+    <!-- Info Petugas + Foto -->
     <div class="bg-white p-6 rounded-lg shadow mb-8">
-        <h2 class="text-xl font-semibold mb-4">Data Petugas</h2>
+        <div class="flex flex-col md:flex-row items-center gap-6">
+            <!-- Foto Profil -->
+            <div class="flex-shrink-0">
+                <div class="relative w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-4 border-teal-200 shadow-md">
+                    <img src="{{ $user->foto_url }}" 
+                         alt="Foto {{ $user->username }}"
+                         class="w-full h-full object-cover">
+                </div>
+                <a href="{{ route('petugas.profile.edit') }}" 
+                   class="mt-3 inline-flex items-center gap-2 text-sm bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg transition shadow-md">
+                    <i class="fas fa-camera"></i>
+                    <span>Edit Profil</span>
+                </a>
+            </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-                <p class="text-sm text-gray-500">Username</p>
-                <p class="font-medium">
-                    {{ $user->username }}
-                </p>
-            </div>
-            <div>
-                <p class="text-sm text-gray-500">Role</p>
-                <p class="font-medium capitalize">
-                    {{ $user->role }}
-                </p>
-            </div>
-            <div>
-                <p class="text-sm text-gray-500">Email</p>
-                <p class="font-medium">
-                    {{ $user->email ?? '-' }}
-                </p>
-            </div>
-            <div>
-                <p class="text-sm text-gray-500">Nomor WhatsApp</p>
-                <p class="font-medium">
-                    {{ $user->nomor_wa ?? '-' }}
-                </p>
+            <!-- Data Petugas -->
+            <div class="flex-1 w-full">
+                <h2 class="text-xl font-semibold mb-4 text-center md:text-left">Data Petugas</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-sm text-gray-500">Username</p>
+                        <p class="font-medium">
+                            {{ $user->username }}
+                        </p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Role</p>
+                        <p class="font-medium capitalize">
+                            {{ $user->role }}
+                        </p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Email</p>
+                        <p class="font-medium">
+                            {{ $user->email ?? '-' }}
+                        </p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Nomor WhatsApp</p>
+                        <p class="font-medium">
+                            {{ $user->nomor_wa ?? '-' }}
+                        </p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

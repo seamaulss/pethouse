@@ -92,15 +92,6 @@
                                 @endif
                             </div>
                             @endif
-
-                            <a href="https://wa.me/6285942173668?text=Halo%20PetHouse,%20saya%20ingin%20booking%20layanan%20*{{ urlencode($layanan->nama) }}*"
-                               target="_blank" rel="noopener"
-                               class="inline-block btn-primary text-white font-bold px-8 py-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
-                                <span class="flex items-center justify-center">
-                                    Booking Sekarang
-                                    <i class="fas fa-paw ml-3 text-xl"></i>
-                                </span>
-                            </a>
                         </div>
                     </div>
                 @endforeach

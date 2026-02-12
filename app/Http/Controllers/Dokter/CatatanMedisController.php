@@ -63,4 +63,4 @@ class CatatanMedisController extends Controller
             ->route('dokter.catatan-medis.index')
             ->with('success', "Catatan medis untuk <strong>{$validated['nama_hewan']}</strong> ({$validated['jenis_hewan']}) berhasil disimpan!");
     }
-}
+}   

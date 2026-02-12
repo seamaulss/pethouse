@@ -65,7 +65,7 @@
 
                             @if(!$notification->is_read)
                                 <div class="mt-4 sm:mt-0 sm:ml-6">
-                                    <a href="{{ route('petugas.notifications.mark-read', $notification->id) }}" 
+                                    <a href="{{ route('petugas.notifications.markAsRead', $notification->id) }}" 
                                        class="bg-teal-500 hover:bg-teal-600 text-white font-bold px-6 py-3 rounded-full shadow-md inline-flex items-center">
                                         <i class="fas fa-check mr-2"></i>
                                         Tandai Dibaca

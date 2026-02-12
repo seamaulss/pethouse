@@ -4,12 +4,13 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\User\DashboardController as UserDashboardController;
 use App\Http\Controllers\Petugas\DashboardController as PetugasDashboardController;
+use App\Http\Controllers\User\ProfilController;
+use App\Http\Controllers\Petugas\ProfileController as PetugasProfileController;
 use App\Http\Controllers\Admin\HeroController;
 use App\Http\Controllers\Admin\GaleriController;
 use App\Http\Controllers\User\BookingController;
 use App\Http\Controllers\User\HewanSayaController;
 use App\Http\Controllers\User\KonsultasiController;
-use App\Http\Controllers\User\ProfilController;
 use App\Http\Controllers\User\CekStatusController;
 use App\Http\Controllers\User\NotificationController;
 use App\Http\Controllers\Petugas\InputLogController;
@@ -141,30 +142,30 @@ Route::middleware(['auth', 'petugas'])->prefix('petugas')->name('petugas.')->gro
     Route::post('/input-log/{booking}', [App\Http\Controllers\Petugas\InputLogController::class, 'store'])->name('input-log.store');
     Route::delete('/input-log/{log}', [App\Http\Controllers\Petugas\InputLogController::class, 'destroyLog'])->name('input-log.destroy-log');
 
-    // Notifications
     Route::get('/notifications', [App\Http\Controllers\Petugas\NotificationController::class, 'index'])->name('notifications.index');
-    Route::get('/notifications/{notification}/read', [App\Http\Controllers\Petugas\NotificationController::class, 'markAsRead'])->name('notifications.mark-read');
+    // Route untuk menandai notifikasi sudah dibaca
+    Route::get('/notifications/{id}/read', [App\Http\Controllers\Petugas\NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
 
     // Profile
     Route::get('/profile', [App\Http\Controllers\Petugas\ProfileController::class, 'index'])->name('profile.index');
+    Route::get('/profile/edit', [App\Http\Controllers\Petugas\ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile/update', [\App\Http\Controllers\Petugas\ProfileController::class, 'update'])->name('profile.update');
 });
-
 
 // ======================
 // ROUTE USER
 // ======================
 
 Route::middleware(['auth', 'user'])->prefix('user')->name('user.')->group(function () {
-    // Dashboard User
+
+    // 1. ROUTE SPESIFIK – DILETAKKAN DI ATAS
     Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('dashboard');
 
-    Route::prefix('notifikasi')->name('notifikasi.')->group(function () {
-        Route::get('/', [NotificationController::class, 'index'])->name('index');                
-        Route::post('/{id}/read', [NotificationController::class, 'markAsRead'])->name('read');   
-        Route::post('/read-all', [NotificationController::class, 'markAllAsRead'])->name('read-all'); 
-        Route::delete('/{id}', [NotificationController::class, 'destroy'])->name('destroy');      
-        Route::get('/get-new', [NotificationController::class, 'getNewNotifications'])->name('get-new'); 
-    });
+    // Notifikasi – route spesifik (bukan wildcard)
+    Route::get('/', [NotificationController::class, 'index'])->name('index');
+    Route::post('/{id}/read', [NotificationController::class, 'markAsRead'])->name('read');
+    Route::post('/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifikasi.read-all'); 
+    Route::get('/get-new', [NotificationController::class, 'getNewNotifications'])->name('notifikasi.get-new');
 
     // Hewan Saya
     Route::get('/hewan-saya', [HewanSayaController::class, 'index'])->name('hewan-saya');
@@ -175,12 +176,9 @@ Route::middleware(['auth', 'user'])->prefix('user')->name('user.')->group(functi
     Route::post('/booking', [BookingController::class, 'store'])->name('booking.store');
     Route::get('/booking/riwayat', [BookingController::class, 'riwayat'])->name('booking.riwayat');
     Route::get('/booking/get-harga', [BookingController::class, 'getHarga'])->name('booking.get-harga');
-    // Perpanjangan Booking
     Route::get('/booking/{id}/extend', [BookingController::class, 'showExtendForm'])->name('booking.extend.form');
     Route::post('/booking/{id}/extend', [BookingController::class, 'extend'])->name('booking.extend');
-    // Pembatalan Booking
     Route::post('/booking/{id}/cancel', [BookingController::class, 'cancel'])->name('booking.cancel');
-    // Detail booking
     Route::get('/booking/{id}', [BookingController::class, 'show'])->name('booking.show');
 
     // Konsultasi
@@ -190,10 +188,13 @@ Route::middleware(['auth', 'user'])->prefix('user')->name('user.')->group(functi
     Route::get('/konsultasi/get-jam', [KonsultasiController::class, 'getJam'])->name('konsultasi.get-jam');
     Route::post('/konsultasi/balas', [KonsultasiController::class, 'balas'])->name('konsultasi.balas');
 
-    // Profil
-    Route::get('/profil', [ProfilController::class, 'index'])->name('profil');
-    Route::post('/profil/update', [ProfilController::class, 'update'])->name('profil.update');
+    // ✅ PROFIL ROUTES – NAMA ROUTE HARUS SEPERTI INI
+    Route::get('/profil', [\App\Http\Controllers\User\ProfilController::class, 'index'])->name('profil');
+    // Route::get('/profil/edit', [\App\Http\Controllers\User\ProfilController::class, 'edit'])->name('profil.edit');
+    Route::put('/profil/update', [\App\Http\Controllers\User\ProfilController::class, 'update'])->name('profil.update');
 
+    // ⚠️ ROUTE WILDCARD – DILETAKKAN PALING BAWAH
+    Route::delete('/{id}', [NotificationController::class, 'destroy'])->name('destroy');
 });
 
 // ======================
@@ -214,10 +215,6 @@ Route::middleware(['auth', 'dokter'])->prefix('dokter')->name('dokter.')->group(
     // Catatan Medis Dokter
     Route::get('/catatan-medis', [\App\Http\Controllers\Dokter\CatatanMedisController::class, 'index'])->name('catatan-medis.index');
     Route::post('/catatan-medis', [\App\Http\Controllers\Dokter\CatatanMedisController::class, 'store'])->name('catatan-medis.store');
-
-    // Cek Status (dokter juga bisa cek)
-    Route::get('/cek-status', [\App\Http\Controllers\User\CekStatusController::class, 'index'])->name('cek-status');
-    Route::post('/cek-status', [\App\Http\Controllers\User\CekStatusController::class, 'show'])->name('cek-status.show');
 });
 
 require __DIR__ . '/auth.php';

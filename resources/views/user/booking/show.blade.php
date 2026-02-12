@@ -424,7 +424,7 @@
                 </div>
 
                 <!-- Modal Body -->
-                <form id="cancelForm" method="POST" class="p-6">
+                <form id="cancelForm" method="POST" class="p-2">
                     @csrf
 
                     <div class="mb-6">

@@ -1,38 +1,30 @@
 <?php
 
-namespace App\Http\Controllers\Petugas;
+namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
-use App\Models\RiwayatPetugas;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class ProfileController extends Controller
 {
+    /**
+     * Tampilkan halaman profil user
+     */
     public function index()
     {
-        $petugasId = Auth::id();
-
-        // Ambil riwayat perawatan petugas
-        $riwayat = RiwayatPetugas::with('booking')
-            ->where('petugas_id', $petugasId)
-            ->orderBy('created_at', 'desc')
-            ->get();
-
-        return view('petugas.profile', [
-            'user' => Auth::user(),
-            'riwayat' => $riwayat
-        ]);
+        $user = Auth::user();
+        return view('user.index', compact('user'));
     }
+
     /**
      * Tampilkan form edit profil
      */
     public function edit()
     {
-        return view('petugas.profile-edit', [
-            'user' => Auth::user()
-        ]);
+        $user = Auth::user();
+        return view('user.edit', compact('user'));
     }
 
     /**
@@ -55,18 +47,18 @@ class ProfileController extends Controller
         if ($request->hasFile('foto')) {
             // Hapus foto lama jika ada
             if ($user->foto) {
-                Storage::disk('public')->delete('foto_petugas/' . $user->foto);
+                Storage::disk('public')->delete('foto_user/' . $user->foto);
             }
 
             $file = $request->file('foto');
-            $filename = 'petugas_' . $user->id . '_' . time() . '.' . $file->getClientOriginalExtension();
-            $path = $file->storeAs('foto_petugas', $filename, 'public');
+            $filename = 'user_' . $user->id . '_' . time() . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('foto_user', $filename, 'public');
             $user->foto = $filename;
         }
 
         $user->save();
 
-        return redirect()->route('petugas.profile.index')
+        return redirect()->route('user.profil.index')
             ->with('success', 'Profil berhasil diperbarui.');
     }
 }

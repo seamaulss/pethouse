@@ -4,8 +4,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\User\DashboardController as UserDashboardController;
 use App\Http\Controllers\Petugas\DashboardController as PetugasDashboardController;
-use App\Http\Controllers\User\ProfilController;
 use App\Http\Controllers\Petugas\ProfileController as PetugasProfileController;
+use App\Http\Controllers\Dokter\DashboardController as DokterDashboardController;
+use App\Http\Controllers\User\ProfilController;
 use App\Http\Controllers\Admin\HeroController;
 use App\Http\Controllers\Admin\GaleriController;
 use App\Http\Controllers\User\BookingController;
@@ -164,7 +165,7 @@ Route::middleware(['auth', 'user'])->prefix('user')->name('user.')->group(functi
     // Notifikasi – route spesifik (bukan wildcard)
     Route::get('/', [NotificationController::class, 'index'])->name('index');
     Route::post('/{id}/read', [NotificationController::class, 'markAsRead'])->name('read');
-    Route::post('/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifikasi.read-all'); 
+    Route::post('/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifikasi.read-all');
     Route::get('/get-new', [NotificationController::class, 'getNewNotifications'])->name('notifikasi.get-new');
 
     // Hewan Saya
@@ -215,6 +216,11 @@ Route::middleware(['auth', 'dokter'])->prefix('dokter')->name('dokter.')->group(
     // Catatan Medis Dokter
     Route::get('/catatan-medis', [\App\Http\Controllers\Dokter\CatatanMedisController::class, 'index'])->name('catatan-medis.index');
     Route::post('/catatan-medis', [\App\Http\Controllers\Dokter\CatatanMedisController::class, 'store'])->name('catatan-medis.store');
+
+    // ✅ PROFIL DOKTER
+    Route::get('/profile', [\App\Http\Controllers\Dokter\ProfileController::class, 'index'])->name('profile.index');
+    Route::get('/profile/edit', [\App\Http\Controllers\Dokter\ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile/update', [\App\Http\Controllers\Dokter\ProfileController::class, 'update'])->name('profile.update');
 });
 
 require __DIR__ . '/auth.php';

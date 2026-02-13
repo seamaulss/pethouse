@@ -54,21 +54,22 @@ class User extends Authenticatable
      */
     public function getFotoUrlAttribute()
     {
-        // Jika tidak ada foto, kembalikan avatar default
         if (empty($this->foto)) {
-            return asset('assets/img/default-avatar.png');
+            return 'https://ui-avatars.com/api/?name=' . urlencode($this->username) . '&background=0D9488&color=fff';
         }
 
-        // Tentukan folder berdasarkan role
-        $folder = ($this->role === 'petugas') ? 'foto_petugas' : 'foto_user';
+        $folder = match ($this->role) {
+            'petugas' => 'foto_petugas',
+            'dokter'  => 'foto_dokter',
+            default   => 'foto_user',
+        };
+
         $path = $folder . '/' . $this->foto;
 
-        // Cek keberadaan file di storage/public
         if (Storage::disk('public')->exists($path)) {
             return Storage::url($path);
         }
 
-        // Fallback jika file tidak ditemukan
-        return asset('assets/img/default-avatar.png');
+        return 'https://ui-avatars.com/api/?name=' . urlencode($this->username) . '&background=0D9488&color=fff';
     }
 }

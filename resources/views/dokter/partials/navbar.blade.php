@@ -1,86 +1,150 @@
 <!-- Navbar Dokter -->
-<nav class="navbar-dokter text-dark shadow-lg sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex justify-between items-center">
-        <a href="{{ route('dokter.dashboard') }}" class="flex items-center text-2xl sm:text-3xl font-bold">
-            <span class="text-4xl mr-3">🩺</span>
-            Pet<span class="font-normal">House</span> Dokter
-        </a>
+<nav class="bg-gradient-to-r from-teal-600 to-teal-700 text-white shadow-lg sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16 lg:h-20">
+            
+            <!-- Logo -->
+            <div class="flex items-center">
+                <a href="{{ route('dokter.dashboard') }}" class="flex items-center gap-3 group">
+                    <div class="bg-white p-2 rounded-lg transform group-hover:scale-110 transition duration-300">
+                        <span class="text-2xl">🩺</span>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="font-bold text-lg lg:text-xl leading-tight">PetHouse</span>
+                        <span class="text-xs text-teal-100 hidden sm:block">Dokter Panel</span>
+                    </div>
+                </a>
+            </div>
 
-        <div class="flex items-center space-x-6">
-            <!-- Greeting -->
-            <span class="hidden sm:block text-lg">
-                Halo, <strong>Dokter {{ auth()->user()->username }}</strong>
-            </span>
+            <!-- Desktop Navigation -->
+            <div class="hidden md:flex items-center gap-2 lg:gap-4">
+                
+                <!-- Catatan Medis Link -->
+                <a href="{{ route('dokter.catatan-medis.index') }}" 
+                   class="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-teal-500 hover:shadow-md transition duration-200 {{ request()->routeIs('dokter.catatan-medis.*') ? 'bg-teal-500 shadow-md' : '' }}">
+                    <i class="fas fa-notes-medical"></i>
+                    <span>Catatan Medis</span>
+                </a>
 
-            <!-- Dropdown Menu (klik untuk buka) -->
-            <div class="relative">
-                <button id="menu-btn" class="flex items-center text-lg font-medium hover:text-teal-200 transition focus:outline-none">
-                    <i class="fas fa-bars mr-2"></i>
-                    Menu
-                    <i class="fas fa-chevron-down ml-2 text-sm transition-transform" id="chevron"></i>
-                </button>
+                <!-- Profile Dropdown -->
+                <div class="relative" x-data="{ open: false }">
+                    <button @click="open = !open" 
+                            class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-teal-500 transition duration-200">
+                        
+                        <!-- Avatar -->
+                        <div class="w-8 h-8 lg:w-10 lg:h-10 rounded-full overflow-hidden border-2 border-white shadow-sm flex-shrink-0">
+                            @php $user = Auth::user(); @endphp
+                            @if($user->foto_url)
+                                <img src="{{ $user->foto_url }}" alt="Foto" class="w-full h-full object-cover">
+                            @else
+                                <div class="w-full h-full bg-white flex items-center justify-center">
+                                    <i class="fas fa-user-md text-teal-600"></i>
+                                </div>
+                            @endif
+                        </div>
+                        
+                        <!-- Nama & Role -->
+                        <div class="hidden lg:block text-left">
+                            <p class="text-sm font-semibold">Dr. {{ $user->username }}</p>
+                            <p class="text-xs text-teal-100">Dokter</p>
+                        </div>
+                        
+                        <i class="fas fa-chevron-down text-sm ml-1" :class="{ 'rotate-180': open }"></i>
+                    </button>
 
-                <!-- Dropdown Content -->
-                <div id="menu-dropdown" class="absolute right-0 mt-4 w-64 bg-white rounded-2xl shadow-2xl opacity-0 invisible transition-all duration-300 transform scale-95 origin-top-right">
-                    <div class="py-3">
-                        <a href="{{ route('dokter.dashboard') }}" class="flex items-center px-6 py-3 text-gray-800 hover:bg-teal-50 hover:text-teal-600 transition">
-                            <i class="fas fa-home mr-3"></i>
-                            Dashboard
+                    <!-- Dropdown Menu -->
+                    <div x-show="open" 
+                         @click.away="open = false"
+                         x-transition
+                         class="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-2xl py-2 z-50 hidden lg:block">
+                        
+                        <a href="{{ route('dokter.profile.index') }}" 
+                           class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-teal-50 hover:text-teal-600 transition">
+                            <div class="w-8 h-8 bg-teal-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-user-circle text-teal-600"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium">Profil Saya</p>
+                                <p class="text-xs text-gray-500">Lihat profil</p>
+                            </div>
                         </a>
-                        <a href="{{ route('dokter.catatan-medis.index') }}" class="flex items-center px-6 py-3 text-gray-800 hover:bg-teal-50 hover:text-teal-600 transition">
-                            <i class="fas fa-notes-medical mr-3"></i>
-                            Catatan Medis
+
+                        <a href="{{ route('dokter.profile.edit') }}" 
+                           class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-teal-50 hover:text-teal-600 transition">
+                            <div class="w-8 h-8 bg-teal-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-cog text-teal-600"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium">Pengaturan</p>
+                                <p class="text-xs text-gray-500">Ubah profil & foto</p>
+                            </div>
                         </a>
-                        <hr class="mx-4 my-2 border-gray-200">
+
+                        <div class="border-t border-gray-100 my-1"></div>
+
+                        <!-- Logout -->
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
-                            <button type="submit" class="flex items-center px-6 py-3 text-red-600 hover:bg-red-50 transition w-full text-left">
-                                <i class="fas fa-sign-out-alt mr-3"></i>
-                                Logout
+                            <button type="submit" 
+                                    class="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 transition">
+                                <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-sign-out-alt text-red-600"></i>
+                                </div>
+                                <div class="text-left">
+                                    <p class="font-medium">Keluar</p>
+                                    <p class="text-xs text-gray-500">Akhiri sesi</p>
+                                </div>
                             </button>
                         </form>
                     </div>
                 </div>
             </div>
 
-            <!-- Logout untuk mobile -->
-            <form method="POST" action="{{ route('logout') }}" class="sm:hidden">
-                @csrf
-                <button type="submit" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-full font-medium shadow-md transition flex items-center text-sm">
-                    <i class="fas fa-sign-out-alt mr-1"></i>
-                    Out
+            <!-- Mobile Menu Button -->
+            <div class="md:hidden flex items-center">
+                <button id="mobileMenuButton" class="p-2 rounded-lg hover:bg-teal-500 transition">
+                    <i class="fas fa-bars text-2xl"></i>
                 </button>
-            </form>
+            </div>
         </div>
+    </div>
+
+    <!-- Mobile Menu (Hidden by default) -->
+    <div id="mobileMenu" class="hidden md:hidden bg-teal-700 px-4 py-4 space-y-3">
+        <a href="{{ route('dokter.dashboard') }}" class="block px-4 py-3 rounded-lg hover:bg-teal-600 transition flex items-center gap-3">
+            <i class="fas fa-home w-6"></i> Dashboard
+        </a>
+        <a href="{{ route('dokter.catatan-medis.index') }}" class="block px-4 py-3 rounded-lg hover:bg-teal-600 transition flex items-center gap-3">
+            <i class="fas fa-notes-medical w-6"></i> Catatan Medis
+        </a>
+        <a href="{{ route('dokter.profile.index') }}" class="block px-4 py-3 rounded-lg hover:bg-teal-600 transition flex items-center gap-3">
+            <i class="fas fa-user-md w-6"></i> Profil Saya
+        </a>
+        <a href="{{ route('dokter.profile.edit') }}" class="block px-4 py-3 rounded-lg hover:bg-teal-600 transition flex items-center gap-3">
+            <i class="fas fa-cog w-6"></i> Pengaturan
+        </a>
+        <div class="border-t border-teal-600 my-2"></div>
+        <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button type="submit" class="w-full text-left px-4 py-3 rounded-lg hover:bg-red-600 transition flex items-center gap-3">
+                <i class="fas fa-sign-out-alt w-6"></i> Logout
+            </button>
+        </form>
     </div>
 </nav>
 
-<!-- Script untuk toggle dropdown -->
+<!-- Script untuk mobile menu -->
 <script>
-    const menuBtn = document.getElementById('menu-btn');
-    const dropdown = document.getElementById('menu-dropdown');
-    const chevron = document.getElementById('chevron');
-
-    menuBtn.addEventListener('click', () => {
-        const isHidden = dropdown.classList.contains('opacity-0');
-
-        if (isHidden) {
-            dropdown.classList.remove('opacity-0', 'invisible', 'scale-95');
-            dropdown.classList.add('opacity-100', 'visible', 'scale-100');
-            chevron.classList.add('rotate-180');
-        } else {
-            dropdown.classList.add('opacity-0', 'invisible', 'scale-95');
-            dropdown.classList.remove('opacity-100', 'visible', 'scale-100');
-            chevron.classList.remove('rotate-180');
-        }
-    });
-
-    // Tutup dropdown kalau klik di luar
-    document.addEventListener('click', (e) => {
-        if (!menuBtn.contains(e.target) && !dropdown.contains(e.target)) {
-            dropdown.classList.add('opacity-0', 'invisible', 'scale-95');
-            dropdown.classList.remove('opacity-100', 'visible', 'scale-100');
-            chevron.classList.remove('rotate-180');
+    document.addEventListener('DOMContentLoaded', function() {
+        const btn = document.getElementById('mobileMenuButton');
+        const menu = document.getElementById('mobileMenu');
+        if (btn && menu) {
+            btn.addEventListener('click', function() {
+                menu.classList.toggle('hidden');
+            });
         }
     });
 </script>
+
+<!-- Alpine.js untuk dropdown -->
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>

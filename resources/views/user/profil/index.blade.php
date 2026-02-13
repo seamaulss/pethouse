@@ -47,7 +47,7 @@
                 <!-- 🔥 FORM DENGAN ENCTYPE UNTUK UPLOAD FOTO -->
                 <form method="POST" action="{{ route('user.profil.update') }}" enctype="multipart/form-data" class="space-y-6">
                     @csrf
-                    @method('PUT') {{-- WAJIB untuk method PUT --}}
+                    @method('PUT')
 
                     <!-- ===== BAGIAN FOTO PROFIL ===== -->
                     <div class="flex flex-col md:flex-row items-center gap-8 pb-6 border-b border-gray-200">

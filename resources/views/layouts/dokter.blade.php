@@ -154,12 +154,6 @@
         @yield('content')
     </main>
 
-    <!-- WhatsApp Float -->
-    <a href="https://wa.me/6285942173668?text=Halo%20admin,%20saya%20dokter%20dan%20butuh%20bantuan"
-       class="whatsapp-float text-4xl sm:text-5xl" target="_blank" rel="noopener" aria-label="Hubungi Admin via WhatsApp">
-        <i class="fab fa-whatsapp"></i>
-    </a>
-
     <!-- AOS Init -->
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script>

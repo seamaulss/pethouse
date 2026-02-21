@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Konsultasi;
 use App\Models\JenisHewan;
+use App\Models\Notification;
 use Carbon\Carbon;
 
 class KonsultasiController extends Controller
@@ -16,7 +17,7 @@ class KonsultasiController extends Controller
         $consultations = Konsultasi::where('user_id', Auth::id())
             ->orderBy('created_at', 'desc')
             ->get();
-            
+
         return view('user.konsultasi.index', [
             'consultations' => $consultations,
             'total' => $consultations->count(),
@@ -35,7 +36,7 @@ class KonsultasiController extends Controller
     public function store(Request $request)
     {
         $today = Carbon::today();
-        
+
         $validated = $request->validate([
             'nama_pemilik' => 'required|string|max:100',
             'no_wa' => 'required|string|max:20',
@@ -70,6 +71,15 @@ class KonsultasiController extends Controller
                 'status' => 'pending',
             ]);
 
+            // --- TAMBAHKAN NOTIFIKASI UNTUK DOKTER DI SINI ---
+            Notification::createForAdmin(
+                'Konsultasi Baru Masuk! 🩺',
+                "Pemilik {$konsultasi->nama_pemilik} telah melakukan booking untuk {$konsultasi->jenis_hewan} pada " . date('d M Y', strtotime($konsultasi->tanggal_janji)) . " jam {$konsultasi->jam_janji} WIB.",
+                null, // booking_id
+                'warning'
+            );
+            // ------------------------------------------------
+
             return redirect()->route('user.konsultasi.index')
                 ->with('success', "Booking Berhasil! Kode: <strong>{$konsultasi->kode_konsultasi}</strong>. Silakan datang sesuai jadwal.");
         } catch (\Exception $e) {
@@ -79,11 +89,15 @@ class KonsultasiController extends Controller
 
     public function getJam(Request $request)
     {
+        // Mengambil jam dan memformatnya menjadi HH:mm (contoh: 08:00)
         $jamTerpakai = Konsultasi::where('tanggal_janji', $request->tanggal)
-            ->whereIn('status', ['pending', 'diterima'])
-            ->pluck('jam_janji')
+            ->whereIn('status', ['pending', 'diterima', 'selesai'])
+            ->get()
+            ->map(function ($item) {
+                return date('H:i', strtotime($item->jam_janji));
+            })
             ->toArray();
-            
+
         return response()->json($jamTerpakai);
     }
 

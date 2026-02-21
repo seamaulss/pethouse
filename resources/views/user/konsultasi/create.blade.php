@@ -170,6 +170,8 @@
     const jamSelect = document.getElementById('jam');
 
     tanggalInput.addEventListener('change', async () => {
+        if (!tanggalInput.value) return;
+
         jamSelect.innerHTML = '<option>Loading jam tersedia...</option>';
         
         try {
@@ -178,8 +180,10 @@
 
             jamSelect.innerHTML = '<option value="">-- Pilih Jam (08.00 - 18.00) --</option>';
 
-            const today = new Date().toISOString().split('T')[0];
-            const nowHour = new Date().getHours();
+            // Menggunakan Waktu Lokal Indonesia/Server
+            const now = new Date();
+            const today = now.toISOString().split('T')[0];
+            const nowHour = now.getHours();
 
             slotJam.forEach(jam => {
                 const jamInt = parseInt(jam.split(':')[0]);
@@ -187,14 +191,18 @@
                 opt.value = jam;
                 opt.textContent = jam;
 
-                if (jamTerpakai.includes(jam)) {
+                // Perbaikan Pencocokan: Cek apakah jam ada di array jamTerpakai
+                const isBooked = jamTerpakai.includes(jam);
+
+                if (isBooked) {
                     opt.disabled = true;
-                    opt.textContent += ' (Sudah dibooking)';
-                }
-                if (tanggalInput.value === today && jamInt <= nowHour) {
+                    opt.textContent = jam + ' (Sudah dibooking)';
+                    opt.style.color = 'red'; // Memberi tanda visual
+                } else if (tanggalInput.value === today && jamInt <= nowHour) {
                     opt.disabled = true;
-                    opt.textContent += ' (Sudah lewat)';
+                    opt.textContent = jam + ' (Sudah lewat)';
                 }
+
                 jamSelect.appendChild(opt);
             });
         } catch (error) {
@@ -203,13 +211,17 @@
         }
     });
 
-    // Jika ada data lama, reload jam
+    // Handle data lama (Old Input)
     @if(!empty(old('tanggal_janji')))
-        tanggalInput.value = '{{ old('tanggal_janji') }}';
-        tanggalInput.dispatchEvent(new Event('change'));
-        setTimeout(() => {
-            jamSelect.value = '{{ old('jam_janji') ?? '' }}';
-        }, 500);
+        document.addEventListener('DOMContentLoaded', () => {
+            tanggalInput.value = '{{ old('tanggal_janji') }}';
+            tanggalInput.dispatchEvent(new Event('change'));
+            
+            // Tunggu fetch selesai baru set value jam
+            setTimeout(() => {
+                jamSelect.value = '{{ old('jam_janji') }}';
+            }, 1000);
+        });
     @endif
 </script>
 @endpush

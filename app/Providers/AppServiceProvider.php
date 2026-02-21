@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Booking;
+use Illuminate\Support\Facades\URL;
 
 
 class AppServiceProvider extends ServiceProvider
@@ -18,6 +19,10 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot()
     {
+
+        if (str_contains(request()->getHost(), 'jacquelin-humpier-uncandidly.ngrok-free.dev')) {
+            URL::forceScheme('https');
+        }
 
         // View Composer untuk user-navbar
         View::composer('partials.user-navbar', function ($view) {

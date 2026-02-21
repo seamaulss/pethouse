@@ -18,13 +18,6 @@
 
             <!-- Desktop Navigation -->
             <div class="hidden md:flex items-center gap-2 lg:gap-4">
-                
-                <!-- Catatan Medis Link -->
-                <a href="{{ route('dokter.catatan-medis.index') }}" 
-                   class="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-teal-500 hover:shadow-md transition duration-200 {{ request()->routeIs('dokter.catatan-medis.*') ? 'bg-teal-500 shadow-md' : '' }}">
-                    <i class="fas fa-notes-medical"></i>
-                    <span>Catatan Medis</span>
-                </a>
 
                 <!-- Profile Dropdown -->
                 <div class="relative" x-data="{ open: false }">
@@ -113,9 +106,6 @@
     <div id="mobileMenu" class="hidden md:hidden bg-teal-700 px-4 py-4 space-y-3">
         <a href="{{ route('dokter.dashboard') }}" class="block px-4 py-3 rounded-lg hover:bg-teal-600 transition flex items-center gap-3">
             <i class="fas fa-home w-6"></i> Dashboard
-        </a>
-        <a href="{{ route('dokter.catatan-medis.index') }}" class="block px-4 py-3 rounded-lg hover:bg-teal-600 transition flex items-center gap-3">
-            <i class="fas fa-notes-medical w-6"></i> Catatan Medis
         </a>
         <a href="{{ route('dokter.profile.index') }}" class="block px-4 py-3 rounded-lg hover:bg-teal-600 transition flex items-center gap-3">
             <i class="fas fa-user-md w-6"></i> Profil Saya

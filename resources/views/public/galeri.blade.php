@@ -14,11 +14,12 @@
         border-radius: 1rem;
         overflow: hidden;
         background: white;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
         transition: all 0.3s ease;
         display: flex;
         flex-direction: column;
-        height: 100%; /* Memastikan semua card sama tinggi dalam satu baris */
+        height: 100%;
+        /* Memastikan semua card sama tinggi dalam satu baris */
         outline: none;
     }
 
@@ -26,7 +27,8 @@
     .img-container {
         position: relative;
         width: 100%;
-        aspect-ratio: 1/1; /* Gambar kotak sempurna */
+        aspect-ratio: 1/1;
+        /* Gambar kotak sempurna */
         overflow: hidden;
     }
 
@@ -63,7 +65,8 @@
         color: #4b5563;
         line-height: 1.4;
         display: -webkit-box;
-        -webkit-line-clamp: 2; /* Default tampil 2 baris */
+        -webkit-line-clamp: 2;
+        /* Default tampil 2 baris */
         -webkit-box-orient: vertical;
         overflow: hidden;
         transition: all 0.4s ease;
@@ -88,7 +91,7 @@
         .overlay-desktop {
             position: absolute;
             inset: 0;
-            background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 70%);
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, transparent 70%);
             display: flex;
             align-items: flex-end;
             padding: 1.25rem;
@@ -96,12 +99,16 @@
             transition: opacity 0.3s ease;
             color: white;
         }
+
         .card-modern:hover .overlay-desktop {
             opacity: 1;
         }
+
         .mobile-caption {
-            display: none; /* Sembunyikan caption bawah di desktop */
+            display: none;
+            /* Sembunyikan caption bawah di desktop */
         }
+
         .tap-hint {
             display: none;
         }
@@ -121,11 +128,14 @@
         align-items: center;
         justify-content: center;
         font-size: 28px;
-        box-shadow: 0 4px 15px rgba(37,211,102,0.4);
+        box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
         z-index: 999;
         transition: transform 0.3s ease;
     }
-    .whatsapp-float:active { transform: scale(0.9); }
+
+    .whatsapp-float:active {
+        transform: scale(0.9);
+    }
 </style>
 @endpush
 
@@ -140,48 +150,48 @@
 <section class="py-10 bg-white">
     <div class="container mx-auto px-4">
         @if($galeris->count() > 0)
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8">
-                @foreach($galeris as $g)
-                    <div class="card-modern group" 
-                         data-aos="fade-up" 
-                         onclick="this.classList.toggle('is-active')">
-                        
-                        <div class="img-container">
-                            @if($g->foto)
-                                <img src="{{ Storage::url($g->foto) }}" 
-                                     alt="{{ $g->judul }}" 
-                                     loading="lazy">
-                            @else
-                                <div class="w-full h-full bg-gray-100 flex items-center justify-center">
-                                    <i class="fas fa-paw text-gray-300 text-3xl"></i>
-                                </div>
-                            @endif
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8">
+            @foreach($galeris as $g)
+            <div class="card-modern group"
+                data-aos="fade-up"
+                onclick="this.classList.toggle('is-active')">
 
-                            <div class="overlay-desktop">
-                                <div>
-                                    <h4 class="font-bold text-lg">{{ $g->judul }}</h4>
-                                    <p class="text-sm opacity-90">{{ $g->keterangan }}</p>
-                                </div>
-                            </div>
-                        </div>
+                <div class="img-container">
+                    @if($g->foto)
+                    <img src="{{ asset('storage/' . $g->foto) }}"
+                        alt="{{ $g->judul }}"
+                        loading="lazy">
+                    @else
+                    <div class="w-full h-full bg-gray-100 flex items-center justify-center">
+                        <i class="fas fa-paw text-gray-300 text-3xl"></i>
+                    </div>
+                    @endif
 
-                        <div class="mobile-caption">
-                            <h4>{{ $g->judul }}</h4>
-                            <p class="description-text">
-                                {{ $g->keterangan }}
-                            </p>
-                            @if(strlen($g->keterangan) > 40)
-                                <span class="tap-hint">Tap untuk baca selengkapnya...</span>
-                            @endif
+                    <div class="overlay-desktop">
+                        <div>
+                            <h4 class="font-bold text-lg">{{ $g->judul }}</h4>
+                            <p class="text-sm opacity-90">{{ $g->keterangan }}</p>
                         </div>
                     </div>
-                @endforeach
+                </div>
+
+                <div class="mobile-caption">
+                    <h4>{{ $g->judul }}</h4>
+                    <p class="description-text">
+                        {{ $g->keterangan }}
+                    </p>
+                    @if(strlen($g->keterangan) > 40)
+                    <span class="tap-hint">Tap untuk baca selengkapnya...</span>
+                    @endif
+                </div>
             </div>
+            @endforeach
+        </div>
         @else
-            <div class="text-center py-20 text-gray-400">
-                <i class="fas fa-camera-retro text-5xl mb-4"></i>
-                <p>Belum ada foto momen yang dibagikan.</p>
-            </div>
+        <div class="text-center py-20 text-gray-400">
+            <i class="fas fa-camera-retro text-5xl mb-4"></i>
+            <p>Belum ada foto momen yang dibagikan.</p>
+        </div>
         @endif
     </div>
 </section>

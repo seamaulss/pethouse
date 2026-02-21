@@ -15,6 +15,7 @@ use App\Http\Controllers\User\KonsultasiController;
 use App\Http\Controllers\User\CekStatusController;
 use App\Http\Controllers\User\NotificationController;
 use App\Http\Controllers\Petugas\InputLogController;
+use App\Http\Controllers\Dokter\CatatanMedisController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicController;
 
@@ -162,11 +163,13 @@ Route::middleware(['auth', 'user'])->prefix('user')->name('user.')->group(functi
     // 1. ROUTE SPESIFIK – DILETAKKAN DI ATAS
     Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('dashboard');
 
-    // Notifikasi – route spesifik (bukan wildcard)
-    Route::get('/', [NotificationController::class, 'index'])->name('index');
-    Route::post('/{id}/read', [NotificationController::class, 'markAsRead'])->name('read');
-    Route::post('/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifikasi.read-all');
-    Route::get('/get-new', [NotificationController::class, 'getNewNotifications'])->name('notifikasi.get-new');
+    // notifikasi user
+    Route::prefix('notifikasi')->name('notifikasi.')->group(function () {
+        Route::get('/', [NotificationController::class, 'index'])->name('index');
+        Route::post('/{id}/read', [NotificationController::class, 'markAsRead'])->name('read');
+        Route::post('/read-all', [NotificationController::class, 'markAllAsRead'])->name('read-all');
+        Route::get('/get-new', [NotificationController::class, 'getNewNotifications'])->name('get-new');
+    });
 
     // Hewan Saya
     Route::get('/hewan-saya', [HewanSayaController::class, 'index'])->name('hewan-saya');
@@ -189,12 +192,11 @@ Route::middleware(['auth', 'user'])->prefix('user')->name('user.')->group(functi
     Route::get('/konsultasi/get-jam', [KonsultasiController::class, 'getJam'])->name('konsultasi.get-jam');
     Route::post('/konsultasi/balas', [KonsultasiController::class, 'balas'])->name('konsultasi.balas');
 
-    // ✅ PROFIL ROUTES – NAMA ROUTE HARUS SEPERTI INI
+    // PROFIL ROUTES
     Route::get('/profil', [\App\Http\Controllers\User\ProfilController::class, 'index'])->name('profil');
-    // Route::get('/profil/edit', [\App\Http\Controllers\User\ProfilController::class, 'edit'])->name('profil.edit');
     Route::put('/profil/update', [\App\Http\Controllers\User\ProfilController::class, 'update'])->name('profil.update');
 
-    // ⚠️ ROUTE WILDCARD – DILETAKKAN PALING BAWAH
+    // ⚠️ ROUTE NOTIFIKASI USER (HANYA JIKA PERLU)
     Route::delete('/{id}', [NotificationController::class, 'destroy'])->name('destroy');
 });
 
@@ -208,19 +210,23 @@ Route::middleware(['auth', 'dokter'])->prefix('dokter')->name('dokter.')->group(
 
     // Konsultasi Dokter
     Route::prefix('konsultasi')->name('konsultasi.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Dokter\KonsultasiController::class, 'index'])->name('index');
+
         Route::get('/{id}', [\App\Http\Controllers\Dokter\KonsultasiController::class, 'show'])->name('show');
         Route::post('/{id}/status', [\App\Http\Controllers\Dokter\KonsultasiController::class, 'updateStatus'])->name('update-status');
         Route::post('/{id}/balas', [\App\Http\Controllers\Dokter\KonsultasiController::class, 'kirimBalasan'])->name('balas');
     });
 
-    // Catatan Medis Dokter
-    Route::get('/catatan-medis', [\App\Http\Controllers\Dokter\CatatanMedisController::class, 'index'])->name('catatan-medis.index');
-    Route::post('/catatan-medis', [\App\Http\Controllers\Dokter\CatatanMedisController::class, 'store'])->name('catatan-medis.store');
-
     // ✅ PROFIL DOKTER
     Route::get('/profile', [\App\Http\Controllers\Dokter\ProfileController::class, 'index'])->name('profile.index');
     Route::get('/profile/edit', [\App\Http\Controllers\Dokter\ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile/update', [\App\Http\Controllers\Dokter\ProfileController::class, 'update'])->name('profile.update');
+
+    // NOTIFIKASI DOKTER
+    Route::get('/notifikasi', [NotificationController::class, 'index'])->name('notifikasi.index');
+    Route::post('/notifikasi/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifikasi.read');
+    Route::post('/notifikasi/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifikasi.read-all');
+    Route::get('/get-notifications', [NotificationController::class, 'getNewNotifications'])->name('notifikasi.get-new');
 });
 
 require __DIR__ . '/auth.php';

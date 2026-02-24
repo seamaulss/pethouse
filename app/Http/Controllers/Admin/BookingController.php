@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\User;
 use App\Models\JenisHewan;
+use App\Models\Kapasitas;
 use App\Models\LayananHarga;
 use App\Models\Notification; // Tambahkan ini
 use Illuminate\Http\Request;
@@ -31,7 +32,7 @@ class BookingController extends Controller
             ->paginate(10);
 
         $petugas = User::where('role', 'petugas')->get();
-        
+
         // Stats for dashboard
         $stats = [
             'total' => Booking::count(),
@@ -67,22 +68,22 @@ class BookingController extends Controller
         ];
 
         $data = ['status' => $status];
-        
+
         // Jika ada alasan cancel
         if ($request->has('alasan_cancel')) {
             $data['alasan_cancel'] = $request->alasan_cancel;
         }
-        
+
         // Jika ada alasan perpanjangan
         if ($request->has('alasan_perpanjangan')) {
             $data['alasan_perpanjangan'] = $request->alasan_perpanjangan;
         }
-        
+
         // Jika ada tanggal perpanjangan
         if ($request->has('tanggal_perpanjangan')) {
             $data['tanggal_perpanjangan'] = $request->tanggal_perpanjangan;
         }
-        
+
         // Jika status in_progress, tambahkan petugas
         if ($status === 'in_progress') {
             $request->validate([
@@ -101,36 +102,36 @@ class BookingController extends Controller
         // Buat notifikasi untuk user berdasarkan status baru
         if ($booking->user_id) {
             $title = "Status Booking Diperbarui";
-            
+
             // Custom message berdasarkan status
-            switch($status) {
+            switch ($status) {
                 case 'diterima':
-                    $message = "Booking #{$booking->kode_booking} untuk {$booking->nama_hewan} telah DITERIMA. Siapkan hewan Anda untuk penitipan pada tanggal " . 
-                              Carbon::parse($booking->tanggal_masuk)->format('d M Y');
+                    $message = "Booking #{$booking->kode_booking} untuk {$booking->nama_hewan} telah DITERIMA. Siapkan hewan Anda untuk penitipan pada tanggal " .
+                        Carbon::parse($booking->tanggal_masuk)->format('d M Y');
                     $type = 'success';
                     break;
-                    
+
                 case 'in_progress':
                     $message = "Booking #{$booking->kode_booking} untuk {$booking->nama_hewan} telah DIMULAI. Anda akan menerima update harian selama penitipan.";
                     $type = 'info';
                     break;
-                    
+
                 case 'selesai':
-                    $message = "Booking #{$booking->kode_booking} untuk {$booking->nama_hewan} telah SELESAI. Hewan Anda sudah bisa diambil. Total biaya: Rp " . 
-                              number_format($booking->total_harga, 0, ',', '.');
+                    $message = "Booking #{$booking->kode_booking} untuk {$booking->nama_hewan} telah SELESAI. Hewan Anda sudah bisa diambil. Total biaya: Rp " .
+                        number_format($booking->total_harga, 0, ',', '.');
                     $type = 'success';
                     break;
-                    
+
                 case 'pembatalan':
                     $alasan = $request->alasan_cancel ?? 'tidak disebutkan';
                     $message = "Booking #{$booking->kode_booking} untuk {$booking->nama_hewan} telah DIBATALKAN. Alasan: {$alasan}";
                     $type = 'warning';
                     break;
-                    
+
                 default:
-                    $message = "Status booking #{$booking->kode_booking} telah diubah dari " . 
-                              ($statusMessages[$oldStatus] ?? $oldStatus) . " menjadi " . 
-                              ($statusMessages[$status] ?? $status);
+                    $message = "Status booking #{$booking->kode_booking} telah diubah dari " .
+                        ($statusMessages[$oldStatus] ?? $oldStatus) . " menjadi " .
+                        ($statusMessages[$status] ?? $status);
                     $type = 'info';
             }
 
@@ -155,30 +156,40 @@ class BookingController extends Controller
         ]);
 
         $booking = Booking::findOrFail($id);
-        
+
         if ($request->action === 'terima') {
-            // Hitung harga tambahan untuk perpanjangan
+            // PROTEKSI: Cek kapasitas sebelum menerima perpanjangan
+            $terisi = Booking::where('layanan_id', $booking->layanan_id)
+                ->where('jenis_hewan', $booking->jenis_hewan)
+                ->where('ukuran_hewan', $booking->ukuran_hewan)
+                ->where('id', '!=', $id)
+                ->whereIn('status', ['pending', 'diterima', 'in_progress', 'perpanjangan'])
+                ->where(function ($q) use ($booking, $request) {
+                    $q->where('tanggal_masuk', '<=', $request->tanggal_perpanjangan)
+                        ->where('tanggal_keluar', '>=', $booking->tanggal_masuk);
+                })->count();
+
+            $max = Kapasitas::where('layanan_id', $booking->layanan_id)
+                ->where('jenis_hewan', $booking->jenis_hewan)
+                ->where('ukuran_hewan', $booking->ukuran_hewan)
+                ->value('max_kapasitas');
+
+            if ($terisi >= $max) {
+                return back()->with('error', "Gagal menerima perpanjangan! Slot sudah penuh dipesan orang lain (Maks: $max).");
+            }
+
+            // Hitung Biaya Tambahan
             $hargaTambahan = 0;
-            $jenisHewan = JenisHewan::where('nama', $booking->jenis_hewan)->first();
-            
-            if ($jenisHewan) {
-                $layananHarga = LayananHarga::where('layanan_id', $booking->layanan_id)
-                    ->where('jenis_hewan_id', $jenisHewan->id)
-                    ->first();
-                
-                if ($layananHarga) {
-                    // Hitung durasi tambahan
-                    $durasiLama = Carbon::parse($booking->tanggal_masuk)
-                        ->diffInDays(Carbon::parse($booking->tanggal_keluar));
-                    $durasiBaru = Carbon::parse($booking->tanggal_masuk)
-                        ->diffInDays(Carbon::parse($request->tanggal_perpanjangan));
-                    $durasiTambahan = $durasiBaru - $durasiLama;
-                    
-                    $hargaTambahan = $durasiTambahan * $layananHarga->harga_per_hari;
+            $jh = JenisHewan::where('nama', $booking->jenis_hewan)->first();
+            if ($jh) {
+                $lh = LayananHarga::where('layanan_id', $booking->layanan_id)->where('jenis_hewan_id', $jh->id)->first();
+                if ($lh) {
+                    $durasiLama = Carbon::parse($booking->tanggal_masuk)->diffInDays(Carbon::parse($booking->tanggal_keluar));
+                    $durasiBaru = Carbon::parse($booking->tanggal_masuk)->diffInDays(Carbon::parse($request->tanggal_perpanjangan));
+                    $hargaTambahan = ($durasiBaru - $durasiLama) * $lh->harga_per_hari;
                 }
             }
 
-            // Update tanggal keluar baru dan total harga
             $booking->update([
                 'tanggal_keluar' => $request->tanggal_perpanjangan,
                 'total_harga' => $booking->total_harga + $hargaTambahan,
@@ -186,54 +197,19 @@ class BookingController extends Controller
                 'alasan_perpanjangan' => null,
                 'tanggal_perpanjangan' => null
             ]);
-            
-            // Notification to user
-            if ($booking->user_id) {
-                Notification::createForUser(
-                    $booking->user_id,
-                    'Perpanjangan Diterima',
-                    "Perpanjangan booking #{$booking->kode_booking} telah DITERIMA hingga " . 
-                    Carbon::parse($request->tanggal_perpanjangan)->format('d M Y') .
-                    ". Biaya tambahan: Rp " . number_format($hargaTambahan, 0, ',', '.') .
-                    ". Total harga: Rp " . number_format($booking->total_harga, 0, ',', '.'),
-                    $booking->id,
-                    'success'
-                );
-            }
-            
-            $message = 'Perpanjangan booking telah diterima.';
-        } else {
-            // Tolak perpanjangan - kembalikan ke status sebelumnya
-            $previousStatus = $booking->status === 'perpanjangan' ? 'in_progress' : $booking->status;
-            
-            $booking->update([
-                'status' => $previousStatus,
-                'alasan_perpanjangan' => null,
-                'tanggal_perpanjangan' => null
-            ]);
-            
-            // Notification to user
-            if ($booking->user_id) {
-                Notification::createForUser(
-                    $booking->user_id,
-                    'Perpanjangan Ditolak',
-                    "Permintaan perpanjangan booking #{$booking->kode_booking} telah DITOLAK.",
-                    $booking->id,
-                    'warning'
-                );
-            }
-            
-            $message = 'Perpanjangan booking telah ditolak.';
-        }
 
-        return redirect()->route('admin.booking.index')
-            ->with('success', $message);
+            return redirect()->route('admin.booking.index')->with('success', 'Perpanjangan diterima.');
+        } else {
+            // Tolak
+            $booking->update(['status' => 'in_progress', 'alasan_perpanjangan' => null, 'tanggal_perpanjangan' => null]);
+            return redirect()->route('admin.booking.index')->with('warning', 'Perpanjangan ditolak.');
+        }
     }
 
     public function destroy($id)
     {
         $booking = Booking::findOrFail($id);
-        
+
         // Kirim notifikasi sebelum menghapus
         if ($booking->user_id) {
             Notification::createForUser(
@@ -244,7 +220,7 @@ class BookingController extends Controller
                 'warning'
             );
         }
-        
+
         $booking->delete();
 
         return redirect()->route('admin.booking.index')

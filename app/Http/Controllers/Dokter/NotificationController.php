@@ -5,39 +5,23 @@ namespace App\Http\Controllers\Dokter;
 use App\Http\Controllers\Controller;
 use App\Models\Notification;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class NotificationController extends Controller
 {
-    /**
-     * Helper untuk filter query Konsultasi
-     */
     private function konsultasiQuery()
     {
         return Notification::where('role_target', 'admin')
-            ->where(function($q) {
+            ->where(function ($q) {
                 $q->where('title', 'like', '%Konsultasi%')
                   ->orWhere('message', 'like', '%Konsultasi%');
             });
     }
 
-    public function index()
-    {
-        $notifications = $this->konsultasiQuery()
-            ->orderBy('created_at', 'desc')
-            ->paginate(5);
-
-        return view('dokter.notifikasi.index', compact('notifications'));
-    }
-
     public function markAsRead($id)
     {
         try {
-            $notification = Notification::findOrFail($id);
-            $notification->update(['is_read' => true]);
-
-            // Hitung sisa unread khusus konsultasi
-            $unreadCount = $this->konsultasiQuery()->where('is_read', false)->count();
+            Notification::where('id', $id)->update(['is_read' => 1]);
+            $unreadCount = $this->konsultasiQuery()->where('is_read', 0)->count();
 
             return response()->json([
                 'success' => true,
@@ -51,11 +35,13 @@ class NotificationController extends Controller
     public function markAllAsRead()
     {
         try {
-            $this->konsultasiQuery()
-                ->where('is_read', false)
-                ->update(['is_read' => true]);
+            $this->konsultasiQuery()->where('is_read', 0)->update(['is_read' => 1]);
 
-            return response()->json(['success' => true]);
+            return response()->json([
+                'success' => true,
+                'message' => 'Semua notifikasi telah ditandai terbaca',
+                'unread_count' => 0
+            ]);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
@@ -63,14 +49,8 @@ class NotificationController extends Controller
 
     public function getNewNotifications()
     {
-        $unreadCount = $this->konsultasiQuery()
-            ->where('is_read', false)
-            ->count();
-
-        $latest = $this->konsultasiQuery()
-            ->orderBy('created_at', 'desc')
-            ->take(5)
-            ->get();
+        $unreadCount = $this->konsultasiQuery()->where('is_read', 0)->count();
+        $latest = $this->konsultasiQuery()->orderBy('created_at', 'desc')->take(5)->get();
 
         return response()->json([
             'success' => true,

@@ -42,12 +42,6 @@ class Konsultasi extends Model
         return $this->belongsTo(User::class, 'dokter_id');
     }
 
-    // Tetap ada untuk rekam medis detail jika diperlukan di masa depan
-    public function catatanMedis(): HasMany
-    {
-        return $this->hasMany(CatatanMedis::class, 'konsultasi_id');
-    }
-
     protected function waLink(): Attribute
     {
         return Attribute::make(

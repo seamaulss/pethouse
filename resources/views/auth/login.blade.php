@@ -116,7 +116,7 @@
 
             <!-- Login Button -->
             <button type="submit"
-                class="w-full bg-teal-600 hover:bg-teal-500 text-teal-600 font-bold py-3 rounded-lg transition shadow-lg flex items-center justify-center gap-2">
+                class="w-full bg-teal-600 hover:bg-teal-500 text-white font-bold py-3 rounded-lg transition shadow-lg flex items-center justify-center gap-2">
                 <i class="fas fa-sign-in-alt"></i> {{ __('Masuk') }}
             </button>
         </form>

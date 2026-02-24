@@ -6,16 +6,11 @@ use App\Http\Controllers\User\DashboardController as UserDashboardController;
 use App\Http\Controllers\Petugas\DashboardController as PetugasDashboardController;
 use App\Http\Controllers\Petugas\ProfileController as PetugasProfileController;
 use App\Http\Controllers\Dokter\DashboardController as DokterDashboardController;
-use App\Http\Controllers\User\ProfilController;
-use App\Http\Controllers\Admin\HeroController;
-use App\Http\Controllers\Admin\GaleriController;
+use App\Http\Controllers\Admin\KapasitasController;
 use App\Http\Controllers\User\BookingController;
 use App\Http\Controllers\User\HewanSayaController;
 use App\Http\Controllers\User\KonsultasiController;
-use App\Http\Controllers\User\CekStatusController;
 use App\Http\Controllers\User\NotificationController;
-use App\Http\Controllers\Petugas\InputLogController;
-use App\Http\Controllers\Dokter\CatatanMedisController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicController;
 
@@ -57,6 +52,12 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::resource('booking', \App\Http\Controllers\Admin\BookingController::class);
     Route::post('booking/{booking}/handle-extension', [\App\Http\Controllers\Admin\BookingController::class, 'handleExtension'])
         ->name('booking.handle-extension');
+
+    // Route Kapasitas
+    Route::get('/kapasitas', [App\Http\Controllers\Admin\KapasitasController::class, 'index'])->name('kapasitas.index');
+    Route::post('/kapasitas', [App\Http\Controllers\Admin\KapasitasController::class, 'store'])->name('kapasitas.store');
+    Route::put('/kapasitas/{id}', [App\Http\Controllers\Admin\KapasitasController::class, 'update'])->name('kapasitas.update');
+    Route::delete('/kapasitas/{id}', [App\Http\Controllers\Admin\KapasitasController::class, 'destroy'])->name('kapasitas.destroy');
 
     // Route untuk admin konsultasi
     Route::get('/konsultasi', [App\Http\Controllers\Admin\KonsultasiController::class, 'index'])->name('konsultasi.index');
@@ -139,10 +140,17 @@ Route::middleware(['auth', 'petugas'])->prefix('petugas')->name('petugas.')->gro
     // Dashboard
     Route::get('/dashboard', [App\Http\Controllers\Petugas\DashboardController::class, 'index'])->name('dashboard');
 
+    // Manajemen Booking untuk Petugas (Daftar Pasien/Hewan)
+    Route::get('/booking', [App\Http\Controllers\Petugas\BookingController::class, 'index'])->name('booking.index');
+    Route::get('/booking/{id}', [App\Http\Controllers\Petugas\BookingController::class, 'show'])->name('booking.show');
+
     // Input Log Kegiatan (Sistem Fleksibel Baru)
     Route::get('/input-log/{booking}', [App\Http\Controllers\Petugas\InputLogController::class, 'show'])->name('input-log.show');
     Route::post('/input-log/{booking}', [App\Http\Controllers\Petugas\InputLogController::class, 'store'])->name('input-log.store');
     Route::delete('/input-log/{log}', [App\Http\Controllers\Petugas\InputLogController::class, 'destroyLog'])->name('input-log.destroy-log');
+
+    // Monitoring Kapasitas (Status Kandang)
+    Route::get('/kapasitas', [App\Http\Controllers\Petugas\KapasitasController::class, 'index'])->name('kapasitas.index');
 
     Route::get('/notifications', [App\Http\Controllers\Petugas\NotificationController::class, 'index'])->name('notifications.index');
     // Route untuk menandai notifikasi sudah dibaca

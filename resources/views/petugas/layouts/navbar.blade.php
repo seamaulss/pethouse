@@ -25,24 +25,11 @@
                     <span>Dashboard</span>
                 </a>
 
-                <!-- Notifications Bell -->
-                <div class="relative">
-                    <button id="notificationButton"
-                        class="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-teal-500 transition duration-200 relative">
-                        <i class="fas fa-bell text-xl"></i>
-                        @if(isset($unreadCount) && $unreadCount > 0)
-                        <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full animate-pulse">
-                            {{ $unreadCount > 9 ? '9+' : $unreadCount }}
-                        </span>
-                        @endif
-                        <span class="hidden lg:inline">Notifikasi</span>
-                    </button>
-
-                    <!-- Dropdown Notifikasi (sembunyikan default) -->
-                    <div id="notificationDropdown" class="hidden absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-2xl text-gray-800 z-50 hidden">
-                        <!-- Isi dropdown notifikasi -->
-                    </div>
-                </div>
+                <a href="{{ route('petugas.kapasitas.index') }}"
+                    class="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-teal-500 hover:shadow-md transition duration-200 {{ request()->routeIs('petugas.kapasitas.*') ? 'bg-teal-500 shadow-md' : '' }}">
+                    <i class="fas fa-warehouse"></i>
+                    <span>Status Kandang</span>
+                </a>
 
                 <!-- Profile Dropdown -->
                 <div class="relative" x-data="{ open: false }">
@@ -137,6 +124,12 @@
             class="block px-4 py-3 rounded-lg hover:bg-teal-600 transition flex items-center gap-3">
             <i class="fas fa-home w-6"></i>
             Dashboard
+        </a>
+
+        <a href="{{ route('petugas.kapasitas.index') }}"
+            class="block px-4 py-3 rounded-lg hover:bg-teal-600 transition flex items-center gap-3 {{ request()->routeIs('petugas.kapasitas.*') ? 'bg-teal-600' : '' }}">
+            <i class="fas fa-warehouse w-6"></i>
+            Status Kandang
         </a>
 
         <a href="{{ route('petugas.profile.index') }}"

@@ -29,13 +29,13 @@ class DashboardController extends Controller
 
         // 2. Hewan Dititipkan Sekarang
         $hewanDititipkanSekarang = Booking::where(function ($query) use ($now) {
-                $query->where('status', 'in_progress')
-                    ->orWhere(function ($q) use ($now) {
-                        $q->where('status', 'diterima')
-                            ->whereDate('tanggal_masuk', '<=', $now)
-                            ->whereDate('tanggal_keluar', '>=', $now);
-                    });
-            })
+            $query->where('status', 'in_progress')
+                ->orWhere(function ($q) use ($now) {
+                    $q->where('status', 'diterima')
+                        ->whereDate('tanggal_masuk', '<=', $now)
+                        ->whereDate('tanggal_keluar', '>=', $now);
+                });
+        })
             ->where('dp_dibayar', 'Ya')
             ->count();
 
@@ -45,24 +45,37 @@ class DashboardController extends Controller
         // 4. Pendapatan Bulan Ini
         $pendapatanBulanIni = $this->hitungPendapatanBulanIni($startOfMonth, $endOfMonth);
 
-        // 5. Occupancy Rate
-        $kapasitasTotal = 20;
-        $occupancyRate = $kapasitasTotal > 0 ? round(($hewanDititipkanSekarang / $kapasitasTotal) * 100, 1) : 0;
+        // 5. Occupancy Rate (Dinamis dari tabel Kapasitas)
+        // Menghitung total slot maksimal yang tersedia dari semua kategori di database
+        $kapasitasTotal = \App\Models\Kapasitas::sum('max_kapasitas');
+
+        // Hitung persentase keterisian
+        $occupancyRate = $kapasitasTotal > 0
+            ? round(($hewanDititipkanSekarang / $kapasitasTotal) * 100, 1)
+            : 0;
 
         // 6. Testimoni Baru
-        $testimoniBaru = Testimoni::whereBetween('created_at', [$startOfMonth, $endOfMonth])->count();
+        $testimoniBaru = Testimoni::where('status', 'aktif')->count();
 
         // 7. Recent Activity (Gabungan Booking & Konsultasi)
         $recentBookings = Booking::with(['layanan'])->orderBy('created_at', 'desc')->limit(5)->get()
             ->map(fn($b) => [
-                'tipe' => 'booking', 'kode' => $b->kode_booking, 'pelanggan' => $b->nama_pemilik,
-                'detail' => $b->nama_hewan . " ({$b->jenis_hewan})", 'tanggal' => $b->created_at, 'status' => $b->status
+                'tipe' => 'booking',
+                'kode' => $b->kode_booking,
+                'pelanggan' => $b->nama_pemilik,
+                'detail' => $b->nama_hewan . " ({$b->jenis_hewan})",
+                'tanggal' => $b->created_at,
+                'status' => $b->status
             ]);
 
         $recentKonsultasi = Konsultasi::orderBy('created_at', 'desc')->limit(5)->get()
             ->map(fn($k) => [
-                'tipe' => 'konsultasi', 'kode' => $k->kode_konsultasi, 'pelanggan' => $k->nama_pemilik,
-                'detail' => 'Topik: ' . ($k->topik ?? 'N/A'), 'tanggal' => $k->created_at, 'status' => $k->status
+                'tipe' => 'konsultasi',
+                'kode' => $k->kode_konsultasi,
+                'pelanggan' => $k->nama_pemilik,
+                'detail' => 'Topik: ' . ($k->topik ?? 'N/A'),
+                'tanggal' => $k->created_at,
+                'status' => $k->status
             ]);
 
         $recentActivity = collect()->merge($recentBookings)->merge($recentKonsultasi)->sortByDesc('tanggal')->take(5)->values();
@@ -96,23 +109,36 @@ class DashboardController extends Controller
             ->get();
 
         return view('admin.dashboard', compact(
-            'adminName', 'totalBookingBulanIni', 'hewanDititipkanSekarang', 'selesaiKonsultasi', 
-            'pendapatanBulanIni', 'occupancyRate', 'testimoniBaru', 'notifCount', 
-            'recentActivity', 'totalHewanSelesaiBulanIni', 'rataRataLamaInap', 
-            'jenisHewanStats', 'kapasitasTotal', 'recentNotifications'
+            'adminName',
+            'totalBookingBulanIni',
+            'hewanDititipkanSekarang',
+            'selesaiKonsultasi',
+            'pendapatanBulanIni',
+            'occupancyRate',
+            'testimoniBaru',
+            'notifCount',
+            'recentActivity',
+            'totalHewanSelesaiBulanIni',
+            'rataRataLamaInap',
+            'jenisHewanStats',
+            'kapasitasTotal',
+            'recentNotifications'
         ) + ['revenueLabels' => $revenueData['labels'], 'revenueValues' => $revenueData['values']]);
     }
 
     // --- Private Methods untuk Hitung Pendapatan ---
-    private function hitungPendapatanBulanIni($start, $end) {
+    private function hitungPendapatanBulanIni($start, $end)
+    {
         return Booking::whereBetween('tanggal_masuk', [$start, $end])
             ->where('dp_dibayar', 'Ya')
             ->whereIn('status', ['diterima', 'in_progress', 'selesai'])
             ->sum('total_harga');
     }
 
-    private function hitungPendapatan7Hari($now) {
-        $labels = []; $values = [];
+    private function hitungPendapatan7Hari($now)
+    {
+        $labels = [];
+        $values = [];
         for ($i = 6; $i >= 0; $i--) {
             $date = $now->copy()->subDays($i);
             $labels[] = $date->format('D');
@@ -125,7 +151,8 @@ class DashboardController extends Controller
     }
 
     // --- Notification Actions (DIFILTER: Hanya Aktivitas User) ---
-    public function markAsRead($id) {
+    public function markAsRead($id)
+    {
         $notification = Notification::find($id);
         if ($notification && $notification->role_target === 'admin') {
             $notification->update(['is_read' => true]);
@@ -135,7 +162,8 @@ class DashboardController extends Controller
         return response()->json(['success' => false], 404);
     }
 
-    public function markAllAsRead() {
+    public function markAllAsRead()
+    {
         Notification::where('role_target', 'admin')->whereIn('type', $this->userActivityTypes)->update(['is_read' => true]);
         return response()->json(['success' => true]);
     }

@@ -33,11 +33,7 @@
                    class="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-teal-500 hover:shadow-md transition duration-200 relative {{ request()->routeIs('user.konsultasi.*') ? 'bg-teal-500 shadow-md' : '' }}">
                     <i class="fas fa-comments"></i>
                     <span>Konsultasi</span>
-                    @if(isset($jml_notif) && $jml_notif > 0)
-                    <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full animate-pulse">
-                        {{ $jml_notif > 9 ? '9+' : $jml_notif }}
-                    </span>
-                    @endif
+                   
                 </a>
 
                 <!-- Profile Dropdown (Sama Persis dengan Petugas) -->
@@ -129,11 +125,6 @@
            class="block px-4 py-3 rounded-lg hover:bg-teal-600 transition flex items-center gap-3 relative">
             <i class="fas fa-comments w-6"></i>
             Konsultasi
-            @if(isset($jml_notif) && $jml_notif > 0)
-            <span class="bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center ml-auto">
-                {{ $jml_notif > 9 ? '9+' : $jml_notif }}
-            </span>
-            @endif
         </a>
         
         <a href="{{ route('user.profil') }}" 

@@ -48,12 +48,11 @@ class Booking extends Model
 
     protected function createNotificationForPetugas($title, $message, $type, $petugasId = null)
     {
-        // Jika petugasId null, notifikasi dikirim ke SEMUA petugas (via user_id = null atau 0)
-        // Sesuaikan dengan logika notifikasi di aplikasi Anda
-        $targetUserId = $petugasId ?? 0;  // 0 atau null artinya semua petugas
+        // Gunakan null, jangan 0
+        $targetUserId = $petugasId;
 
         Notification::create([
-            'user_id'      => $targetUserId,
+            'user_id'      => $targetUserId, // Sekarang akan mengirim NULL jika petugas belum ditentukan
             'role_target'  => 'petugas',
             'title'        => $title,
             'message'      => $message,

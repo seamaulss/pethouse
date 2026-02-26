@@ -139,14 +139,21 @@ class DashboardController extends Controller
     {
         $labels = [];
         $values = [];
-        for ($i = 6; $i >= 0; $i--) {
-            $date = $now->copy()->subDays($i);
-            $labels[] = $date->format('D');
-            $values[] = (int)Booking::whereDate('tanggal_masuk', $date->toDateString())
+
+        // Pastikan minggu dimulai dari Senin
+        $startOfWeek = $now->copy()->startOfWeek(\Carbon\Carbon::MONDAY);
+
+        for ($i = 0; $i < 7; $i++) {
+            $date = $startOfWeek->copy()->addDays($i);
+
+            $labels[] = $date->locale('id')->translatedFormat('D');
+
+            $values[] = (int) Booking::whereDate('tanggal_masuk', $date->toDateString())
                 ->where('dp_dibayar', 'Ya')
                 ->whereIn('status', ['diterima', 'in_progress', 'selesai'])
                 ->sum('total_harga');
         }
+
         return ['labels' => $labels, 'values' => $values];
     }
 

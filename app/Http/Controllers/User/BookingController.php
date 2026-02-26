@@ -156,10 +156,10 @@ class BookingController extends Controller
     {
         $booking = Booking::where('user_id', Auth::id())->where('id', $id)->firstOrFail();
         if (!in_array($booking->status, ['diterima', 'in_progress'])) return redirect()->route('user.booking.riwayat')->with('error', 'Tidak bisa perpanjang.');
-        
+
         $minDate = Carbon::parse($booking->tanggal_keluar)->addDay()->format('Y-m-d');
         $maxDate = Carbon::parse($booking->tanggal_keluar)->addDays(30)->format('Y-m-d');
-        
+
         $hargaPerHari = 0;
         $jh = JenisHewan::where('nama', $booking->jenis_hewan)->first();
         if ($jh) {
@@ -190,7 +190,7 @@ class BookingController extends Controller
     public function cancel(Request $request, $id)
     {
         $booking = Booking::where('user_id', Auth::id())->where('id', $id)->firstOrFail();
-        if (!in_array($booking->status, ['pending', 'diterima'])) return redirect()->route('user.booking.riwayat')->with('error', 'Gagal batal.');
+        if (!in_array($booking->status, ['pending', 'diterima'])) return redirect()->route('user.booking.riwayat')->with('error', 'Booking Dibatalkan.');
 
         $request->validate(['alasan_cancel' => 'required|string|max:500']);
         $booking->update(['status' => 'pembatalan', 'alasan_cancel' => $request->alasan_cancel]);
@@ -200,18 +200,34 @@ class BookingController extends Controller
 
     public function show($id)
     {
-        $booking = Booking::where('user_id', Auth::id())->with(['layanan', 'dailyLogs'])->findOrFail($id);
+        // 1. Ambil data booking
+        $booking = Booking::where('user_id', Auth::id())
+            ->with(['layanan', 'dailyLogs'])
+            ->findOrFail($id);
+
+        // 2. Hitung durasi (sudah benar)
         $durasi = max(1, Carbon::parse($booking->tanggal_masuk)->diffInDays(Carbon::parse($booking->tanggal_keluar)));
-        return view('user.booking.show', compact('booking', 'durasi'));
+
+        // 3. Ambil nilai dari Accessor Model
+        // Ini memicu fungsi getHargaPerHariAttribute() di Model Booking
+        $hargaPerHari = $booking->harga_per_hari;
+
+        // Ini memicu fungsi getTotalBiayaAttribute() di Model Booking
+        $totalBiaya = $booking->total_biaya;
+
+        // 4. Kirim semua variabel ke view
+        return view('user.booking.show', compact('booking', 'durasi', 'hargaPerHari', 'totalBiaya'));
     }
 
-    private function normalizeWhatsApp($nomor) {
+    private function normalizeWhatsApp($nomor)
+    {
         $nomor = preg_replace('/[^\d]/', '', $nomor);
         if (str_starts_with($nomor, '0')) $nomor = '62' . substr($nomor, 1);
         return $nomor;
     }
 
-    private function generateKodeBooking() {
+    private function generateKodeBooking()
+    {
         $tahun = date('Y');
         do {
             $last = Booking::where('kode_booking', 'like', "BOOK-$tahun-%")->latest('id')->first();

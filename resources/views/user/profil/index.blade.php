@@ -55,13 +55,13 @@
                         <div class="flex-shrink-0 text-center">
                             <div class="relative inline-block">
                                 <div class="w-28 h-28 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-teal-200 shadow-md">
-                                    <img id="profile-preview" 
-                                         src="{{ $user->foto_url }}" 
-                                         alt="Foto Profil"
-                                         class="w-full h-full object-cover">
+                                    <img id="profile-preview"
+                                        src="{{ $user->foto_url }}"
+                                        alt="Foto Profil"
+                                        class="w-full h-full object-cover">
                                 </div>
-                                <label for="foto" 
-                                       class="absolute bottom-0 right-0 bg-teal-600 text-white p-2 rounded-full cursor-pointer hover:bg-teal-700 shadow-lg transition">
+                                <label for="foto"
+                                    class="absolute bottom-0 right-0 bg-teal-600 text-white p-2 rounded-full cursor-pointer hover:bg-teal-700 shadow-lg transition">
                                     <i class="fas fa-camera"></i>
                                 </label>
                                 <input type="file" id="foto" name="foto" class="hidden" accept="image/*" onchange="previewImage(this)">
@@ -75,7 +75,7 @@
                             <h3 class="text-lg font-semibold text-gray-800">{{ $user->username }}</h3>
                             <p class="text-sm text-gray-600">{{ $user->email }}</p>
                             <p class="text-sm text-gray-500 mt-2">
-                                <i class="fas fa-calendar-alt mr-1"></i> Member sejak {{ $user->created_at->format('d M Y') }}
+                                <i class="fas fa-calendar-alt mr-1"></i> Member sejak, {{ $user->created_at->translatedFormat('d F Y') }}
                             </p>
                         </div>
                     </div>
@@ -216,15 +216,15 @@
                     <div class="flex items-center">
                         <i class="fas fa-calendar-alt text-purple-500 mr-3 text-xl"></i>
                         <div>
-                            <p class="text-sm text-gray-500">Bergabung Sejak</p>
-                            <p class="font-medium">{{ $user->created_at->format('d M Y') }}</p>
+                            <p class="text-sm text-gray-500">Bergabung Sejak,</p>
+                            <p class="font-medium">{{ $user->created_at->translatedFormat('d F Y') }}</p>
                         </div>
                     </div>
                     <div class="flex items-center">
                         <i class="fas fa-clock text-purple-500 mr-3 text-xl"></i>
                         <div>
                             <p class="text-sm text-gray-500">Terakhir Login</p>
-                            <p class="font-medium">{{ now()->format('d M Y H:i') }}</p>
+                            <p class="font-medium">{{ now()->translatedFormat('d F Y') }}</p>
                         </div>
                     </div>
                 </div>
@@ -346,14 +346,14 @@
 
 <!-- JavaScript untuk Preview Foto -->
 <script>
-function previewImage(input) {
-    if (input.files && input.files[0]) {
-        var reader = new FileReader();
-        reader.onload = function(e) {
-            document.getElementById('profile-preview').src = e.target.result;
+    function previewImage(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('profile-preview').src = e.target.result;
+            }
+            reader.readAsDataURL(input.files[0]);
         }
-        reader.readAsDataURL(input.files[0]);
     }
-}
 </script>
 @endsection

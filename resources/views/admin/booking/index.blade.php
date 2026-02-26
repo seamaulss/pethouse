@@ -234,14 +234,14 @@
                         </td>
                         <td class="px-6 py-5 text-gray-700">{{ $booking->layanan->nama_layanan ?? '-' }}</td>
                         <td class="px-6 py-5 text-gray-700">
-                            {{ $tanggal_masuk->format('d M Y') }}
+                            {{ $tanggal_masuk->locale('id')->translatedFormat('d M Y') }}
                             <span class="text-gray-500">→</span>
-                            {{ $tanggal_keluar->format('d M Y') }}
+                            {{ $tanggal_keluar->locale('id')->translatedFormat('d M Y') }}
                             <div class="text-xs text-gray-400 mt-1">{{ $durasi }} hari</div>
                             @if($booking->status == 'perpanjangan' && $booking->tanggal_perpanjangan)
                             <div class="text-xs text-purple-600 font-semibold mt-1">
                                 <i class="fas fa-clock mr-1"></i>
-                                Ajukan perpanjangan hingga: {{ \Carbon\Carbon::parse($booking->tanggal_perpanjangan)->format('d M Y') }}
+                                Ajukan perpanjangan hingga: {{ \Carbon\Carbon::parse($booking->tanggal_perpanjangan)->locale('id')->translatedFormat('d M Y') }}
                             </div>
                             @endif
                         </td>

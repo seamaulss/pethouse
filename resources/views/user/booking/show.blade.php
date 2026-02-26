@@ -194,11 +194,11 @@
                         </div>
                         <div class="bg-white border border-gray-200 p-4 rounded-lg">
                             <div class="text-gray-600 text-sm mb-1">Tanggal Masuk</div>
-                            <div class="font-bold text-lg">{{ \Carbon\Carbon::parse($booking->tanggal_masuk)->format('d-m-Y') }}</div>
+                            <div class="font-bold text-lg">{{ \Carbon\Carbon::parse($booking->tanggal_masuk)->locale('id')->settings(['formatFunction' => 'translatedFormat'])->format('d F Y') }}</div>
                         </div>
                         <div class="bg-white border border-gray-200 p-4 rounded-lg">
                             <div class="text-gray-600 text-sm mb-1">Tanggal Keluar</div>
-                            <div class="font-bold text-lg">{{ \Carbon\Carbon::parse($booking->tanggal_keluar)->format('d-m-Y') }}</div>
+                            <div class="font-bold text-lg">{{ \Carbon\Carbon::parse($booking->tanggal_keluar)->locale('id')->settings(['formatFunction' => 'translatedFormat'])->format('d F Y') }}</div>
                         </div>
                     </div>
                 </div>

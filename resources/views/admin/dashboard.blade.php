@@ -12,7 +12,7 @@
         </h1>
         <p class="text-gray-500 text-lg flex items-center gap-2">
             <i class="far fa-calendar-alt text-teal"></i>
-            {{ now()->translatedFormat('l, d F Y') }}
+            {{ now()->locale('id')->translatedFormat('l, d F Y') }}
         </p>
     </div>
     <div class="flex items-center gap-6 bg-white px-8 py-4 rounded-3xl shadow-lg relative" x-data="{ showNotifications: false }">
@@ -34,9 +34,9 @@
                 <div class="p-4 border-b border-gray-100 flex justify-between items-center">
                     <h3 class="text-lg font-bold text-gray-800">Notifikasi Terbaru</h3>
                     @if($notifCount > 0)
-                    <button id="mark-all-read-btn" 
-                            class="text-xs text-teal hover:text-teal-600 font-medium transition-colors duration-200"
-                            onclick="markAllAsRead()">
+                    <button id="mark-all-read-btn"
+                        class="text-xs text-teal hover:text-teal-600 font-medium transition-colors duration-200"
+                        onclick="markAllAsRead()">
                         <i class="fas fa-check-double mr-1"></i>Tandai semua terbaca
                     </button>
                     @endif
@@ -219,7 +219,7 @@
                     <td class="py-5 px-4 text-gray-600">{{ $row['pelanggan'] }}</td>
                     <td class="py-5 px-4 text-gray-600">{{ $row['detail'] }}</td>
                     <td class="py-5 px-4 text-gray-500">
-                        <i class="far fa-clock mr-2"></i>{{ date('d M Y', strtotime($row['tanggal'])) }}
+                        <i class="far fa-clock mr-2"></i>{{ \Carbon\Carbon::parse($row['tanggal'])->locale('id')->translatedFormat('d F Y') }}
                     </td>
                     <td class="py-5 px-4">
                         <span class="px-4 py-2 rounded-full text-xs font-bold border-2 {{ $badgeClass }}">
@@ -265,6 +265,7 @@
             }]
         },
         options: {
+            locale: 'id-ID',
             responsive: true,
             maintainAspectRatio: true,
             plugins: {
@@ -299,7 +300,9 @@
                             size: 12,
                             family: 'Poppins'
                         },
-                        callback: value => 'Rp ' + (value / 1000) + 'k'
+                        callback: function(value) {
+                            return 'Rp ' + value.toLocaleString('id-ID');
+                        }
                     }
                 },
                 x: {
@@ -330,13 +333,13 @@
     async function markAllAsRead() {
         const button = document.getElementById('mark-all-read-btn');
         if (!button) return;
-        
+
         const originalText = button.innerHTML;
-        
+
         // Tampilkan loading
         button.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Memproses...';
         button.disabled = true;
-        
+
         try {
             const response = await fetch('{{ route("admin.notifications.mark-all-read") }}', {
                 method: 'POST',
@@ -346,36 +349,36 @@
                     'Accept': 'application/json'
                 }
             });
-            
+
             const data = await response.json();
-            
+
             if (data.success) {
                 // 1. Hilangkan badge notifikasi
                 const badge = document.getElementById('notification-badge');
                 if (badge) {
                     badge.remove();
                 }
-                
+
                 // 2. Hapus background biru dari semua notifikasi
                 document.querySelectorAll('.notification-item').forEach(item => {
                     item.classList.remove('bg-blue-50');
                 });
-                
+
                 // 3. Hapus titik merah dari semua notifikasi
                 document.querySelectorAll('.unread-dot').forEach(dot => {
                     dot.remove();
                 });
-                
+
                 // 4. Tampilkan pesan sukses
                 showToast('success', data.message || 'Semua notifikasi telah ditandai sebagai terbaca');
-                
+
                 // 5. Update tombol "Tandai semua terbaca" hilang karena tidak ada notif
                 button.style.display = 'none';
-                
+
             } else {
                 showToast('error', data.message || 'Terjadi kesalahan');
             }
-            
+
         } catch (error) {
             console.error('Error:', error);
             showToast('error', 'Gagal menghubungi server');
@@ -397,23 +400,23 @@
                     'Accept': 'application/json'
                 }
             });
-            
+
             const data = await response.json();
-            
+
             if (data.success) {
                 // Hapus background biru
                 element.classList.remove('bg-blue-50');
-                
+
                 // Hapus titik merah
                 const dot = element.querySelector('.unread-dot');
                 if (dot) {
                     dot.remove();
                 }
-                
+
                 // Update badge count
                 updateBadgeCount(data.unread_count);
             }
-            
+
         } catch (error) {
             console.error('Error marking as read:', error);
         }
@@ -423,7 +426,7 @@
     function updateBadgeCount(count) {
         const badge = document.getElementById('notification-badge');
         const markAllBtn = document.getElementById('mark-all-read-btn');
-        
+
         if (count > 0) {
             if (badge) {
                 badge.textContent = count;
@@ -442,18 +445,18 @@
                     bellIcon.appendChild(newBadge);
                 }
             }
-            
+
             // Tampilkan tombol "Tandai semua terbaca"
             if (markAllBtn) {
                 markAllBtn.style.display = 'block';
             }
-            
+
         } else {
             // Hapus badge jika count = 0
             if (badge) {
                 badge.remove();
             }
-            
+
             // Sembunyikan tombol "Tandai semua terbaca"
             if (markAllBtn) {
                 markAllBtn.style.display = 'none';
@@ -468,13 +471,13 @@
         if (existingToast) {
             existingToast.remove();
         }
-        
+
         const toast = document.createElement('div');
         toast.id = 'toast-notification';
         toast.className = `fixed top-6 right-6 z-50 px-6 py-4 rounded-xl shadow-2xl transform transition-all duration-300 translate-y-0 opacity-100 ${
             type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
         }`;
-        
+
         toast.innerHTML = `
             <div class="flex items-center gap-3">
                 <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} text-xl"></i>
@@ -486,9 +489,9 @@
                 </button>
             </div>
         `;
-        
+
         document.body.appendChild(toast);
-        
+
         // Auto remove setelah 3 detik
         setTimeout(() => {
             if (toast.parentElement) {
@@ -501,17 +504,17 @@
 
     // Event listener untuk dropdown notifikasi
     document.addEventListener('DOMContentLoaded', function() {
-        
+
         // Tutup dropdown saat klik di luar
         document.addEventListener('click', function(event) {
             const dropdown = document.querySelector('[x-show="showNotifications"]');
             const bellButton = document.querySelector('.fa-bell')?.closest('button');
-            
-            if (dropdown && bellButton && 
-                !dropdown.contains(event.target) && 
+
+            if (dropdown && bellButton &&
+                !dropdown.contains(event.target) &&
                 !bellButton.contains(event.target) &&
                 dropdown.style.display !== 'none') {
-                
+
                 // Gunakan Alpine.js untuk menutup dropdown
                 if (typeof Alpine !== 'undefined') {
                     const alpineComponent = Alpine.$data(dropdown);
@@ -525,67 +528,75 @@
 </script>
 
 <style>
-.notification-badge {
-    animation: pulse 2s infinite;
-}
+    .notification-badge {
+        animation: pulse 2s infinite;
+    }
 
-@keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.1); }
-    100% { transform: scale(1); }
-}
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+        }
 
-.notification-item {
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
+        50% {
+            transform: scale(1.1);
+        }
 
-.notification-item:hover {
-    transform: translateX(5px);
-}
+        100% {
+            transform: scale(1);
+        }
+    }
 
-/* Style untuk dropdown */
-[x-show="showNotifications"] {
-    scrollbar-width: thin;
-    scrollbar-color: #0d9488 #f0fdfa;
-}
+    .notification-item {
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
 
-[x-show="showNotifications"]::-webkit-scrollbar {
-    width: 6px;
-}
+    .notification-item:hover {
+        transform: translateX(5px);
+    }
 
-[x-show="showNotifications"]::-webkit-scrollbar-track {
-    background: #f0fdfa;
-    border-radius: 10px;
-}
+    /* Style untuk dropdown */
+    [x-show="showNotifications"] {
+        scrollbar-width: thin;
+        scrollbar-color: #0d9488 #f0fdfa;
+    }
 
-[x-show="showNotifications"]::-webkit-scrollbar-thumb {
-    background: #0d9488;
-    border-radius: 10px;
-}
+    [x-show="showNotifications"]::-webkit-scrollbar {
+        width: 6px;
+    }
 
-/* Animation for card hover */
-.card-hover {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
+    [x-show="showNotifications"]::-webkit-scrollbar-track {
+        background: #f0fdfa;
+        border-radius: 10px;
+    }
 
-.card-hover:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-}
+    [x-show="showNotifications"]::-webkit-scrollbar-thumb {
+        background: #0d9488;
+        border-radius: 10px;
+    }
 
-/* Gradient text */
-.gradient-text {
-    background: linear-gradient(135deg, #0d9488, #2dd4bf);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
+    /* Animation for card hover */
+    .card-hover {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
 
-/* Table row hover */
-.table-row:hover {
-    background-color: #f9fafb;
-}
+    .card-hover:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Gradient text */
+    .gradient-text {
+        background: linear-gradient(135deg, #0d9488, #2dd4bf);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    /* Table row hover */
+    .table-row:hover {
+        background-color: #f9fafb;
+    }
 </style>
 
 @endpush

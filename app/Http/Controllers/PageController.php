@@ -24,7 +24,7 @@ class PageController extends Controller
             $slides = collect([
                 (object) [
                     'gambar' => 'default-hero.jpg',
-                    'judul' => 'Selamat Datang di PetHouse',
+                    'judul' => 'Selamat Datang di LARAPetHouse',
                     'subjudul' => 'Penitipan, Grooming & Perawatan Hewan Kesayangan Anda dengan Cinta',
                     'tombol_text' => 'Booking Sekarang',
                     'tombol_link' => ''

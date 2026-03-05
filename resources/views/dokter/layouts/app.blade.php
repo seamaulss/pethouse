@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>@yield('title', 'Dokter Panel - PetHouse')</title>
+    <title>@yield('title', 'Dokter Panel - LARAPetHouse')</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -36,7 +36,7 @@
     <!-- Footer (opsional) -->
     <footer class="bg-white border-t border-gray-200 py-4 mt-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-gray-500 text-sm">
-            &copy; {{ date('Y') }} PetHouse. All rights reserved.
+            &copy; {{ date('Y') }} LARAPetHouse. All rights reserved.
         </div>
     </footer>
 

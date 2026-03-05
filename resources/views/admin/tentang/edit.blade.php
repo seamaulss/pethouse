@@ -1,6 +1,6 @@
 @extends('admin.layout')
 
-@section('title', 'Edit Konten Tentang - PetHouse Admin')
+@section('title', 'Edit Konten Tentang - LARAPetHouse Admin')
 
 @section('content')
 <div class="container mx-auto px-4">
@@ -60,7 +60,7 @@
                         value="{{ old('judul', $tentang->judul) }}"
                         required
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition duration-300"
-                        placeholder="Contoh: Visi & Misi PetHouse">
+                        placeholder="Contoh: Visi & Misi LARAPetHouse">
                     @error('judul')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror

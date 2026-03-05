@@ -1,240 +1,216 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
-use App\Http\Controllers\User\DashboardController as UserDashboardController;
-use App\Http\Controllers\Petugas\DashboardController as PetugasDashboardController;
-use App\Http\Controllers\Petugas\ProfileController as PetugasProfileController;
-use App\Http\Controllers\Dokter\DashboardController as DokterDashboardController;
-use App\Http\Controllers\Admin\KapasitasController;
-use App\Http\Controllers\User\BookingController;
-use App\Http\Controllers\User\HewanSayaController;
-use App\Http\Controllers\User\KonsultasiController;
-use App\Http\Controllers\User\NotificationController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\PublicController;
+use App\Http\Controllers\{ProfileController, PublicController};
 
+// Controller Aliases (untuk kerapihan)
+use App\Http\Controllers\Admin\{
+    DashboardController as AdminDashboard,
+    BookingController as AdminBooking,
+    KapasitasController as AdminKapasitas,
+    KonsultasiController as AdminKonsultasi,
+    JenisHewanController as AdminJenisHewan,
+    LayananController as AdminLayanan,
+    GaleriController as AdminGaleri,
+    TestimoniController as AdminTestimoni,
+    TentangController as AdminTentang,
+    HeroController as AdminHero,
+    MasterKegiatanController,
+    BookingController as BookingController,
+};
 
-// ======================
-// ROUTE PUBLIC (Tidak Perlu Login)
-// ======================
+use App\Http\Controllers\Petugas\{
+    DashboardController as PetugasDashboard,
+    BookingController as PetugasBooking,
+    InputLogController as PetugasInputLog,
+    KapasitasController as PetugasKapasitas,
+    NotificationController as PetugasNotification,
+    ProfileController as PetugasProfile
+};
 
-Route::get('/', [PublicController::class, 'index'])->name('home');
-Route::get('/layanan', [PublicController::class, 'layanan'])->name('layanan');
-Route::get('/galeri', [PublicController::class, 'galeri'])->name('galeri');
-Route::get('/kontak', [PublicController::class, 'kontak'])->name('kontak');
+use App\Http\Controllers\User\{
+    DashboardController as UserDashboard,
+    BookingController as UserBooking,
+    HewanSayaController,
+    KonsultasiController as UserKonsultasi,
+    NotificationController as UserNotification,
+    ProfilController as UserProfil
+};
 
-// ======================
-// ROUTE AUTH (Breeze)
-// ======================
+use App\Http\Controllers\Dokter\{
+    DashboardController as DokterDashboard,
+    KonsultasiController as DokterKonsultasi,
+    ProfileController as DokterProfile
+};
 
-Route::middleware(['auth'])->group(function () {
-    // Profile routes
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+// ======================================================
+// PUBLIC ROUTES
+// ======================================================
+Route::controller(PublicController::class)->group(function () {
+    Route::get('/', 'index')->name('home');
+    Route::get('/layanan', 'layanan')->name('layanan');
+    Route::get('/galeri', 'galeri')->name('galeri');
+    Route::get('/kontak', 'kontak')->name('kontak');
 });
 
+// ======================================================
+// AUTH ROUTES (Breeze & Shared Profile)
+// ======================================================
+Route::middleware('auth')->group(function () {
+    Route::controller(ProfileController::class)->prefix('profile')->name('profile.')->group(function () {
+        Route::get('/', 'edit')->name('edit');
+        Route::patch('/', 'update')->name('update');
+        Route::delete('/', 'destroy')->name('destroy');
+    });
+});
 
-
-// ======================
-// ROUTE ADMIN
-// ======================
-
+// ======================================================
+// ADMIN ROUTES
+// ======================================================
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', [AdminDashboard::class, 'index'])->name('dashboard');
 
-    // Hanya gunakan route yang benar-benar dibutuhkan
-    Route::get('/booking', [App\Http\Controllers\Admin\BookingController::class, 'index'])->name('booking.index');
-    Route::put('/booking/{id}', [App\Http\Controllers\Admin\BookingController::class, 'update'])->name('booking.update');
-    Route::delete('/booking/{id}', [App\Http\Controllers\Admin\BookingController::class, 'destroy'])->name('booking.destroy');
-    // Booking routes
-    Route::resource('booking', \App\Http\Controllers\Admin\BookingController::class);
-    Route::post('booking/{booking}/handle-extension', [\App\Http\Controllers\Admin\BookingController::class, 'handleExtension'])
-        ->name('booking.handle-extension');
+    // Booking Management
+    Route::post('booking/{booking}/handle-extension', [AdminBooking::class, 'handleExtension'])->name('booking.handle-extension');
+    Route::resource('booking', AdminBooking::class);
 
-    // Route Kapasitas
-    Route::get('/kapasitas', [App\Http\Controllers\Admin\KapasitasController::class, 'index'])->name('kapasitas.index');
-    Route::post('/kapasitas', [App\Http\Controllers\Admin\KapasitasController::class, 'store'])->name('kapasitas.store');
-    Route::put('/kapasitas/{id}', [App\Http\Controllers\Admin\KapasitasController::class, 'update'])->name('kapasitas.update');
-    Route::delete('/kapasitas/{id}', [App\Http\Controllers\Admin\KapasitasController::class, 'destroy'])->name('kapasitas.destroy');
+    // Route khusus untuk Export PDF
+    Route::get('booking-export-pdf', [BookingController::class, 'exportPdf'])->name('booking.export-pdf');
 
-    // Route untuk admin konsultasi
-    Route::get('/konsultasi', [App\Http\Controllers\Admin\KonsultasiController::class, 'index'])->name('konsultasi.index');
-    Route::get('/konsultasi/{id}', [App\Http\Controllers\Admin\KonsultasiController::class, 'show'])->name('konsultasi.show');
-    Route::get('/konsultasi/{id}/edit', [App\Http\Controllers\Admin\KonsultasiController::class, 'edit'])->name('konsultasi.edit');
-    Route::put('/konsultasi/{id}', [App\Http\Controllers\Admin\KonsultasiController::class, 'update'])->name('konsultasi.update');
-    Route::delete('/konsultasi/{id}', [App\Http\Controllers\Admin\KonsultasiController::class, 'destroy'])->name('konsultasi.destroy');
-    Route::post('/konsultasi/{id}/add-balasan', [KonsultasiController::class, 'updateBalasan'])->name('konsultasi.add-balasan');
+    // Master Data Resources
+    Route::resource('kapasitas', AdminKapasitas::class)->except(['show', 'create', 'edit']);
+    Route::resource('konsultasi', AdminKonsultasi::class);
+    Route::post('konsultasi/{id}/add-balasan', [AdminKonsultasi::class, 'updateBalasan'])->name('konsultasi.add-balasan');
+    
+    Route::resource('jenis-hewan', AdminJenisHewan::class);
+    Route::resource('galeri', AdminGaleri::class);
+    Route::resource('testimoni', AdminTestimoni::class);
+    Route::resource('tentang', AdminTentang::class);
+    Route::resource('hero', AdminHero::class);
+    Route::resource('master-kegiatan', MasterKegiatanController::class)->except(['show']);
 
-    // Jenis Hewan
-    Route::get('/jenis-hewan', [App\Http\Controllers\Admin\JenisHewanController::class, 'index'])->name('jenis-hewan.index');
-    Route::get('/jenis-hewan/create', [App\Http\Controllers\Admin\JenisHewanController::class, 'create'])->name('jenis-hewan.create');
-    Route::post('/jenis-hewan', [App\Http\Controllers\Admin\JenisHewanController::class, 'store'])->name('jenis-hewan.store');
-    Route::get('/jenis-hewan/{id}/edit', [App\Http\Controllers\Admin\JenisHewanController::class, 'edit'])->name('jenis-hewan.edit');
-    Route::put('/jenis-hewan/{id}', [App\Http\Controllers\Admin\JenisHewanController::class, 'update'])->name('jenis-hewan.update');
-    Route::delete('/jenis-hewan/{id}', [App\Http\Controllers\Admin\JenisHewanController::class, 'destroy'])->name('jenis-hewan.destroy');
+    // Layanan & Custom Pricing
+    Route::controller(AdminLayanan::class)->prefix('layanan')->name('layanan.')->group(function () {
+        Route::get('/{id}/atur-harga', 'aturHarga')->name('atur-harga');
+        Route::post('/{id}/simpan-harga', 'simpanHarga')->name('simpan-harga');
+    });
+    Route::resource('layanan', AdminLayanan::class);
 
-    // Layanan
-    Route::get('/layanan', [App\Http\Controllers\Admin\LayananController::class, 'index'])->name('layanan.index');
-    Route::get('/layanan/create', [App\Http\Controllers\Admin\LayananController::class, 'create'])->name('layanan.create');
-    Route::post('/layanan', [App\Http\Controllers\Admin\LayananController::class, 'store'])->name('layanan.store');
-    Route::get('/layanan/{id}/edit', [App\Http\Controllers\Admin\LayananController::class, 'edit'])->name('layanan.edit');
-    Route::put('/layanan/{id}', [App\Http\Controllers\Admin\LayananController::class, 'update'])->name('layanan.update');
-    Route::delete('/layanan/{id}', [App\Http\Controllers\Admin\LayananController::class, 'destroy'])->name('layanan.destroy');
-
-    // Route untuk atur harga
-    Route::get('/layanan/{id}/atur-harga', [App\Http\Controllers\Admin\LayananController::class, 'aturHarga'])->name('layanan.atur-harga');
-    Route::post('/layanan/{id}/simpan-harga', [App\Http\Controllers\Admin\LayananController::class, 'simpanHarga'])->name('layanan.simpan-harga');
-
-    // Galeri Admin
-    Route::get('/galeri', [App\Http\Controllers\Admin\GaleriController::class, 'index'])->name('galeri.index');
-    Route::get('/galeri/create', [App\Http\Controllers\Admin\GaleriController::class, 'create'])->name('galeri.create');
-    Route::post('/galeri', [App\Http\Controllers\Admin\GaleriController::class, 'store'])->name('galeri.store');
-    Route::get('/galeri/{id}/edit', [App\Http\Controllers\Admin\GaleriController::class, 'edit'])->name('galeri.edit');
-    Route::put('/galeri/{id}', [App\Http\Controllers\Admin\GaleriController::class, 'update'])->name('galeri.update');
-    Route::delete('/galeri/{id}', [App\Http\Controllers\Admin\GaleriController::class, 'destroy'])->name('galeri.destroy');
-
-    // Testimoni Admin
-    Route::get('/testimoni', [App\Http\Controllers\Admin\TestimoniController::class, 'index'])->name('testimoni.index');
-    Route::get('/testimoni/create', [App\Http\Controllers\Admin\TestimoniController::class, 'create'])->name('testimoni.create');
-    Route::post('/testimoni', [App\Http\Controllers\Admin\TestimoniController::class, 'store'])->name('testimoni.store');
-    Route::get('/testimoni/{id}/edit', [App\Http\Controllers\Admin\TestimoniController::class, 'edit'])->name('testimoni.edit');
-    Route::put('/testimoni/{id}', [App\Http\Controllers\Admin\TestimoniController::class, 'update'])->name('testimoni.update');
-    Route::delete('/testimoni/{id}', [App\Http\Controllers\Admin\TestimoniController::class, 'destroy'])->name('testimoni.destroy');
-
-    // Tentang Kami Admin
-    Route::get('/tentang', [App\Http\Controllers\Admin\TentangController::class, 'index'])->name('tentang.index');
-    Route::get('/tentang/create', [App\Http\Controllers\Admin\TentangController::class, 'create'])->name('tentang.create');
-    Route::post('/tentang', [App\Http\Controllers\Admin\TentangController::class, 'store'])->name('tentang.store');
-    Route::get('/tentang/{id}/edit', [App\Http\Controllers\Admin\TentangController::class, 'edit'])->name('tentang.edit');
-    Route::put('/tentang/{id}', [App\Http\Controllers\Admin\TentangController::class, 'update'])->name('tentang.update');
-    Route::delete('/tentang/{id}', [App\Http\Controllers\Admin\TentangController::class, 'destroy'])->name('tentang.destroy');
-
-    // Hero Slider Admin
-    Route::get('/hero', [App\Http\Controllers\Admin\HeroController::class, 'index'])->name('hero.index');
-    Route::get('/hero/create', [App\Http\Controllers\Admin\HeroController::class, 'create'])->name('hero.create');
-    Route::post('/hero', [App\Http\Controllers\Admin\HeroController::class, 'store'])->name('hero.store');
-    Route::get('/hero/{id}/edit', [App\Http\Controllers\Admin\HeroController::class, 'edit'])->name('hero.edit');
-    Route::put('/hero/{id}', [App\Http\Controllers\Admin\HeroController::class, 'update'])->name('hero.update');
-    Route::delete('/hero/{id}', [App\Http\Controllers\Admin\HeroController::class, 'destroy'])->name('hero.destroy');
-
-    // NOTIFIKASI ROUTES - GUNAKAN AdminDashboardController
-    Route::post('/notifications/{id}/read', [AdminDashboardController::class, 'markAsRead'])
-        ->name('notifications.read');
-    Route::post('/notifications/mark-all-read', [AdminDashboardController::class, 'markAllAsRead'])
-        ->name('notifications.mark-all-read');
-    Route::get('/notifications/count', [AdminDashboardController::class, 'getNotificationCount'])
-        ->name('notifications.count');
-
-    // Master Kegiatan (Tambahkan ini)
-    Route::resource('master-kegiatan', \App\Http\Controllers\Admin\MasterKegiatanController::class)
-        ->except(['show']);
+    // Notifications
+    Route::controller(AdminDashboard::class)->prefix('notifications')->name('notifications.')->group(function () {
+        Route::post('/{id}/read', 'markAsRead')->name('read');
+        Route::post('/mark-all-read', 'markAllAsRead')->name('mark-all-read');
+        Route::get('/count', 'getNotificationCount')->name('count');
+    });
 });
 
-// ======================
-// Petugas Routes
-// =====================
-
+// ======================================================
+// PETUGAS ROUTES
+// ======================================================
 Route::middleware(['auth', 'petugas'])->prefix('petugas')->name('petugas.')->group(function () {
-    // Dashboard
-    Route::get('/dashboard', [App\Http\Controllers\Petugas\DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', [PetugasDashboard::class, 'index'])->name('dashboard');
 
-    // Manajemen Booking untuk Petugas (Daftar Pasien/Hewan)
-    Route::get('/booking', [App\Http\Controllers\Petugas\BookingController::class, 'index'])->name('booking.index');
-    Route::get('/booking/{id}', [App\Http\Controllers\Petugas\BookingController::class, 'show'])->name('booking.show');
+    Route::resource('booking', PetugasBooking::class)->only(['index', 'show']);
+    Route::get('/kapasitas', [PetugasKapasitas::class, 'index'])->name('kapasitas.index');
 
-    // Input Log Kegiatan (Sistem Fleksibel Baru)
-    Route::get('/input-log/{booking}', [App\Http\Controllers\Petugas\InputLogController::class, 'show'])->name('input-log.show');
-    Route::post('/input-log/{booking}', [App\Http\Controllers\Petugas\InputLogController::class, 'store'])->name('input-log.store');
-    Route::delete('/input-log/{log}', [App\Http\Controllers\Petugas\InputLogController::class, 'destroyLog'])->name('input-log.destroy-log');
-
-    // Monitoring Kapasitas (Status Kandang)
-    Route::get('/kapasitas', [App\Http\Controllers\Petugas\KapasitasController::class, 'index'])->name('kapasitas.index');
-
-    Route::get('/notifications', [App\Http\Controllers\Petugas\NotificationController::class, 'index'])->name('notifications.index');
-    // Route untuk menandai notifikasi sudah dibaca
-    Route::get('/notifications/{id}/read', [App\Http\Controllers\Petugas\NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
-
-    // Profile
-    Route::get('/profile', [App\Http\Controllers\Petugas\ProfileController::class, 'index'])->name('profile.index');
-    Route::get('/profile/edit', [App\Http\Controllers\Petugas\ProfileController::class, 'edit'])->name('profile.edit');
-    Route::put('/profile/update', [\App\Http\Controllers\Petugas\ProfileController::class, 'update'])->name('profile.update');
-});
-
-// ======================
-// ROUTE USER
-// ======================
-
-Route::middleware(['auth', 'user'])->prefix('user')->name('user.')->group(function () {
-
-    // 1. ROUTE SPESIFIK – DILETAKKAN DI ATAS
-    Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('dashboard');
-
-    // notifikasi user
-    Route::prefix('notifikasi')->name('notifikasi.')->group(function () {
-        Route::get('/', [NotificationController::class, 'index'])->name('index');
-        Route::post('/{id}/read', [NotificationController::class, 'markAsRead'])->name('read');
-        Route::post('/read-all', [NotificationController::class, 'markAllAsRead'])->name('read-all');
-        Route::get('/get-new', [NotificationController::class, 'getNewNotifications'])->name('get-new');
+    // Log Kegiatan
+    Route::controller(PetugasInputLog::class)->prefix('input-log')->name('input-log.')->group(function () {
+        Route::get('/{booking}', 'show')->name('show');
+        Route::post('/{booking}', 'store')->name('store');
+        Route::delete('/{log}', 'destroyLog')->name('destroy-log');
     });
 
-    // Hewan Saya
-    Route::get('/hewan-saya', [HewanSayaController::class, 'index'])->name('hewan-saya');
-    Route::get('/hewan-saya/{id}/log', [HewanSayaController::class, 'logHarian'])->name('hewan-saya.log');
+    // Profile Petugas
+    Route::controller(PetugasProfile::class)->prefix('profile')->name('profile.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/edit', 'edit')->name('edit');
+        Route::put('/update', 'update')->name('update');
+    });
 
-    // Booking
-    Route::get('/booking', [BookingController::class, 'create'])->name('booking.create');
-    Route::post('/booking', [BookingController::class, 'store'])->name('booking.store');
-    Route::get('/booking/riwayat', [BookingController::class, 'riwayat'])->name('booking.riwayat');
-    Route::get('/booking/get-harga', [BookingController::class, 'getHarga'])->name('booking.get-harga');
-    Route::get('/booking/{id}/extend', [BookingController::class, 'showExtendForm'])->name('booking.extend.form');
-    Route::post('/booking/{id}/extend', [BookingController::class, 'extend'])->name('booking.extend');
-    Route::post('/booking/{id}/cancel', [BookingController::class, 'cancel'])->name('booking.cancel');
-    Route::get('/booking/{id}', [BookingController::class, 'show'])->name('booking.show');
-
-    // Konsultasi
-    Route::get('/konsultasi', [KonsultasiController::class, 'create'])->name('konsultasi.create');
-    Route::post('/konsultasi', [KonsultasiController::class, 'store'])->name('konsultasi.store');
-    Route::get('/konsultasi-saya', [KonsultasiController::class, 'index'])->name('konsultasi.index');
-    Route::get('/konsultasi/get-jam', [KonsultasiController::class, 'getJam'])->name('konsultasi.get-jam');
-    Route::post('/konsultasi/balas', [KonsultasiController::class, 'balas'])->name('konsultasi.balas');
-
-    // PROFIL ROUTES
-    Route::get('/profil', [\App\Http\Controllers\User\ProfilController::class, 'index'])->name('profil');
-    Route::put('/profil/update', [\App\Http\Controllers\User\ProfilController::class, 'update'])->name('profil.update');
-
-    // ⚠️ ROUTE NOTIFIKASI USER (HANYA JIKA PERLU)
-    Route::delete('/{id}', [NotificationController::class, 'destroy'])->name('destroy');
+    // Notifikasi
+    Route::controller(PetugasNotification::class)->prefix('notifications')->name('notifications.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/{id}/read', 'markAsRead')->name('markAsRead');
+    });
 });
 
-// ======================
-// ROUTE DOKTER
-// ======================
+// ======================================================
+// USER ROUTES
+// ======================================================
+Route::middleware(['auth', 'user'])->prefix('user')->name('user.')->group(function () {
+    Route::get('/dashboard', [UserDashboard::class, 'index'])->name('dashboard');
 
+    // Hewan & Log
+    Route::controller(HewanSayaController::class)->group(function () {
+        Route::get('/hewan-saya', 'index')->name('hewan-saya');
+        Route::get('/hewan-saya/{id}/log', 'logHarian')->name('hewan-saya.log');
+    });
+
+    // Booking User
+    Route::controller(UserBooking::class)->prefix('booking')->name('booking.')->group(function () {
+        Route::get('/', 'create')->name('create');
+        Route::post('/', 'store')->name('store');
+        Route::get('/riwayat', 'riwayat')->name('riwayat');
+        Route::get('/get-harga', 'getHarga')->name('get-harga');
+        Route::get('/{id}/extend', 'showExtendForm')->name('extend.form');
+        Route::post('/{id}/extend', 'extend')->name('extend');
+        Route::post('/{id}/cancel', 'cancel')->name('cancel');
+        Route::get('/{id}', 'show')->name('show');
+    });
+
+    // Konsultasi User
+    Route::controller(UserKonsultasi::class)->prefix('konsultasi')->name('konsultasi.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/buat', 'create')->name('create');
+        Route::post('/', 'store')->name('store');
+        Route::get('/get-jam', 'getJam')->name('get-jam');
+        Route::post('/balas', 'balas')->name('balas');
+    });
+
+    // Notifikasi User
+    Route::controller(UserNotification::class)->prefix('notifikasi')->name('notifikasi.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::post('/{id}/read', 'markAsRead')->name('read');
+        Route::post('/read-all', 'markAllAsRead')->name('read-all');
+        Route::get('/get-new', 'getNewNotifications')->name('get-new');
+        Route::delete('/{id}', 'destroy')->name('destroy');
+    });
+
+    // Profile User
+    Route::controller(UserProfil::class)->prefix('profil')->name('profil')->group(function () {
+        Route::get('/', 'index');
+        Route::put('/update', 'update')->name('.update');
+    });
+});
+
+// ======================================================
+// DOKTER ROUTES
+// ======================================================
 Route::middleware(['auth', 'dokter'])->prefix('dokter')->name('dokter.')->group(function () {
-    // Dashboard Dokter
-    Route::get('/dashboard', [\App\Http\Controllers\Dokter\DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', [DokterDashboard::class, 'index'])->name('dashboard');
 
     // Konsultasi Dokter
-    Route::prefix('konsultasi')->name('konsultasi.')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Dokter\KonsultasiController::class, 'index'])->name('index');
-
-        Route::get('/{id}', [\App\Http\Controllers\Dokter\KonsultasiController::class, 'show'])->name('show');
-        Route::post('/{id}/status', [\App\Http\Controllers\Dokter\KonsultasiController::class, 'updateStatus'])->name('update-status');
-        Route::post('/{id}/balas', [\App\Http\Controllers\Dokter\KonsultasiController::class, 'kirimBalasan'])->name('balas');
+    Route::controller(DokterKonsultasi::class)->prefix('konsultasi')->name('konsultasi.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/{id}', 'show')->name('show');
+        Route::post('/{id}/status', 'updateStatus')->name('update-status');
+        Route::post('/{id}/balas', 'kirimBalasan')->name('balas');
     });
 
-    // ✅ PROFIL DOKTER
-    Route::get('/profile', [\App\Http\Controllers\Dokter\ProfileController::class, 'index'])->name('profile.index');
-    Route::get('/profile/edit', [\App\Http\Controllers\Dokter\ProfileController::class, 'edit'])->name('profile.edit');
-    Route::put('/profile/update', [\App\Http\Controllers\Dokter\ProfileController::class, 'update'])->name('profile.update');
+    // Profile Dokter
+    Route::controller(DokterProfile::class)->prefix('profile')->name('profile.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/edit', 'edit')->name('edit');
+        Route::put('/update', 'update')->name('update');
+    });
 
-    // NOTIFIKASI DOKTER
-    Route::get('/notifikasi', [NotificationController::class, 'index'])->name('notifikasi.index');
-    Route::post('/notifikasi/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifikasi.read');
-    Route::post('/notifikasi/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifikasi.read-all');
-    Route::get('/get-notifications', [NotificationController::class, 'getNewNotifications'])->name('notifikasi.get-new');
+    // Notifikasi Dokter (Menggunakan UserNotification controller agar reusable)
+    Route::controller(UserNotification::class)->prefix('notifikasi')->name('notifikasi.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::post('/{id}/read', 'markAsRead')->name('read');
+        Route::post('/read-all', 'markAllAsRead')->name('read-all');
+        Route::get('/get-notifications', 'getNewNotifications')->name('get-new');
+    });
 });
 
 require __DIR__ . '/auth.php';

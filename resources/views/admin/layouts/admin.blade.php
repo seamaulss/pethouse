@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'PetHouse Admin')</title>
+    <title>@yield('title', 'LARAPetHouse Admin')</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -50,7 +50,7 @@
         <div class="lg:hidden bg-white border-b border-gray-200 p-4">
             <div class="flex items-center justify-between">
                 <div>
-                    <h1 class="text-lg font-bold text-gray-800">@yield('title', 'PetHouse Admin')</h1>
+                    <h1 class="text-lg font-bold text-gray-800">@yield('title', 'LARAPetHouse Admin')</h1>
                     <p class="text-sm text-gray-600">Administrator Panel</p>
                 </div>
                 <div class="flex items-center space-x-4">

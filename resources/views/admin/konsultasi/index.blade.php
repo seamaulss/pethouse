@@ -4,7 +4,7 @@
 <div class="p-6 max-w-7xl mx-auto">
     <div class="mb-10" data-aos="fade-down">
         <h1 class="text-4xl font-bold text-gray-800">Manajemen Antrean</h1>
-        <p class="text-lg text-gray-600 mt-2 italic">Pantau status kunjungan klinik PetHouse hari ini.</p>
+        <p class="text-lg text-gray-600 mt-2 italic">Pantau status kunjungan klinik LARAPetHouse hari ini.</p>
     </div>
 
     @if(session('success'))

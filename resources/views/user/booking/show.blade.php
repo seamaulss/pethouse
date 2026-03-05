@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detail Booking - PetHouse</title>
+    <title>Detail Booking - LARAPetHouse</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -117,7 +117,7 @@
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center">
                     <div>
                         <h2 class="text-xl font-bold text-teal-800">Kode Booking: {{ $booking->kode_booking }}</h2>
-                        <p class="text-sm text-teal-600">Dibuat: {{ $booking->created_at->format('d M Y H:i') }}</p>
+                        <p class="text-sm text-teal-600">Dibuat: {{ $booking->created_at->translatedFormat('d F Y H:i') }}</p>
                     </div>
                     <div class="mt-2 sm:mt-0">
                         @if($booking->dp_dibayar === 'Ya')

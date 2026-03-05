@@ -15,14 +15,14 @@ class NotificationController extends Controller
     public function index()
     {
         $user = Auth::user();
-        
+
         $notifications = Notification::where('user_id', $user->id)
             ->orderBy('created_at', 'desc')
             ->paginate(15);
-            
+
         return view('user.notifikasi.index', compact('notifications'));
     }
-    
+
     /**
      * Tandai notifikasi sebagai dibaca
      */
@@ -31,13 +31,13 @@ class NotificationController extends Controller
         try {
             $notification = Notification::where('user_id', Auth::id())
                 ->findOrFail($id);
-                
+
             $notification->update(['is_read' => true]);
-            
+
             $unreadCount = Notification::where('user_id', Auth::id())
                 ->where('is_read', false)
                 ->count();
-            
+
             return response()->json([
                 'success' => true,
                 'message' => 'Notifikasi ditandai sebagai terbaca',
@@ -50,7 +50,7 @@ class NotificationController extends Controller
             ], 500);
         }
     }
-    
+
     /**
      * Tandai semua notifikasi sebagai dibaca
      */
@@ -60,7 +60,7 @@ class NotificationController extends Controller
             $count = Notification::where('user_id', Auth::id())
                 ->where('is_read', false)
                 ->update(['is_read' => true]);
-            
+
             return response()->json([
                 'success' => true,
                 'message' => 'Semua notifikasi telah ditandai sebagai terbaca',
@@ -73,7 +73,7 @@ class NotificationController extends Controller
             ], 500);
         }
     }
-    
+
     /**
      * Hapus notifikasi
      */
@@ -82,9 +82,9 @@ class NotificationController extends Controller
         try {
             $notification = Notification::where('user_id', Auth::id())
                 ->findOrFail($id);
-                
+
             $notification->delete();
-            
+
             return response()->json([
                 'success' => true,
                 'message' => 'Notifikasi berhasil dihapus'
@@ -96,24 +96,27 @@ class NotificationController extends Controller
             ], 500);
         }
     }
-    
+
     /**
      * Get notifikasi baru (untuk AJAX polling)
      */
     public function getNewNotifications()
     {
         $user = Auth::user();
-        
+
+        // Ambil data terbaru
         $notifications = Notification::where('user_id', $user->id)
             ->where('is_read', false)
             ->orderBy('created_at', 'desc')
             ->take(10)
             ->get();
-            
+
+        // Daripada query lagi ke DB, hitung dari hasil koleksi jika datanya sedikit
+        // Tapi jika notifikasi bisa sangat banyak, tetap gunakan count() di DB.
         $unreadCount = Notification::where('user_id', $user->id)
             ->where('is_read', false)
             ->count();
-            
+
         return response()->json([
             'success' => true,
             'notifications' => $notifications,

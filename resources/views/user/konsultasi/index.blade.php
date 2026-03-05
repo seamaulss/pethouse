@@ -1,6 +1,6 @@
 @extends('layouts.user')
 
-@section('title', 'Konsultasi Saya - PetHouse')
+@section('title', 'Konsultasi Saya - LARAPetHouse')
 
 @push('styles')
 <style>
@@ -40,7 +40,7 @@
             <div class="flex items-center space-x-4">
                 <div class="hidden md:flex items-center space-x-2 text-gray-600">
                     <i class="fas fa-calendar-day text-teal-600"></i>
-                    <span>{{ now()->format('d F Y') }}</span>
+                    <span>{{ now()->translatedFormat('d F Y') }}</span>
                 </div>
                 <a href="{{ route('user.konsultasi.create') }}" class="bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 text-white px-5 py-3 rounded-xl font-medium transition duration-200 shadow-md hover:shadow-lg flex items-center space-x-2">
                     <i class="fas fa-plus-circle"></i>
@@ -136,7 +136,7 @@
                     </div>
                     <div>
                         <p class="text-xs text-gray-500 uppercase">Jadwal</p>
-                        <p class="font-semibold">{{ $konsultasi->tanggal_janji->format('d M Y') }}</p>
+                        <p class="font-semibold">{{ $konsultasi->tanggal_janji->translatedFormat('d F Y') }}</p>
                     </div>
                     <div>
                         <p class="text-xs text-gray-500 uppercase">Waktu</p>
@@ -182,7 +182,7 @@
             <div class="text-gray-600 text-sm">
                 <i class="fas fa-info-circle mr-2"></i>
                 Butuh bantuan? Hubungi kami di
-                <a href="mailto:support@pethouse.com" class="text-teal-600 hover:underline">support@pethouse.com</a>
+                <a href="mailto:support@LARAPetHouse.com" class="text-teal-600 hover:underline">support@LARAPetHouse.com</a>
             </div>
         </div>
     </div>

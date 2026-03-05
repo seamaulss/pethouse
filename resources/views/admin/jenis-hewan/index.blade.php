@@ -12,7 +12,7 @@
             Master Jenis Hewan
         </h1>
         <p class="text-gray-600 mt-2">
-            Kelola daftar jenis hewan yang tersedia di PetHouse
+            Kelola daftar jenis hewan yang tersedia di LARAPetHouse
         </p>
     </div>
 

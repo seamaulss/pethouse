@@ -8,13 +8,15 @@
     /* Responsive Hero Height */
     .hero-slide {
         position: relative;
-        height: 450px; /* Tinggi untuk Mobile */
+        height: 450px;
+        /* Tinggi untuk Mobile */
         overflow: hidden;
     }
 
     @media (min-width: 768px) {
         .hero-slide {
-            height: 600px; /* Tinggi untuk Desktop */
+            height: 600px;
+            /* Tinggi untuk Desktop */
         }
     }
 
@@ -49,12 +51,14 @@
     .swiper-pagination-bullet-active {
         opacity: 1;
         background: #0d9488;
-        width: 25px; /* Efek memanjang saat aktif */
+        width: 25px;
+        /* Efek memanjang saat aktif */
         border-radius: 5px;
     }
 
     /* Sembunyikan Navigasi Panah di Mobile agar tidak ganggu teks */
     @media (max-width: 768px) {
+
         .swiper-button-next,
         .swiper-button-prev {
             display: none !important;
@@ -85,13 +89,13 @@
             <div class="swiper-slide">
                 <div class="hero-slide">
                     @if($slide->gambar && file_exists(public_path('storage/hero/' . $slide->gambar)))
-                    <img src="{{ asset('storage/hero/' . $slide->gambar) }}" 
-                         alt="{{ $slide->judul }}"
-                         loading="eager"> 
+                    <img src="{{ asset('storage/hero/' . $slide->gambar) }}"
+                        alt="{{ $slide->judul }}"
+                        loading="eager">
                     @else
                     <div class="no-image w-full h-full"></div>
                     @endif
-                    
+
                     <div class="hero-content">
                         <div class="container mx-auto px-6">
                             <div class="max-w-3xl mx-auto text-center text-white">
@@ -130,7 +134,7 @@
         <div class="text-center mb-10 md:mb-16" data-aos="fade-up">
             <h2 class="text-2xl md:text-4xl font-bold text-gray-800 mb-3">Apa Kata Pelanggan Kami</h2>
             <p class="text-gray-600 text-sm md:text-base max-w-2xl mx-auto">
-                Testimoni dari pelanggan yang puas dengan layanan PetHouse
+                Testimoni dari pelanggan yang puas dengan layanan LARAPetHouse
             </p>
         </div>
 
@@ -164,12 +168,47 @@
                     <div class="flex text-yellow-400 text-sm">
                         @for($i = 1; $i <= 5; $i++)
                             <i class="{{ $i <= ($testimoni->rating ?? 5) ? 'fas' : 'far' }} fa-star"></i>
-                        @endfor
+                            @endfor
                     </div>
-                    <span class="text-xs text-gray-400">{{ $testimoni->created_at->format('d M Y') }}</span>
+                    <span class="text-xs text-gray-400">{{ $testimoni->created_at->translatedFormat('d F Y') }}</span>
                 </div>
             </div>
             @endforeach
+        </div>
+    </div>
+</section>
+@endif
+
+@if($tentang)
+<section class="py-12 md:py-24 bg-white overflow-hidden">
+    <div class="container mx-auto px-4">
+        <div class="flex flex-col lg:flex-row items-center gap-12">
+
+            <div class="w-full lg:w-1/2 relative" data-aos="fade-right">
+                <div class="relative z-10">
+                    @if($tentang->gambar && file_exists(public_path('storage/tentang/' . $tentang->gambar)))
+                    <img src="{{ asset('storage/tentang/' . $tentang->gambar) }}"
+                        alt="{{ $tentang->judul }}"
+                        class="rounded-3xl shadow-2xl w-full object-cover h-[350px] md:h-[500px]">
+                    @else
+                    <div class="w-full h-[350px] md:h-[500px] bg-gradient-to-br from-teal-500 to-teal-700 rounded-3xl flex items-center justify-center">
+                        <i class="fas fa-paw text-white text-8xl opacity-30"></i>
+                    </div>
+                    @endif
+                </div>
+                <div class="absolute -bottom-6 -left-6 w-32 h-32 bg-teal-100 rounded-full -z-0"></div>
+                <div class="absolute -top-6 -right-6 w-24 h-24 bg-yellow-100 rounded-full -z-0"></div>
+            </div>
+
+            <div class="w-full lg:w-1/2" data-aos="fade-left">
+                <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-6 leading-tight">
+                    {{ $tentang->judul }}
+                </h2>
+                <div class="prose prose-teal max-w-none text-gray-600 text-base md:text-lg leading-relaxed mb-8">
+                    {!! nl2br(e($tentang->isi)) !!}
+                </div>
+            </div>
+
         </div>
     </div>
 </section>
@@ -186,9 +225,9 @@
             @foreach($layanans as $index => $layanan)
             <div class="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden group" data-aos="fade-up">
                 <div class="h-52 overflow-hidden">
-                    <img src="{{ asset('storage/layanan/' . $layanan->gambar) }}" 
-                         class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
-                         loading="lazy">
+                    <img src="{{ asset('storage/layanan/' . $layanan->gambar) }}"
+                        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        loading="lazy">
                 </div>
                 <div class="p-6 text-center">
                     <h3 class="text-xl font-bold text-gray-800 mb-2">{{ $layanan->nama_layanan }}</h3>
@@ -200,13 +239,14 @@
     </div>
 </section>
 
-<section class="py-12 md:py-20 bg-white">
+<!-- Galeri Section  -->
+<section class="py-12 md:py-20 bg-white">a
     <div class="container mx-auto px-4">
-        <h2 class="text-2xl md:text-4xl font-bold text-center mb-10 text-gray-800">Galeri PetHouse</h2>
+        <h2 class="text-2xl md:text-4xl font-bold text-center mb-10 text-gray-800">Galeri LARAPetHouse</h2>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
             @foreach($galeris->take(8) as $galeri)
             <div class="aspect-square rounded-xl overflow-hidden shadow-sm group relative">
-                <img src="{{ Storage::url($galeri->foto) }}" class="w-full h-full object-cover group-hover:scale-110 transition-duration-500" loading="lazy">
+                <img src="{{ asset('storage/' . $galeri->foto) }}" class="w-full h-full object-cover group-hover:scale-110 transition-duration-500" loading="lazy">
                 <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-2 text-center">
                     <p class="text-white text-xs md:text-sm font-medium">{{ $galeri->keterangan }}</p>
                 </div>
@@ -215,6 +255,7 @@
         </div>
     </div>
 </section>
+
 @endsection
 
 @push('scripts')
@@ -225,14 +266,27 @@
         const swiper = new Swiper('.mySwiper', {
             loop: true,
             speed: 1000,
-            autoplay: { delay: 5000 },
-            pagination: { el: '.swiper-pagination', clickable: true },
-            navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
+            autoplay: {
+                delay: 5000
+            },
+            pagination: {
+                el: '.swiper-pagination',
+                clickable: true
+            },
+            navigation: {
+                nextEl: '.swiper-button-next',
+                prevEl: '.swiper-button-prev'
+            },
             effect: 'fade',
-            fadeEffect: { crossFade: true },
+            fadeEffect: {
+                crossFade: true
+            },
         });
 
-        AOS.init({ duration: 800, once: true });
+        AOS.init({
+            duration: 800,
+            once: true
+        });
     });
 </script>
 @endpush

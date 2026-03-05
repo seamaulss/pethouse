@@ -5,15 +5,16 @@ namespace App\Http\Controllers\Dokter;
 use App\Http\Controllers\Controller;
 use App\Models\Notification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class NotificationController extends Controller
 {
     private function konsultasiQuery()
     {
-        return Notification::where('role_target', 'admin')
+        return Notification::where('user_id', Auth::id())
             ->where(function ($q) {
                 $q->where('title', 'like', '%Konsultasi%')
-                  ->orWhere('message', 'like', '%Konsultasi%');
+                    ->orWhere('message', 'like', '%Konsultasi%');
             });
     }
 

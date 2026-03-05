@@ -11,18 +11,40 @@
     </div>
 
     <!-- Search Bar -->
-    <div class="max-w-lg mb-8" data-aos="fade-up">
-        <form method="GET" class="relative">
-            <input type="text" name="search" value="{{ request('search') }}"
-                placeholder="Cari kode booking, nama pemilik, atau nama hewan..."
-                class="w-full pl-12 pr-6 py-4 bg-white rounded-3xl shadow-lg focus:outline-none focus:ring-4 focus:ring-teal-200 text-gray-700">
-            <i class="fas fa-search absolute left-5 top-1/2 transform -translate-y-1/2 text-teal text-xl"></i>
-            @if(request('search'))
-            <a href="{{ route('admin.booking.index') }}"
-                class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                <i class="fas fa-times text-xl"></i>
-            </a>
-            @endif
+    <div class="mb-8" data-aos="fade-up">
+        <form method="GET" action="{{ route('admin.booking.index') }}" class="flex flex-wrap md:flex-nowrap gap-4 items-center">
+
+            <div class="relative flex-grow">
+                <input type="text" name="search" value="{{ request('search') }}"
+                    placeholder="Cari kode, nama pemilik, atau hewan..."
+                    class="w-full pl-12 pr-10 py-4 bg-white rounded-2xl shadow-lg focus:outline-none focus:ring-4 focus:ring-teal-200 text-gray-700">
+                <i class="fas fa-search absolute left-5 top-1/2 transform -translate-y-1/2 text-teal text-xl"></i>
+                @if(request('search'))
+                <a href="{{ route('admin.booking.index') }}"
+                    class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </a>
+                @endif
+            </div>
+
+            <div class="flex items-center gap-2 bg-white p-2 rounded-2xl shadow-lg border border-gray-100">
+                <div class="flex items-center px-2">
+                    <i class="fas fa-calendar-alt text-teal mr-2"></i>
+                    <input type="date" name="date" value="{{ request('date') }}"
+                        class="border-none focus:ring-0 text-sm text-gray-600 p-1">
+                </div>
+            </div>
+
+            <div class="flex gap-2">
+                <button type="submit" class="bg-teal text-white px-6 py-4 rounded-2xl hover:bg-teal-700 shadow-lg transition font-semibold">
+                    Filter
+                </button>
+
+                <a href="{{ route('admin.booking.export-pdf', request()->all()) }}"
+                    class="bg-red-500 text-white px-6 py-4 rounded-2xl hover:bg-red-600 shadow-lg transition flex items-center gap-2" target="_blank">
+                    <i class="fas fa-file-pdf"></i> PDF
+                </a>
+            </div>
         </form>
     </div>
 
@@ -57,54 +79,6 @@
                 class="px-4 py-2 rounded-full text-sm {{ request('status') == 'perpanjangan' ? 'bg-purple-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
                 Perpanjangan
             </a>
-        </div>
-    </div>
-
-    <!-- Statistik -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8" data-aos="fade-up" data-aos-delay="100">
-        <div class="bg-white p-4 rounded-xl shadow">
-            <div class="flex justify-between items-center">
-                <div>
-                    <p class="text-sm text-gray-500">Total Booking</p>
-                    <p class="text-2xl font-bold">{{ $stats['total'] ?? 0 }}</p>
-                </div>
-                <div class="bg-blue-100 p-3 rounded-full">
-                    <i class="fas fa-calendar text-blue-500 text-xl"></i>
-                </div>
-            </div>
-        </div>
-        <div class="bg-white p-4 rounded-xl shadow">
-            <div class="flex justify-between items-center">
-                <div>
-                    <p class="text-sm text-gray-500">Dititipkan</p>
-                    <p class="text-2xl font-bold">{{ $stats['in_progress'] ?? 0 }}</p>
-                </div>
-                <div class="bg-teal-100 p-3 rounded-full">
-                    <i class="fas fa-paw text-teal-500 text-xl"></i>
-                </div>
-            </div>
-        </div>
-        <div class="bg-white p-4 rounded-xl shadow">
-            <div class="flex justify-between items-center">
-                <div>
-                    <p class="text-sm text-gray-500">Perpanjangan</p>
-                    <p class="text-2xl font-bold">{{ $stats['perpanjangan'] ?? 0 }}</p>
-                </div>
-                <div class="bg-purple-100 p-3 rounded-full">
-                    <i class="fas fa-clock text-purple-500 text-xl"></i>
-                </div>
-            </div>
-        </div>
-        <div class="bg-white p-4 rounded-xl shadow">
-            <div class="flex justify-between items-center">
-                <div>
-                    <p class="text-sm text-gray-500">Pembatalan</p>
-                    <p class="text-2xl font-bold">{{ $stats['pembatalan'] ?? 0 }}</p>
-                </div>
-                <div class="bg-red-100 p-3 rounded-full">
-                    <i class="fas fa-times text-red-500 text-xl"></i>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -234,14 +208,16 @@
                         </td>
                         <td class="px-6 py-5 text-gray-700">{{ $booking->layanan->nama_layanan ?? '-' }}</td>
                         <td class="px-6 py-5 text-gray-700">
-                            {{ $tanggal_masuk->locale('id')->translatedFormat('d M Y') }}
-                            <span class="text-gray-500">→</span>
-                            {{ $tanggal_keluar->locale('id')->translatedFormat('d M Y') }}
+                            {{ $tanggal_masuk->locale('id')->translatedFormat('d F Y') }}
+                            <br>
+                            <span class="text-gray-500">s/d </span>
+                            <br>
+                            {{ $tanggal_keluar->locale('id')->translatedFormat('d F Y') }}
                             <div class="text-xs text-gray-400 mt-1">{{ $durasi }} hari</div>
                             @if($booking->status == 'perpanjangan' && $booking->tanggal_perpanjangan)
                             <div class="text-xs text-purple-600 font-semibold mt-1">
                                 <i class="fas fa-clock mr-1"></i>
-                                Ajukan perpanjangan hingga: {{ \Carbon\Carbon::parse($booking->tanggal_perpanjangan)->locale('id')->translatedFormat('d M Y') }}
+                                Ajukan perpanjangan hingga: {{ \Carbon\Carbon::parse($booking->tanggal_perpanjangan)->locale('id')->translatedFormat('d F Y') }}
                             </div>
                             @endif
                         </td>
@@ -330,7 +306,7 @@
                                 </form>
 
                                 <!-- Tombol untuk reject booking -->
-                                <button type="button" onclick="showRejectForm({{ $booking->id }})"
+                                <button type="button" onclick="showRejectForm('{{ $booking->id }}')"
                                     class="inline-block px-4 py-2 text-sm text-white bg-red-600 rounded-xl hover:bg-red-700 transition shadow">
                                     <i class="fas fa-times mr-1"></i> Tolak
                                 </button>

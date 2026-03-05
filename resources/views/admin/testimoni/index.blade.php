@@ -12,7 +12,7 @@
             Manajemen Testimoni
         </h1>
         <p class="text-gray-600 mt-2">
-            Kelola testimoni pelanggan PetHouse
+            Kelola testimoni pelanggan LARAPetHouse
         </p>
     </div>
 

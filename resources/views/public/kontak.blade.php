@@ -1,7 +1,7 @@
 @extends('layouts.public')
 
-@section('title', 'Kontak - PetHouse')
-@section('meta_description', 'Hubungi PetHouse untuk informasi layanan penitipan, grooming, dan perawatan hewan.')
+@section('title', 'Kontak - LARAPetHouse')
+@section('meta_description', 'Hubungi LARAPetHouse untuk informasi layanan penitipan, grooming, dan perawatan hewan.')
 
 @push('styles')
 <style>
@@ -109,9 +109,9 @@
 
                     <li class="flex items-center">
                         <i class="fas fa-envelope text-pink-500 text-xl mr-4"></i>
-                        <a href="mailto:pethouse@gmail.com"
+                        <a href="mailto:LARAPetHouse@gmail.com"
                            class="text-teal-600 hover:underline">
-                            pethouse@gmail.com
+                            LARAPetHouse@gmail.com
                         </a>
                     </li>
 
@@ -175,7 +175,7 @@
 </section>
 
 <!-- FLOATING WHATSAPP -->
-<a href="https://wa.me/6285942173668?text=Halo%20PetHouse"
+<a href="https://wa.me/6285942173668?text=Halo%20LARAPetHouse"
    class="whatsapp-float text-4xl"
    target="_blank">
     <i class="fab fa-whatsapp"></i>

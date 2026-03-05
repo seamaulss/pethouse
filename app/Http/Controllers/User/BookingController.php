@@ -49,7 +49,7 @@ class BookingController extends Controller
     public function store(Request $request)
     {
         $user = Auth::user();
-        $today = Carbon::today()->format('Y-m-d');
+        $today = Carbon::today()->translatedFormat('Y-F-d');
 
         $validated = $request->validate([
             'nama_pemilik' => 'required|string|max:100',
@@ -157,8 +157,8 @@ class BookingController extends Controller
         $booking = Booking::where('user_id', Auth::id())->where('id', $id)->firstOrFail();
         if (!in_array($booking->status, ['diterima', 'in_progress'])) return redirect()->route('user.booking.riwayat')->with('error', 'Tidak bisa perpanjang.');
 
-        $minDate = Carbon::parse($booking->tanggal_keluar)->addDay()->format('Y-m-d');
-        $maxDate = Carbon::parse($booking->tanggal_keluar)->addDays(30)->format('Y-m-d');
+        $minDate = Carbon::parse($booking->tanggal_keluar)->addDay()->translatedFormat('Y-m-d');
+        $maxDate = Carbon::parse($booking->tanggal_keluar)->addDays(30)->translatedFormat('Y-m-d');
 
         $hargaPerHari = 0;
         $jh = JenisHewan::where('nama', $booking->jenis_hewan)->first();
@@ -175,7 +175,7 @@ class BookingController extends Controller
         $booking = Booking::where('user_id', Auth::id())->where('id', $id)->firstOrFail();
         $request->validate(['tanggal_keluar_baru' => 'required|date|after:' . $booking->tanggal_keluar]);
 
-        $kapasitas = $this->cekKapasitas($booking->layanan_id, $booking->jenis_hewan, $booking->ukuran_hewan, Carbon::parse($booking->tanggal_keluar)->addDay()->format('Y-m-d'), $request->tanggal_keluar_baru);
+        $kapasitas = $this->cekKapasitas($booking->layanan_id, $booking->jenis_hewan, $booking->ukuran_hewan, Carbon::parse($booking->tanggal_keluar)->addDay()->translatedFormat('Y-m-d'), $request->tanggal_keluar_baru);
         if (!$kapasitas['tersedia']) return back()->withErrors(['tanggal_keluar_baru' => $kapasitas['pesan']])->withInput();
 
         $booking->update([

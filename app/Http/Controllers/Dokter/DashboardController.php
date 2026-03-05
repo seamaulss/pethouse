@@ -22,23 +22,27 @@ class DashboardController extends Controller
             ->orderBy('jam_janji', 'asc')
             ->get();
 
-        // TAMBAHKAN FILTER KONSULTASI DI SINI
-        $notifications = Notification::where('role_target', 'admin')
-            ->where(function($q) {
+        $user = Auth::user(); // Ambil data dokter yang login
+
+        // Ambil list notifikasi milik dokter ini
+        $notifications = Notification::where(function ($q) use ($user) {
+            $q->where('user_id', $user->id)
+                ->orWhere('role_target', 'dokter'); // Agar notifikasi role-based juga muncul
+        })
+            ->where(function ($q) {
                 $q->where('title', 'like', '%Konsultasi%')
-                  ->orWhere('message', 'like', '%Konsultasi%');
+                    ->orWhere('message', 'like', '%Konsultasi%');
             })
-            ->orderBy('created_at', 'desc')
+            ->latest()
             ->take(5)
             ->get();
 
-        // HITUNG UNREAD KHUSUS KONSULTASI
-        $unreadCount = Notification::where('role_target', 'admin')
+        // Hitung unread yang BENAR-BENAR milik dokter ini
+        $unreadCount = Notification::where(function ($q) use ($user) {
+            $q->where('user_id', $user->id)
+                ->orWhere('role_target', 'dokter');
+        })
             ->where('is_read', false)
-            ->where(function($q) {
-                $q->where('title', 'like', '%Konsultasi%')
-                  ->orWhere('message', 'like', '%Konsultasi%');
-            })
             ->count();
 
         return view('dokter.dashboard', compact('pending', 'diterima', 'notifications', 'unreadCount'));

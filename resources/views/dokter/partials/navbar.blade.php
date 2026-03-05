@@ -1,91 +1,106 @@
-<!-- Navbar Dokter -->
-<nav class="bg-gradient-to-r from-teal-600 to-teal-700 text-white shadow-lg sticky top-0 z-50">
+<nav class="bg-teal-600/95 backdrop-blur-md text-white shadow-xl sticky top-0 z-50 border-b border-teal-500/30" 
+     x-data="{ mobileMenuOpen: false }">
+    
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-16 lg:h-20">
             
-            <!-- Logo -->
             <div class="flex items-center">
-                <a href="{{ route('dokter.dashboard') }}" class="flex items-center gap-3 group">
-                    <div class="bg-white p-2 rounded-lg transform group-hover:scale-110 transition duration-300">
-                        <span class="text-2xl">🩺</span>
+                <a href="{{ route('dokter.dashboard') }}" class="flex items-center gap-4 group">
+                    <div class="bg-white p-2 rounded-xl shadow-inner transform group-hover:rotate-6 transition duration-300">
+                        <span class="text-2xl lg:text-3xl">🩺</span>
                     </div>
-                    <div class="flex flex-col">
-                        <span class="font-bold text-lg lg:text-xl leading-tight">PetHouse</span>
-                        <span class="text-xs text-teal-100 hidden sm:block">Dokter Panel</span>
+                    <div class="flex flex-col leading-tight">
+                        <span class="font-extrabold text-xl lg:text-2xl tracking-tight italic">
+                            Pet<span class="text-teal-200">House</span>
+                        </span>
+                        <span class="text-[10px] uppercase tracking-[0.2em] text-teal-100 font-medium">Medical Panel</span>
                     </div>
                 </a>
             </div>
 
-            <!-- Desktop Navigation -->
-            <div class="hidden md:flex items-center gap-2 lg:gap-4">
+            <div class="hidden md:flex items-center gap-6">
+                
+                <div class="flex items-center gap-1 border-r border-teal-500/50 pr-6 mr-2">
+                    <a href="{{ route('dokter.dashboard') }}" 
+                       class="px-4 py-2 rounded-lg text-sm font-semibold hover:bg-white/10 transition-all duration-200 {{ request()->routeIs('dokter.dashboard') ? 'bg-white/20' : '' }}">
+                        Dashboard
+                    </a>
+                </div>
 
-                <!-- Profile Dropdown -->
                 <div class="relative" x-data="{ open: false }">
                     <button @click="open = !open" 
-                            class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-teal-500 transition duration-200">
+                            @click.outside="open = false"
+                            class="flex items-center gap-3 p-1 pr-3 rounded-full bg-teal-700/50 hover:bg-teal-500 transition-all duration-300 border border-transparent hover:border-teal-400 focus:outline-none">
                         
-                        <!-- Avatar -->
-                        <div class="w-8 h-8 lg:w-10 lg:h-10 rounded-full overflow-hidden border-2 border-white shadow-sm flex-shrink-0">
-                            @php $user = Auth::user(); @endphp
-                            @if($user->foto_url)
-                                <img src="{{ $user->foto_url }}" alt="Foto" class="w-full h-full object-cover">
-                            @else
-                                <div class="w-full h-full bg-white flex items-center justify-center">
-                                    <i class="fas fa-user-md text-teal-600"></i>
-                                </div>
-                            @endif
+                        <div class="relative">
+                            <div class="w-9 h-9 lg:w-11 lg:h-11 rounded-full overflow-hidden border-2 border-white/80 shadow-md">
+                                @php $user = Auth::user(); @endphp
+                                @if($user->foto_url)
+                                    <img src="{{ asset('storage/foto_dokter/' . $user->foto) }}" alt="Foto Profile" class="w-full h-full object-cover">
+                                @else
+                                    <div class="w-full h-full bg-gradient-to-br from-teal-100 to-teal-300 flex items-center justify-center">
+                                        <i class="fas fa-user-md text-teal-700 text-lg"></i>
+                                    </div>
+                                @endif
+                            </div>
+                            <span class="absolute bottom-0 right-0 w-3 h-3 bg-green-400 border-2 border-teal-600 rounded-full shadow-sm"></span>
                         </div>
                         
-                        <!-- Nama & Role -->
-                        <div class="hidden lg:block text-left">
-                            <p class="text-sm font-semibold">Dr. {{ $user->username }}</p>
-                            <p class="text-xs text-teal-100">Dokter</p>
+                        <div class="hidden xl:block text-left">
+                            <p class="text-[10px] font-light text-teal-100 leading-none mb-1">Selamat bekerja,</p>
+                            <p class="text-sm font-bold leading-none">Dr. {{ Str::limit($user->username, 12) }}</p>
                         </div>
                         
-                        <i class="fas fa-chevron-down text-sm ml-1" :class="{ 'rotate-180': open }"></i>
+                        <i class="fas fa-chevron-down text-[10px] opacity-70 transition-transform duration-300" :class="{ 'rotate-180': open }"></i>
                     </button>
 
-                    <!-- Dropdown Menu -->
                     <div x-show="open" 
-                         @click.away="open = false"
-                         x-transition
-                         class="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-2xl py-2 z-50 hidden lg:block">
+                         x-cloak
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 scale-95 translate-y-2"
+                         x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                         x-transition:leave="transition ease-in duration-75"
+                         x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                         x-transition:leave-end="opacity-0 scale-95 translate-y-2"
+                         class="absolute right-0 mt-3 w-64 bg-white rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] py-2 z-[60] overflow-hidden border border-gray-100">
                         
+                        <div class="px-4 py-3 bg-gray-50/50 border-b border-gray-100 mb-2">
+                            <p class="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Manajemen Akun</p>
+                        </div>
+
                         <a href="{{ route('dokter.profile.index') }}" 
-                           class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-teal-50 hover:text-teal-600 transition">
-                            <div class="w-8 h-8 bg-teal-100 rounded-full flex items-center justify-center">
-                                <i class="fas fa-user-circle text-teal-600"></i>
+                           class="group flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-teal-50 transition-colors">
+                            <div class="w-9 h-9 bg-teal-50 rounded-xl flex items-center justify-center group-hover:bg-teal-600 group-hover:text-white transition-all duration-300">
+                                <i class="fas fa-id-card text-sm"></i>
                             </div>
                             <div>
-                                <p class="font-medium">Profil Saya</p>
-                                <p class="text-xs text-gray-500">Lihat profil</p>
+                                <p class="font-semibold text-sm">Profil Lengkap</p>
+                                <p class="text-[11px] text-gray-400">Lihat biodata dokter</p>
                             </div>
                         </a>
 
                         <a href="{{ route('dokter.profile.edit') }}" 
-                           class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-teal-50 hover:text-teal-600 transition">
-                            <div class="w-8 h-8 bg-teal-100 rounded-full flex items-center justify-center">
-                                <i class="fas fa-cog text-teal-600"></i>
+                           class="group flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-teal-50 transition-colors">
+                            <div class="w-9 h-9 bg-teal-50 rounded-xl flex items-center justify-center group-hover:bg-teal-600 group-hover:text-white transition-all duration-300">
+                                <i class="fas fa-user-edit text-sm"></i>
                             </div>
                             <div>
-                                <p class="font-medium">Pengaturan</p>
-                                <p class="text-xs text-gray-500">Ubah profil & foto</p>
+                                <p class="font-semibold text-sm">Edit Informasi</p>
+                                <p class="text-[11px] text-gray-400">Ubah foto & detail</p>
                             </div>
                         </a>
 
-                        <div class="border-t border-gray-100 my-1"></div>
+                        <div class="border-t border-gray-100 my-2"></div>
 
-                        <!-- Logout -->
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
-                            <button type="submit" 
-                                    class="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 transition">
-                                <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
-                                    <i class="fas fa-sign-out-alt text-red-600"></i>
+                            <button type="submit" class="w-full group flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-50 transition-colors">
+                                <div class="w-9 h-9 bg-red-50 rounded-xl flex items-center justify-center group-hover:bg-red-500 group-hover:text-white transition-all duration-300">
+                                    <i class="fas fa-power-off text-sm"></i>
                                 </div>
                                 <div class="text-left">
-                                    <p class="font-medium">Keluar</p>
-                                    <p class="text-xs text-gray-500">Akhiri sesi</p>
+                                    <p class="font-bold text-sm">Keluar Aplikasi</p>
+                                    <p class="text-[11px] text-red-300">Selesaikan sesi</p>
                                 </div>
                             </button>
                         </form>
@@ -93,48 +108,47 @@
                 </div>
             </div>
 
-            <!-- Mobile Menu Button -->
             <div class="md:hidden flex items-center">
-                <button id="mobileMenuButton" class="p-2 rounded-lg hover:bg-teal-500 transition">
-                    <i class="fas fa-bars text-2xl"></i>
+                <button @click="mobileMenuOpen = !mobileMenuOpen" 
+                        class="w-10 h-10 flex items-center justify-center rounded-xl bg-teal-500/50 border border-teal-400/30 active:scale-90 transition-all">
+                    <i class="fas" :class="mobileMenuOpen ? 'fa-times' : 'fa-bars text-xl'"></i>
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Mobile Menu (Hidden by default) -->
-    <div id="mobileMenu" class="hidden md:hidden bg-teal-700 px-4 py-4 space-y-3">
-        <a href="{{ route('dokter.dashboard') }}" class="block px-4 py-3 rounded-lg hover:bg-teal-600 transition flex items-center gap-3">
-            <i class="fas fa-home w-6"></i> Dashboard
-        </a>
-        <a href="{{ route('dokter.profile.index') }}" class="block px-4 py-3 rounded-lg hover:bg-teal-600 transition flex items-center gap-3">
-            <i class="fas fa-user-md w-6"></i> Profil Saya
-        </a>
-        <a href="{{ route('dokter.profile.edit') }}" class="block px-4 py-3 rounded-lg hover:bg-teal-600 transition flex items-center gap-3">
-            <i class="fas fa-cog w-6"></i> Pengaturan
-        </a>
-        <div class="border-t border-teal-600 my-2"></div>
-        <form method="POST" action="{{ route('logout') }}">
-            @csrf
-            <button type="submit" class="w-full text-left px-4 py-3 rounded-lg hover:bg-red-600 transition flex items-center gap-3">
-                <i class="fas fa-sign-out-alt w-6"></i> Logout
-            </button>
-        </form>
+    <div x-show="mobileMenuOpen" 
+         x-cloak
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="max-h-0 opacity-0"
+         x-transition:enter-end="max-h-screen opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="max-h-screen opacity-100"
+         x-transition:leave-end="max-h-0 opacity-0"
+         class="md:hidden bg-teal-800 border-t border-teal-600 overflow-hidden">
+        <div class="px-4 py-6 space-y-2">
+            <a href="{{ route('dokter.dashboard') }}" class="flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-white/10 transition">
+                <i class="fas fa-th-large w-5 text-teal-300"></i> Dashboard
+            </a>
+            <a href="{{ route('dokter.profile.index') }}" class="flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-white/10 transition">
+                <i class="fas fa-user-circle w-5 text-teal-300"></i> Profil Saya
+            </a>
+            <a href="{{ route('dokter.profile.edit') }}" class="flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-white/10 transition">
+                <i class="fas fa-cog w-5 text-teal-300"></i> Pengaturan Akun
+            </a>
+            <div class="pt-4 mt-4 border-t border-teal-700">
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit" class="w-full flex items-center gap-4 px-4 py-3 rounded-xl bg-red-500/20 text-red-200">
+                        <i class="fas fa-sign-out-alt w-5"></i> Logout Sesi
+                    </button>
+                </form>
+            </div>
+        </div>
     </div>
 </nav>
 
-<!-- Script untuk mobile menu -->
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const btn = document.getElementById('mobileMenuButton');
-        const menu = document.getElementById('mobileMenu');
-        if (btn && menu) {
-            btn.addEventListener('click', function() {
-                menu.classList.toggle('hidden');
-            });
-        }
-    });
-</script>
-
-<!-- Alpine.js untuk dropdown -->
+<style>
+    [x-cloak] { display: none !important; }
+</style>
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>

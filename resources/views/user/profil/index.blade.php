@@ -1,6 +1,6 @@
 @extends('layouts.user')
 
-@section('title', 'Profil Saya - PetHouse')
+@section('title', 'Profil Saya - LARAPetHouse')
 
 @section('content')
 <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -56,7 +56,7 @@
                             <div class="relative inline-block">
                                 <div class="w-28 h-28 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-teal-200 shadow-md">
                                     <img id="profile-preview"
-                                        src="{{ $user->foto_url }}"
+                                        src="{{ $user->foto ? asset('storage/foto_user/' . $user->foto) : asset('images/default-avatar.png') }}"
                                         alt="Foto Profil"
                                         class="w-full h-full object-cover">
                                 </div>
@@ -312,7 +312,7 @@
                         </div>
                         <div>
                             <p class="font-medium text-gray-800">Email</p>
-                            <p class="text-sm text-gray-600">support@pethouse.com</p>
+                            <p class="text-sm text-gray-600">support@LARAPetHouse.com</p>
                         </div>
                     </div>
                 </div>

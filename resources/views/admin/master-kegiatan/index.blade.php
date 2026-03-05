@@ -12,7 +12,7 @@
             Master Kegiatan
         </h1>
         <p class="text-gray-600 mt-2">
-            Kelola daftar kegiatan layanan yang tersedia di PetHouse
+            Kelola daftar kegiatan layanan yang tersedia di LARAPetHouse
         </p>
     </div>
 

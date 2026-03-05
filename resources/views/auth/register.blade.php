@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ config('app.name', 'PetHouse') }}</title>
+    <title>{{ config('app.name', 'LARAPetHouse') }}</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -19,7 +19,7 @@
 
     <style>
     .bg-regist {
-        background-image: url('{{ asset('images/login.png') }}');
+        background-image: url('{{ asset('images/login-1.jpg') }}');
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
@@ -47,13 +47,13 @@
         <div class="text-center mb-8">
             <img
                 src="{{ asset('storage/logos/logos.png') }}"
-                alt="LARAPetHouse Logo"
+                alt="LARALARAPetHouse Logo"
                 class="mx-auto mb-4"
                 width="80"
                 height="80">
 
             <h1 class="text-3xl font-bold text-gray-800">
-               Registrasi {{ config('app.name', 'LARAPetHouse') }}
+               Registrasi {{ config('app.name', 'LARALARAPetHouse') }}
             </h1>
 
             <p class="text-gray-600 mt-2">
@@ -140,7 +140,7 @@
 
             <!-- Register Button -->
             <button type="submit"
-                class="w-full bg-teal-600 hover:bg-teal-500 text-teal-700 font-bold py-3 rounded-lg transition shadow-lg flex items-center justify-center gap-2">
+                class="w-full bg-teal-600 hover:bg-teal-500 text-white font-bold py-3 rounded-lg transition shadow-lg flex items-center justify-center gap-2">
                 <i class="fas fa-user-plus"></i> Daftar
             </button>
         </form>
@@ -158,7 +158,7 @@
 
         <!-- Footer -->
         <div class="mt-10 text-center text-xs text-gray-500">
-            © {{ date('Y') }} {{ config('app.name', 'PetHouse') }} - All Rights Reserved
+            © {{ date('Y') }} {{ config('app.name', 'LARAPetHouse') }} - All Rights Reserved
         </div>
 
     </div>

@@ -15,7 +15,7 @@ class UserSeeder extends Seeder
             'username' => 'admin',
             'password' => Hash::make('password'),
             'role' => 'admin',
-            'email' => 'admin@pethouse.com',
+            'email' => 'admin@LARAPetHouse.com',
         ]);
 
         // Petugas
@@ -31,7 +31,7 @@ class UserSeeder extends Seeder
             'username' => 'dokter',
             'password' => Hash::make('password'),
             'role' => 'dokter',
-            'email' => 'dokter@pethouse.com',
+            'email' => 'dokter@LARAPetHouse.com',
         ]);
 
         // Users

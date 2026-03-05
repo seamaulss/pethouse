@@ -120,7 +120,7 @@
         </div>
         <h3 class="text-2xl font-bold text-gray-800 mb-3">Belum Ada Hewan</h3>
         <p class="text-gray-600 mb-8 max-w-md mx-auto">
-            Anda belum pernah menitipkan hewan di PetHouse. Mulai pengalaman penitipan hewan pertama Anda!
+            Anda belum pernah menitipkan hewan di LARAPetHouse. Mulai pengalaman penitipan hewan pertama Anda!
         </p>
         <div class="space-y-4">
             <a href="{{ route('user.booking.create') }}" class="inline-flex items-center justify-center bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 text-white px-8 py-3 rounded-xl font-medium transition duration-200 shadow-md hover:shadow-lg">
@@ -241,11 +241,11 @@
                         <div class="flex flex-wrap items-center gap-4 text-sm text-gray-600">
                             <div class="flex items-center">
                                 <i class="fas fa-calendar-check mr-2 text-teal-500"></i>
-                                <span>Masuk: {{ $booking->tanggal_masuk->format('d M Y') }}</span>
+                                <span>Masuk: {{ $booking->tanggal_masuk->translatedFormat('d F Y') }}</span>
                             </div>
                             <div class="flex items-center">
                                 <i class="fas fa-calendar-times mr-2 text-pink-500"></i>
-                                <span>Keluar: {{ $booking->tanggal_keluar->format('d M Y') }}</span>
+                                <span>Keluar: {{ $booking->tanggal_keluar->translatedFormat('d F Y') }}</span>
                             </div>
                             <div class="flex items-center">
                                 <i class="fas fa-clock mr-2 text-amber-500"></i>
@@ -323,15 +323,8 @@
                         @endif
                     </a>
                     @endif
-
-                    <a href="{{ route('user.booking.show', $booking->id) }}"
-                        class="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl font-medium transition duration-200 flex items-center space-x-2">
-                        <i class="fas fa-info-circle"></i>
-                        <span>Detail Booking</span>
-                    </a>
-
                     @if($booking->status === 'in_progress')
-                    <a href="https://wa.me/6285942173668?text={{ urlencode('Halo PetHouse, saya ingin bertanya tentang booking ' . $booking->kode_booking . ' untuk ' . $booking->nama_hewan) }}"
+                    <a href="https://wa.me/6285942173668?text={{ urlencode('Halo LARAPetHouse, saya ingin bertanya tentang booking ' . $booking->kode_booking . ' untuk ' . $booking->nama_hewan) }}"
                         target="_blank"
                         class="px-5 py-2.5 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-xl font-medium transition duration-200 flex items-center space-x-2">
                         <i class="fab fa-whatsapp"></i>

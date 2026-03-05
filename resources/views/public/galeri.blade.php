@@ -1,6 +1,6 @@
 @extends('layouts.frontend')
 
-@section('title', 'Galeri - PetHouse')
+@section('title', 'Galeri - LARAPetHouse')
 
 @push('styles')
 <style>
@@ -143,7 +143,7 @@
 <section class="py-12 bg-teal-50">
     <div class="container mx-auto px-4 text-center">
         <h1 class="text-3xl md:text-5xl font-bold text-gray-800 mb-2" data-aos="fade-down">Galeri Kita</h1>
-        <p class="text-gray-600" data-aos="fade-up">Intip keseruan teman bulu favoritmu di PetHouse! 🐾</p>
+        <p class="text-gray-600" data-aos="fade-up">Intip keseruan teman bulu favoritmu di LARAPetHouse! 🐾</p>
     </div>
 </section>
 

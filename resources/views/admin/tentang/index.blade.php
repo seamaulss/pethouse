@@ -2,7 +2,7 @@
 
 @extends('admin.layout')
 
-@section('title', 'Tentang Kami - PetHouse Admin')
+@section('title', 'Tentang Kami - LARAPetHouse Admin')
 
 @section('content')
 

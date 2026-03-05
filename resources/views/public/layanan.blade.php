@@ -1,6 +1,6 @@
 @extends('layouts.frontend')
 
-@section('title', 'Layanan - PetHouse')
+@section('title', 'Layanan - LARAPetHouse')
 
 @section('content')
 <!-- Hero Section Layanan -->
@@ -111,7 +111,7 @@
 </section>
 
 <!-- Floating WhatsApp -->
-<a href="https://wa.me/6285942173668?text=Halo%20PetHouse,%20saya%20ingin%20informasi%20layanan"
+<a href="https://wa.me/6285942173668?text=Halo%20LARAPetHouse,%20saya%20ingin%20informasi%20layanan"
    class="whatsapp-float" target="_blank" rel="noopener" aria-label="Hubungi via WhatsApp">
     <i class="fab fa-whatsapp text-3xl"></i>
 </a>

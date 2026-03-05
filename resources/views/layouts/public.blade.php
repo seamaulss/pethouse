@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>@yield('title', 'PetHouse')</title>
+    <title>@yield('title', 'LARAPetHouse')</title>
     <meta name="description" content="@yield('meta_description')">
 
     <!-- Tailwind CDN (SAMA PERSIS PHP NATIVE) -->

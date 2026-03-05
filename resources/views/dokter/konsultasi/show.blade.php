@@ -22,7 +22,7 @@
         <div class="bg-gradient-to-r from-teal-600 to-teal-700 p-6 text-white">
             <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
                 <div>
-                    <p class="text-teal-100 text-sm font-medium uppercase tracking-wider">Antrean Klinik PetHouse</p>
+                    <p class="text-teal-100 text-sm font-medium uppercase tracking-wider">Antrean Klinik LARAPetHouse</p>
                     <h1 class="text-3xl font-bold">#{{ $konsultasi->kode_konsultasi }}</h1>
                     <div class="flex items-center gap-3 mt-2">
                         <span class="px-3 py-1 rounded-full text-xs font-bold uppercase shadow-sm
@@ -33,7 +33,7 @@
                             {{ $konsultasi->status_label }}
                         </span>
                         <span class="text-teal-50 text-sm">
-                            <i class="far fa-calendar-alt mr-1"></i> {{ $konsultasi->created_at->format('d M Y, H:i') }}
+                            <i class="far fa-calendar-alt mr-1"></i> {{ $konsultasi->created_at->translatedFormat('d F Y, H:i') }}
                         </span>
                     </div>
                 </div>
@@ -80,7 +80,7 @@
                                 </div>
                                 <div>
                                     <p class="text-xs text-teal-600">Tanggal Janji</p>
-                                    <p class="font-bold text-gray-800">{{ $konsultasi->tanggal_janji->format('d F Y') }}</p>
+                                    <p class="font-bold text-gray-800">{{ $konsultasi->tanggal_janji->translatedFormat('d F Y') }}</p>
                                 </div>
                             </div>
                             <div class="flex items-center gap-4">
@@ -89,7 +89,7 @@
                                 </div>
                                 <div>
                                     <p class="text-xs text-teal-600">Jam Kedatangan</p>
-                                    <p class="font-bold text-gray-800">{{ date('H:i', strtotime($konsultasi->jam_janji)) }} WIB</p>
+                                    <p class="font-bold text-gray-800">{{ $konsultasi->jam_janji->translatedFormat('H:i') }} WIB</p>
                                 </div>
                             </div>
                         </div>
@@ -161,8 +161,8 @@
                             {{ $konsultasi->balasan_dokter }}
                         </div>
                         <div class="mt-4 flex justify-between items-center text-xs text-gray-400 italic">
-                            <span>Ditangani oleh: {{ $konsultasi->dokter->username ?? 'Dokter PetHouse' }}</span>
-                            <span>Selesai pada: {{ $konsultasi->updated_at->format('d/m/Y H:i') }}</span>
+                            <span>Ditangani oleh: {{ $konsultasi->dokter->username ?? 'Dokter LARAPetHouse' }}</span>
+                            <span>Selesai pada: {{ $konsultasi->updated_at->translatedFormat('d/F/Y H:i') }}</span>
                         </div>
                     </div>
                 @endif

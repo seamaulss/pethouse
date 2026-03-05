@@ -1,6 +1,6 @@
 @extends('admin.layouts.app')
 
-@section('title', 'Tambah Jenis Hewan - PetHouse Admin')
+@section('title', 'Tambah Jenis Hewan - LARAPetHouse Admin')
 
 @section('content')
 <div class="container mx-auto px-4 py-6">

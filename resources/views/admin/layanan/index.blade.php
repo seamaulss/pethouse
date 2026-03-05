@@ -186,7 +186,7 @@
                     </div>
                     <h3 class="text-xl font-bold text-gray-700 mb-2">Belum ada layanan</h3>
                     <p class="text-gray-500 mb-6 max-w-md mx-auto">
-                        Mulai tambahkan layanan pertama untuk PetHouse Anda.
+                        Mulai tambahkan layanan pertama untuk LARAPetHouse Anda.
                     </p>
                     <a href="{{ route('admin.layanan.create') }}" 
                        class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-teal-600 to-teal-500 

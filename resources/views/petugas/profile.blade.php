@@ -15,7 +15,7 @@
             <!-- Foto Profil -->
             <div class="flex-shrink-0">
                 <div class="relative w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-4 border-teal-200 shadow-md">
-                    <img src="{{ $user->foto_url }}" 
+                    <img src="{{ asset('storage/foto_petugas/' . $user->foto) }}" 
                          alt="Foto {{ $user->username }}"
                          class="w-full h-full object-cover">
                 </div>

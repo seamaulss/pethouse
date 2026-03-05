@@ -28,7 +28,7 @@ class PublicController extends Controller
             $slides = collect([
                 (object) [
                     'gambar' => null,
-                    'judul' => 'Selamat Datang di PetHouse',
+                    'judul' => 'Selamat Datang di LARAPetHouse',
                     'subjudul' => 'Penitipan, Grooming & Perawatan Hewan Kesayangan Anda dengan Cinta',
                     'tombol_text' => 'Booking Sekarang',
                     'tombol_link' => '#'
@@ -36,7 +36,15 @@ class PublicController extends Controller
             ]);
         }
 
-        return view('public.index', compact('layanans', 'testimonis', 'galeris', 'tentang', 'slides'));
+        // Logika Jam Operasional
+        $now = now()->timezone('Asia/Jakarta');
+        $time = $now->format('H:i');
+        $day = $now->dayOfWeek;
+
+        // Buka Senin-Sabtu, 08:00 - 18:00 (sesuai teks footer Anda)
+        $isOpen = ($time >= '08:00' && $time <= '18:00') && ($day != 0);
+
+        return view('public.index', compact('layanans', 'testimonis', 'galeris', 'tentang', 'slides', 'isOpen'));
     }
 
     /**
@@ -73,7 +81,7 @@ class PublicController extends Controller
         $tentangItems = Tentang::orderBy('id', 'desc')->get();
         $testimonis = Testimoni::where('status', 'aktif')->orderBy('created_at', 'desc')->limit(3)->get();
         $layanans = Layanan::orderBy('id', 'desc')->limit(4)->get();
-        
+
         return view('public.tentang', compact('tentangItems', 'testimonis', 'layanans'));
     }
 }

@@ -1,6 +1,6 @@
 @extends('layouts.user')
 
-@section('title', 'Log Harian ' . $booking->nama_hewan . ' - PetHouse')
+@section('title', 'Log Harian ' . $booking->nama_hewan . ' - LARAPetHouse')
 
 @section('content')
 <div class="max-w-6xl mx-auto px-4 py-8">
@@ -49,7 +49,7 @@
                     </span>
                     <span class="flex items-center">
                         <i class="fas fa-calendar mr-2 text-amber-500"></i>
-                        {{ \Carbon\Carbon::parse($booking->tanggal_masuk)->format('d M Y') }} - {{ \Carbon\Carbon::parse($booking->tanggal_keluar)->format('d M Y') }}
+                        {{ \Carbon\Carbon::parse($booking->tanggal_masuk)->translatedFormat('d F Y') }} - {{ \Carbon\Carbon::parse($booking->tanggal_keluar)->translatedFormat('d F Y') }}
                     </span>
                 </div>
             </div>
@@ -128,21 +128,21 @@
                         <a href="{{ route('user.hewan-saya.log', ['booking' => $booking->id, 'tanggal' => $prevDate]) }}"
                            class="flex items-center text-teal-600 hover:text-teal-800 font-medium">
                             <i class="fas fa-arrow-left mr-2"></i>
-                            {{ \Carbon\Carbon::parse($prevDate)->format('d M') }}
+                            {{ \Carbon\Carbon::parse($prevDate)->translatedFormat('d F Y') }}
                         </a>
                     @else
                         <div></div>
                     @endif
                     
                     <span class="text-gray-700 font-medium">
-                        {{ \Carbon\Carbon::parse($selectedDate)->format('d F Y') }}
+                        {{ \Carbon\Carbon::parse($selectedDate)->translatedFormat('d F Y') }}
                     </span>
                     
                     @if($currentIndex < count($dates) - 1)
                         @php $nextDate = $dates[$currentIndex + 1]; @endphp
                         <a href="{{ route('user.hewan-saya.log', ['booking' => $booking->id, 'tanggal' => $nextDate]) }}"
                            class="flex items-center text-teal-600 hover:text-teal-800 font-medium">
-                            {{ \Carbon\Carbon::parse($nextDate)->format('d M') }}
+                            {{ \Carbon\Carbon::parse($nextDate)->translatedFormat('d F Y') }}
                             <i class="fas fa-arrow-right ml-2"></i>
                         </a>
                     @else
@@ -176,7 +176,7 @@
                 <h3 class="text-lg font-medium text-gray-700 mb-2">Belum Ada Kegiatan</h3>
                 <p class="text-gray-500 mb-6">
                     @if($booking->status === 'in_progress')
-                        Belum ada kegiatan yang dicatat untuk tanggal {{ \Carbon\Carbon::parse($selectedDate)->format('d F Y') }}.
+                        Belum ada kegiatan yang dicatat untuk tanggal {{ \Carbon\Carbon::parse($selectedDate)->translatedFormat('d F Y') }}.
                         Kegiatan biasanya diupdate 2-3 kali sehari.
                     @else
                         Tidak ada kegiatan yang tercatat untuk tanggal ini.
@@ -219,7 +219,7 @@
                                                                 {{ $log->kegiatan->nama_kegiatan }}
                                                             </h3>
                                                             <span class="text-sm font-medium text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
-                                                                {{ \Carbon\Carbon::parse($log->waktu)->format('H:i') }}
+                                                                {{ \Carbon\Carbon::parse($log->waktu)->translatedFormat('H:i') }}
                                                             </span>
                                                         </div>
                                                         
@@ -353,7 +353,7 @@
         
         <!-- WhatsApp Button -->
         <div class="mt-6 pt-6 border-t border-teal-200">
-            <a href="https://wa.me/6285942173668?text={{ urlencode('Halo PetHouse, saya ingin bertanya tentang log harian ' . $booking->nama_hewan . ' (' . $booking->kode_booking . ') untuk tanggal ' . $selectedDate) }}" 
+            <a href="https://wa.me/6285942173668?text={{ urlencode('Halo LARAPetHouse, saya ingin bertanya tentang log harian ' . $booking->nama_hewan . ' (' . $booking->kode_booking . ') untuk tanggal ' . $selectedDate) }}" 
                target="_blank"
                class="inline-flex items-center justify-center bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-6 py-3 rounded-lg font-medium transition shadow-md hover:shadow-lg">
                 <i class="fab fa-whatsapp mr-3 text-xl"></i>

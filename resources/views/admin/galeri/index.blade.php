@@ -13,7 +13,7 @@
                 Galeri
             </h1>
             <p class="text-gray-600 mt-2">
-                Kelola foto-foto galeri PetHouse
+                Kelola foto-foto galeri LARAPetHouse
             </p>
         </div>
 

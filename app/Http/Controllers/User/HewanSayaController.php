@@ -51,7 +51,7 @@ class HewanSayaController extends Controller
         $selected = Carbon::parse($selectedDate);
         
         if ($selected->lt($masuk) || $selected->gt($keluar)) {
-            $selectedDate = now()->format('Y-m-d');
+            $selectedDate = now()->translatedFormat('Y-F-d');
         }
         
         // Ambil semua log untuk tanggal yang dipilih
@@ -73,14 +73,14 @@ class HewanSayaController extends Controller
         $dateOptions = [];
         foreach ($datesWithLogs as $date) {
             $dateObj = Carbon::parse($date);
-            $dateOptions[$date] = $dateObj->format('d M Y') . 
-                ($date == now()->format('Y-m-d') ? ' (Hari Ini)' : '') .
+            $dateOptions[$date] = $dateObj->translatedFormat('d F Y') . 
+                ($date == now()->translatedFormat('Y-m-d') ? ' (Hari Ini)' : '') .
                 ' (' . DailyLog::where('booking_id', $id)->where('tanggal', $date)->count() . ' kegiatan)';
         }
         
         // Jika belum ada log sama sekali
         if (empty($dateOptions) && $booking->status == 'in_progress') {
-            $dateOptions[now()->format('Y-m-d')] = now()->format('d M Y') . ' (Hari Ini) - Belum ada log';
+            $dateOptions[now()->translatedFormat('Y-m-d')] = now()->translatedFormat('d F Y') . ' (Hari Ini) - Belum ada log';
         }
         
         return view('user.hewan-saya.log', compact(

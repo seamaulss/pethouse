@@ -27,7 +27,7 @@
                 <!-- Foto Profil -->
                 <div class="flex-shrink-0 text-center">
                     <div class="relative w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-4 border-teal-200 shadow-md">
-                        <img src="{{ $user->foto_url }}" alt="Foto Dokter" class="w-full h-full object-cover">
+                        <img src="{{ asset('storage/foto_dokter/' . $user->foto) }}" alt="Foto Dokter" class="w-full h-full object-cover">
                     </div>
                     <a href="{{ route('dokter.profile.edit') }}"
                         class="mt-4 inline-flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white px-5 py-2 rounded-lg transition shadow-md">
@@ -54,29 +54,11 @@
                             <p class="text-sm text-gray-500">Role</p>
                             <p class="font-medium capitalize text-gray-800">{{ $user->role }}</p>
                         </div>
-                        <div>
-                            <p class="text-sm text-gray-500">Bergabung Sejak</p>
-                            <p class="font-medium text-gray-800">
-                                {{ $user->created_at ? $user->created_at->format('d M Y') : '-' }}
-                            </p>
-                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- Statistik Singkat (Opsional) -->
-    <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="bg-gradient-to-r from-blue-50 to-blue-100 p-5 rounded-xl border border-blue-200">
-            <div class="flex items-center">
-                <div class="p-3 bg-white rounded-lg shadow-sm mr-4">
-                    <i class="fas fa-notes-medical text-blue-600 text-xl"></i>
-                </div>
-                
-            </div>
-        </div>
-        <!-- bisa tambah statistik lain -->
     </div>
 </div>
 @endsection

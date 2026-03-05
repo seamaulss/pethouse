@@ -40,7 +40,7 @@
                     <div class="relative inline-block">
                         <div id="preview-container" class="w-32 h-32 mx-auto rounded-full overflow-hidden border-4 border-teal-200">
                             <img id="preview" 
-                                 src="{{ $user->foto_url }}" 
+                                 src="{{ asset('storage/foto_petugas/' . $user->foto) }}" 
                                  alt="Foto Profil"
                                  class="w-full h-full object-cover">
                         </div>

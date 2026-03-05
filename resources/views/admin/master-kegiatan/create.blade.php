@@ -12,7 +12,7 @@
             Tambah Kegiatan
         </h1>
         <p class="text-gray-600 mt-2">
-            Tambahkan jenis kegiatan layanan baru di PetHouse
+            Tambahkan jenis kegiatan layanan baru di LARAPetHouse
         </p>
     </div>
 

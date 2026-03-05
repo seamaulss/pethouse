@@ -1,85 +1,87 @@
-<footer class="bg-gradient-to-br from-teal-600 to-teal-700 text-white mt-16 sm:mt-20">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-10 lg:gap-16 text-center md:text-left">
+<footer class="bg-gradient-to-br from-teal-700 to-teal-900 text-white mt-20 relative overflow-hidden">
+    <div class="absolute top-0 right-0 opacity-5 transform translate-x-10 -translate-y-10">
+        <i class="fas fa-paw text-[200px]"></i>
+    </div>
 
-            <!-- Kontak & Lokasi -->
-            <div data-aos="fade-up" data-aos-delay="100">
-                <h3 class="text-xl sm:text-2xl font-bold mb-6 flex items-center justify-center md:justify-start">
-                    <i class="fas fa-map-marker-alt mr-3 text-pink-300"></i>
-                    Kontak & Lokasi
-                </h3>
-                <ul class="space-y-4 text-sm sm:text-base">
-                    <li class="flex items-center justify-center md:justify-start">
-                        <i class="fas fa-location-dot text-pink-300 mr-3 text-lg"></i>
-                        <span>Jl. Tampomas,<br>Kota Banjarnegara</span>
-                    </li>
-                    <li class="flex items-center justify-center md:justify-start">
-                        <i class="fab fa-whatsapp text-green-300 mr-3 text-xl"></i>
-                        <a href="https://wa.me/6289506700308" target="_blank" class="hover:underline">
-                            0895-0670-0308
-                        </a>
-                    </li>
-                    <li class="flex items-center justify-center md:justify-start">
-                        <i class="fas fa-envelope text-amber-300 mr-3 text-lg"></i>
-                        <a href="mailto:pethouse@gmail.com" class="hover:underline">
-                            pethouse@gmail.com
-                        </a>
-                    </li>
-                </ul>
-            </div>
-
-            <!-- Media Sosial -->
-            <div data-aos="fade-up" data-aos-delay="200">
-                <h3 class="text-xl sm:text-2xl font-bold mb-6 flex items-center justify-center md:justify-start">
-                    <i class="fas fa-heart text-pink-300 mr-3"></i>
-                    Ikuti Kami
-                </h3>
-                <div class="flex justify-center md:justify-start space-x-6 text-3xl">
-                    <a href="https://www.instagram.com/arkanmaulidhana/" class="hover:text-pink-300 transition transform hover:scale-110" target="_blank">
-                        <i class="fab fa-instagram"></i>
+    <div class="max-w-7xl mx-auto px-6 py-16 relative z-10">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+            
+            <div data-aos="fade-up">
+                <a href="{{ route('home') }}" class="flex items-center text-3xl font-bold mb-6">
+                    <span class="mr-2">🐾</span> Pet<span class="text-teal-300">House</span>
+                </a>
+                <p class="text-teal-100 leading-relaxed mb-6 opacity-80">
+                    Solusi terpercaya untuk penitipan, perawatan, dan kesehatan hewan kesayangan Anda di Banjarnegara. Kami merawat mereka seperti keluarga sendiri.
+                </p>
+                <div class="flex space-x-4">
+                    <a href="https://instagram.com/arkanmaulidhana/" class="w-10 h-10 bg-teal-600 rounded-full flex items-center justify-center hover:bg-pink-500 transition-all duration-300 shadow-lg">
+                        <i class="fab fa-instagram text-lg"></i>
                     </a>
-                    <a href="#" class="hover:text-pink-300 transition transform hover:scale-110">
-                        <i class="fab fa-facebook"></i>
+                    <a href="#" class="w-10 h-10 bg-teal-600 rounded-full flex items-center justify-center hover:bg-blue-600 transition-all duration-300 shadow-lg">
+                        <i class="fab fa-facebook-f text-lg"></i>
                     </a>
-                    <a href="https://wa.me/6285942173668" target="_blank" class="hover:text-green-300 transition transform hover:scale-110">
-                        <i class="fab fa-whatsapp"></i>
-                    </a>
-                    <a href="#" class="hover:text-pink-300 transition transform hover:scale-110" target="_blank">
-                        <i class="fab fa-tiktok"></i>
+                    <a href="#" class="w-10 h-10 bg-teal-600 rounded-full flex items-center justify-center hover:bg-black transition-all duration-300 shadow-lg">
+                        <i class="fab fa-tiktok text-lg"></i>
                     </a>
                 </div>
-                <p class="mt-6 text-sm sm:text-base text-gray-200">
-                    Dapatkan update foto hewan lucu & promo menarik!
-                </p>
             </div>
 
-            <!-- Jam Operasional -->
-            <div data-aos="fade-up" data-aos-delay="300">
-                <h3 class="text-xl sm:text-2xl font-bold mb-6 flex items-center justify-center md:justify-start">
-                    <i class="fas fa-clock text-amber-300 mr-3"></i>
-                    Jam Operasional
-                </h3>
-                <ul class="space-y-3 text-sm sm:text-base">
-                    <li class="flex items-center justify-center md:justify-start">
-                        <span class="font-medium">Senin - Sabtu:</span>
-                        <span class="ml-3">08.00 - 18.00 WIB</span>
-                    </li>
+            <div data-aos="fade-up" data-aos-delay="100">
+                <h3 class="text-xl font-bold mb-6 pb-2 border-b-2 border-teal-500 w-16">Navigasi</h3>
+                <ul class="space-y-4">
+                    <li><a href="{{ route('home') }}" class="text-teal-100 hover:text-white hover:translate-x-2 transition-all inline-block">Home</a></li>
+                    <li><a href="{{ route('layanan') }}" class="text-teal-100 hover:text-white hover:translate-x-2 transition-all inline-block">Layanan Kami</a></li>
+                    <li><a href="{{ route('galeri') }}" class="text-teal-100 hover:text-white hover:translate-x-2 transition-all inline-block">Galeri Foto</a></li>
+                    <li><a href="{{ route('kontak') }}" class="text-teal-100 hover:text-white hover:translate-x-2 transition-all inline-block">Hubungi Kami</a></li>
+                </ul>
+            </div>
 
-                    <li class="text-pink-300 mt-4 flex items-center justify-center md:justify-start">
-                        <i class="fas fa-phone-alt mr-3"></i>
-                        Layanan darurat 24 jam via WhatsApp
+            <div data-aos="fade-up" data-aos-delay="200">
+                <h3 class="text-xl font-bold mb-6 pb-2 border-b-2 border-teal-500 w-16">Kontak</h3>
+                <ul class="space-y-5">
+                    <li class="flex items-start gap-4">
+                        <div class="bg-teal-600 p-3 rounded-xl"><i class="fas fa-map-marker-alt"></i></div>
+                        <a href="https://maps.google.com" target="_blank" class="text-teal-100 hover:text-white transition">
+                            Jl. Tampomas, Kec. Bawang,<br>Banjarnegara, Jawa Tengah
+                        </a>
+                    </li>
+                    <li class="flex items-center gap-4">
+                        <div class="bg-teal-600 p-3 rounded-xl"><i class="fas fa-phone-alt"></i></div>
+                        <a href="https://wa.me/6285942173668" class="text-teal-100 hover:text-white transition">0859-4217-3668</a>
+                    </li>
+                    <li class="flex items-center gap-4">
+                        <div class="bg-teal-600 p-3 rounded-xl"><i class="fas fa-envelope"></i></div>
+                        <a href="mailto:hello@laraLARAPetHouse.com" class="text-teal-100 hover:text-white transition">hello@laraLARAPetHouse.com</a>
                     </li>
                 </ul>
             </div>
 
+            <div data-aos="fade-up" data-aos-delay="300">
+                <h3 class="text-xl font-bold mb-6 pb-2 border-b-2 border-teal-500 w-16">Jadwal</h3>
+                <div class="bg-teal-800/50 p-6 rounded-2xl border border-teal-600">
+                    <ul class="space-y-3">
+                        <li class="flex justify-between text-sm">
+                            <span class="text-teal-300">Senin - Sabtu</span>
+                            <span class="font-bold">08:00 - 18:00</span>
+                        </li>
+                        <li class="flex justify-between text-sm">
+                            <span class="text-teal-300">Minggu</span>
+                            <span class="text-pink-400 font-bold uppercase italic">Tutup</span>
+                        </li>
+                    </ul>
+                    <hr class="my-4 border-teal-600">
+                    <p class="text-xs text-teal-200 italic leading-relaxed">
+                        *Layanan gawat darurat tersedia melalui WhatsApp di luar jam kantor.
+                    </p>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Copyright -->
-    <div class="bg-teal-800/70 text-center py-5 text-sm sm:text-base border-t border-teal-500/30">
-        <p class="flex items-center justify-center">
-            © {{ date('Y') }} <span class="font-bold mx-2">PetHouse</span> 
-        </p>
+    <div class="border-t border-teal-800 bg-teal-950/50 py-8 text-center text-teal-400 text-sm px-6">
+        <div class="flex flex-col md:flex-row justify-between items-center text-center max-w-7xl mx-auto gap-4">
+            <p>© {{ date('Y') }} LARAPetHouse</p>
+        </div>
     </div>
 </footer>
 

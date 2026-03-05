@@ -1,6 +1,6 @@
 @extends('layouts.user')
 
-@section('title', 'Konsultasi Dokter - PetHouse')
+@section('title', 'Konsultasi Dokter - LARAPetHouse')
 
 @push('styles')
 <style>
@@ -70,7 +70,7 @@
                         <i class="fas fa-user mr-2 text-teal-600"></i> Nama Pemilik <span class="text-red-500">*</span>
                     </label>
                     <input type="text" name="nama_pemilik" required 
-                           value="{{ old('nama_pemilik', auth()->user()->name) }}"
+                           value="{{ old('nama_pemilik', auth()->user()->username) }}"
                            class="w-full px-5 py-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-teal-200 focus:border-teal-500 text-base"
                            placeholder="Nama lengkap Anda">
                 </div>
@@ -80,7 +80,7 @@
                         <i class="fab fa-whatsapp mr-2 text-green-500"></i> Nomor WhatsApp <span class="text-red-500">*</span>
                     </label>
                     <input type="text" name="no_wa" required 
-                           value="{{ old('no_wa', auth()->user()->no_wa) }}"
+                           value="{{ old('nomor_wa', auth()->user()->nomor_wa) }}"
                            class="w-full px-5 py-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-teal-200 focus:border-teal-500 text-base"
                            placeholder="081234567890">
                 </div>
@@ -93,7 +93,7 @@
                         <i class="fas fa-paw mr-2 text-pink-500"></i> Jenis Hewan <span class="text-red-500">*</span>
                     </label>
                     <select name="jenis_hewan" required class="w-full px-5 py-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-teal-200 focus:border-teal-500 text-base">
-                        <option value="">-- Pilih Jenis Hewan --</option>
+                        <option value="">Pilih Jenis Hewan</option>
                         @foreach($jenisHewan as $jh)
                             <option value="{{ $jh->nama }}" {{ old('jenis_hewan') == $jh->nama ? 'selected' : '' }}>
                                 {{ $jh->nama }}
@@ -109,7 +109,7 @@
                     <input type="text" name="topik" required 
                            value="{{ old('topik') }}"
                            class="w-full px-5 py-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-teal-200 focus:border-teal-500 text-base"
-                           placeholder="Misal: Vaksin, demam, perilaku aneh">
+                           placeholder="Contoh: demam">
                 </div>
             </div>
 
@@ -165,7 +165,7 @@
 
 @push('scripts')
 <script>
-    const slotJam = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'];
+    const slotJam = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00'];
     const tanggalInput = document.getElementById('tanggal');
     const jamSelect = document.getElementById('jam');
 
@@ -178,7 +178,7 @@
             const res = await fetch("{{ route('user.konsultasi.get-jam') }}?tanggal=" + tanggalInput.value);
             const jamTerpakai = await res.json();
 
-            jamSelect.innerHTML = '<option value="">-- Pilih Jam (08.00 - 18.00) --</option>';
+            jamSelect.innerHTML = '<option value="">Pilih Jam</option>';
 
             // Menggunakan Waktu Lokal Indonesia/Server
             const now = new Date();

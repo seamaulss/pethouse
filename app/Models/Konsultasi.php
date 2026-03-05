@@ -28,8 +28,8 @@ class Konsultasi extends Model
     ];
 
     protected $casts = [
-        'tanggal_janji' => 'date',
-        // Kita simpan jam_janji sebagai string agar tidak bentrok dengan casting datetime saat validasi
+        'tanggal_janji' => 'datetime',
+        'jam_janji' => 'datetime',
     ];
 
     public function user(): BelongsTo
@@ -84,7 +84,7 @@ class Konsultasi extends Model
     {
         $statusText = strtoupper($this->statusLabel);
         $pesan = "Halo {$this->nama_pemilik} 👋\n\n";
-        $pesan .= "Reservasi Anda di *PetHouse* telah diperbarui menjadi: *{$statusText}*\n\n";
+        $pesan .= "Reservasi Anda di *LARAPetHouse* telah diperbarui menjadi: *{$statusText}*\n\n";
         $pesan .= "📋 Detail Kunjungan:\n";
         $pesan .= "• Kode: {$this->kode_konsultasi}\n";
         $pesan .= "• Hewan: {$this->jenis_hewan}\n";
@@ -94,7 +94,7 @@ class Konsultasi extends Model
         if ($this->status === 'diterima') {
             $pesan .= "Silakan datang tepat waktu ya. Sampai jumpa! 🐾";
         } elseif ($this->status === 'selesai') {
-            $pesan .= "Hasil pemeriksaan sudah bisa dilihat di website PetHouse. Terima kasih ❤️";
+            $pesan .= "Hasil pemeriksaan sudah bisa dilihat di website LARAPetHouse. Terima kasih ❤️";
         }
 
         return urlencode($pesan);

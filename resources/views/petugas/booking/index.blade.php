@@ -48,15 +48,12 @@
                         </td>
                         <td class="px-6 py-4">
                             <div class="text-xs text-gray-600">
-                                <i class="far fa-calendar-alt mr-1"></i> {{ \Carbon\Carbon::parse($booking->tanggal_masuk)->format('d M') }} 
-                                - {{ \Carbon\Carbon::parse($booking->tanggal_keluar)->format('d M Y') }}
+                                <i class="far fa-calendar-alt mr-1"></i> {{ \Carbon\Carbon::parse($booking->tanggal_masuk)->translatedFormat('d F') }} 
+                                - {{ \Carbon\Carbon::parse($booking->tanggal_keluar)->translatedFormat('d F Y') }}
                             </div>
                             @php
                                 $sisaHari = \Carbon\Carbon::now()->diffInDays(\Carbon\Carbon::parse($booking->tanggal_keluar), false);
                             @endphp
-                            <div class="text-xs mt-1 {{ $sisaHari <= 1 ? 'text-red-500 font-bold' : 'text-gray-400' }}">
-                                {{ $sisaHari < 0 ? 'Melewati batas' : 'Sisa ' . $sisaHari . ' hari' }}
-                            </div>
                         </td>
                         <td class="px-6 py-4">
                             <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase

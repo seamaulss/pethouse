@@ -21,7 +21,7 @@ class KapasitasController extends Controller
             $terisi = Booking::where('layanan_id', $item->layanan_id)
                 ->where('jenis_hewan', $item->jenis_hewan)
                 ->where('ukuran_hewan', $item->ukuran_hewan)
-                ->whereIn('status', ['pending', 'diterima', 'in_progress', 'perpanjangan'])
+                ->whereIn('status', ['in_progress', 'perpanjangan'])
                 ->where(function ($q) use ($now) {
                     $q->whereDate('tanggal_masuk', '<=', $now)
                       ->whereDate('tanggal_keluar', '>=', $now);

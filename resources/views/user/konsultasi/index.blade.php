@@ -4,186 +4,145 @@
 
 @push('styles')
 <style>
-    .status-badge {
-        padding: 0.25rem 0.75rem;
-        border-radius: 9999px;
-        font-size: 0.75rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.025em;
+    /* Tab Active State */
+    .tab-active {
+        border-bottom: 3px solid #0d9488;
+        color: #0d9488;
     }
-
-    .card-hover {
-        transition: all 0.3s ease;
+    .card-active {
+        border-left: 6px solid #fbbf24; /* Amber untuk yang sedang berjalan */
     }
-
-    .card-hover:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    .card-history {
+        border-left: 6px solid #10b981; /* Emerald untuk yang selesai */
     }
-
-    .empty-state {
-        background: linear-gradient(135deg, #faf9f6 0%, #f5f3eb 100%);
-    }
+    [x-cloak] { display: none !important; }
 </style>
 @endpush
 
 @section('content')
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <!-- Header dengan statistik -->
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" x-data="{ activeTab: 'ongoing' }">
+    
     <div class="mb-8" data-aos="fade-up">
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
-                <h1 class="text-3xl font-bold text-gray-800">Konsultasi Saya</h1>
-                <p class="text-gray-600 mt-2">Riwayat konsultasi hewan peliharaan Anda dengan dokter kami</p>
+                <h1 class="text-4xl font-extrabold text-gray-900 tracking-tight">Konsultasi <span class="text-teal-600">Saya</span></h1>
+                <p class="text-gray-500 mt-2 text-lg">Kelola jadwal pertemuan dan lihat rekam medis anabul Anda.</p>
             </div>
-            <div class="flex items-center space-x-4">
-                <div class="hidden md:flex items-center space-x-2 text-gray-600">
-                    <i class="fas fa-calendar-day text-teal-600"></i>
-                    <span>{{ now()->translatedFormat('d F Y') }}</span>
-                </div>
-                <a href="{{ route('user.konsultasi.create') }}" class="bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 text-white px-5 py-3 rounded-xl font-medium transition duration-200 shadow-md hover:shadow-lg flex items-center space-x-2">
-                    <i class="fas fa-plus-circle"></i>
-                    <span>Konsultasi Baru</span>
-                </a>
-            </div>
-        </div>
-    </div>
-
-    @if($consultations->count() == 0)
-    <!-- Empty State -->
-    <div class="empty-state rounded-3xl shadow-lg p-8 md:p-12 text-center max-w-2xl mx-auto mt-8 border border-amber-100" data-aos="zoom-in">
-        <div class="inline-flex items-center justify-center w-24 h-24 rounded-full bg-gradient-to-r from-amber-100 to-pink-100 mb-6">
-            <i class="fas fa-comments text-4xl text-amber-600"></i>
-        </div>
-        <h3 class="text-2xl font-bold text-gray-800 mb-3">Belum Ada Konsultasi</h3>
-        <p class="text-gray-600 mb-8 max-w-md mx-auto">
-            Anda belum pernah melakukan konsultasi dengan dokter kami. Ajukan konsultasi pertama Anda sekarang!
-        </p>
-        <div class="space-y-4">
-            <a href="{{ route('user.konsultasi.create') }}" class="inline-flex items-center justify-center bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 text-white px-8 py-3 rounded-xl font-medium transition duration-200 shadow-md hover:shadow-lg">
-                <i class="fas fa-plus-circle mr-3"></i>
-                Ajukan Konsultasi Pertama
+            <a href="{{ route('user.konsultasi.create') }}" class="inline-flex items-center justify-center bg-teal-600 hover:bg-teal-700 text-white px-6 py-3.5 rounded-2xl font-bold transition-all shadow-lg shadow-teal-200 group">
+                <i class="fas fa-plus-circle mr-2 group-hover:rotate-90 transition-transform"></i>
+                Buat Janji Temu Baru
             </a>
-            <p class="text-sm text-gray-500 mt-4">
-                <i class="fas fa-info-circle mr-1"></i>
-                Konsultasi akan ditanggapi dalam 1x24 jam oleh dokter kami
-            </p>
-        </div>
-    </div>
-    @else
-    <!-- Statistik Ringkas -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8" data-aos="fade-up">
-        <div class="bg-white rounded-2xl shadow-lg p-5 border border-gray-100">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-500 text-sm font-medium">Total Konsultasi</p>
-                    <p class="text-3xl font-bold text-gray-800">{{ $total }}</p>
-                </div>
-                <div class="w-12 h-12 rounded-full bg-teal-100 flex items-center justify-center">
-                    <i class="fas fa-stethoscope text-teal-600 text-xl"></i>
-                </div>
-            </div>
-        </div>
-
-        <div class="bg-white rounded-2xl shadow-lg p-5 border border-gray-100">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-500 text-sm font-medium">Dalam Proses</p>
-                    <p class="text-3xl font-bold text-gray-800">{{ $pending + $diterima }}</p>
-                </div>
-                <div class="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center">
-                    <i class="fas fa-clock text-amber-600 text-xl"></i>
-                </div>
-            </div>
-        </div>
-
-        <div class="bg-white rounded-2xl shadow-lg p-5 border border-gray-100">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-gray-500 text-sm font-medium">Selesai</p>
-                    <p class="text-3xl font-bold text-gray-800">{{ $selesai }}</p>
-                </div>
-                <div class="w-12 h-12 rounded-full bg-pink-100 flex items-center justify-center">
-                    <i class="fas fa-check-circle text-pink-600 text-xl"></i>
-                </div>
-            </div>
         </div>
     </div>
 
-    <!-- Daftar Konsultasi -->
-    <div class="space-y-6">
-        @foreach($consultations as $konsultasi)
-        <div class="card-hover bg-white rounded-3xl shadow-lg overflow-hidden border border-gray-200 mb-6" data-aos="fade-up">
-            <div class="p-6 md:p-8">
-                <div class="flex justify-between items-start mb-4">
-                    <div>
-                        <span class="px-3 py-1 rounded-full text-xs font-bold {{ $konsultasi->status_class }}">
-                            {{ $konsultasi->status_label }}
-                        </span>
-                        <h3 class="text-xl font-bold text-gray-800 mt-2">{{ $konsultasi->topik }}</h3>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-xs text-gray-500">ID Reservasi</p>
-                        <p class="font-mono font-bold text-teal-600">{{ $konsultasi->kode_konsultasi }}</p>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 py-4 border-y border-gray-50">
-                    <div>
-                        <p class="text-xs text-gray-500 uppercase">Hewan</p>
-                        <p class="font-semibold">{{ $konsultasi->jenis_hewan }}</p>
-                    </div>
-                    <div>
-                        <p class="text-xs text-gray-500 uppercase">Jadwal</p>
-                        <p class="font-semibold">{{ $konsultasi->tanggal_janji->translatedFormat('d F Y') }}</p>
-                    </div>
-                    <div>
-                        <p class="text-xs text-gray-500 uppercase">Waktu</p>
-                        <p class="font-semibold">{{ date('H:i', strtotime($konsultasi->jam_janji)) }} WIB</p>
-                    </div>
-                    <div>
-                        <p class="text-xs text-gray-500 uppercase">Pemilik</p>
-                        <p class="font-semibold text-truncate">{{ $konsultasi->nama_pemilik }}</p>
-                    </div>
-                </div>
-
-                @if($konsultasi->status === 'selesai')
-                <div class="mt-6 p-5 rounded-2xl bg-emerald-50 border border-emerald-100">
-                    <div class="flex items-center mb-3 text-emerald-700">
-                        <i class="fas fa-file-medical-alt mr-2 text-xl"></i>
-                        <h4 class="font-bold">Hasil Rekam Medis</h4>
-                    </div>
-                    <div class="bg-white p-4 rounded-xl shadow-sm text-gray-700 italic">
-                        {{ $konsultasi->balasan_dokter ?? 'Dokter tidak memberikan catatan tambahan.' }}
-                    </div>
-                </div>
-                @elseif($konsultasi->status === 'diterima')
-                <div class="mt-6 p-4 rounded-2xl bg-blue-50 border border-blue-100 flex items-center text-blue-700">
-                    <i class="fas fa-info-circle mr-3 text-lg"></i>
-                    <p class="text-sm font-medium">Jadwal Anda sudah dikonfirmasi. Silakan datang ke klinik sesuai waktu di atas.</p>
-                </div>
-                @endif
-            </div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10" data-aos="fade-up">
+        <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+            <p class="text-sm text-gray-500 font-medium">Total</p>
+            <p class="text-2xl font-black text-gray-800">{{ $total }}</p>
         </div>
-        @endforeach
+        <div class="bg-amber-50 p-6 rounded-3xl shadow-sm border border-amber-100">
+            <p class="text-sm text-amber-600 font-medium">Menunggu</p>
+            <p class="text-2xl font-black text-amber-700">{{ $pending }}</p>
+        </div>
+        <div class="bg-blue-50 p-6 rounded-3xl shadow-sm border border-blue-100">
+            <p class="text-sm text-blue-600 font-medium">Dikonfirmasi</p>
+            <p class="text-2xl font-black text-blue-700">{{ $diterima }}</p>
+        </div>
+        <div class="bg-emerald-50 p-6 rounded-3xl shadow-sm border border-emerald-100">
+            <p class="text-sm text-emerald-600 font-medium">Selesai</p>
+            <p class="text-2xl font-black text-emerald-700">{{ $selesai }}</p>
+        </div>
     </div>
-    @endif
 
-    <!-- Footer Navigasi -->
-    <div class="mt-12 pt-8 border-t border-gray-200" data-aos="fade-up">
-        <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div>
-                <a href="{{ route('user.dashboard') }}" class="text-teal-600 hover:text-teal-800 font-medium flex items-center space-x-2">
-                    <i class="fas fa-arrow-left"></i>
-                    <span>Kembali ke Dashboard</span>
-                </a>
-            </div>
-            <div class="text-gray-600 text-sm">
-                <i class="fas fa-info-circle mr-2"></i>
-                Butuh bantuan? Hubungi kami di
-                <a href="mailto:support@LARAPetHouse.com" class="text-teal-600 hover:underline">support@LARAPetHouse.com</a>
-            </div>
+    <div class="flex border-b border-gray-200 mb-8 overflow-x-auto">
+        <button @click="activeTab = 'ongoing'" 
+                :class="activeTab === 'ongoing' ? 'border-teal-600 text-teal-600' : 'border-transparent text-gray-400 hover:text-gray-600'"
+                class="pb-4 px-6 font-bold text-lg border-b-2 transition-all whitespace-nowrap">
+            <i class="fas fa-calendar-alt mr-2"></i>Konsultasi Aktif 
+            <span class="ml-2 bg-gray-100 px-2 py-0.5 rounded-lg text-xs">{{ $pending + $diterima }}</span>
+        </button>
+        <button @click="activeTab = 'history'" 
+                :class="activeTab === 'history' ? 'border-teal-600 text-teal-600' : 'border-transparent text-gray-400 hover:text-gray-600'"
+                class="pb-4 px-6 font-bold text-lg border-b-2 transition-all whitespace-nowrap">
+            <i class="fas fa-history mr-2"></i>Riwayat Selesai
+            <span class="ml-2 bg-gray-100 px-2 py-0.5 rounded-lg text-xs">{{ $selesai }}</span>
+        </button>
+    </div>
+
+    <div>
+        <div x-show="activeTab === 'ongoing'" x-transition x-cloak>
+            @php $ongoing = $consultations->whereIn('status', ['pending', 'diterima']); @endphp
+            
+            @forelse($ongoing as $konsultasi)
+                <div class="bg-white rounded-3xl shadow-md border border-gray-100 mb-6 card-active overflow-hidden hover:shadow-xl transition-shadow">
+                    <div class="p-6 md:p-8">
+                        <div class="flex flex-col md:flex-row justify-between gap-4">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-3 mb-3">
+                                    <span class="px-3 py-1 rounded-lg text-xs font-black tracking-widest uppercase {{ $konsultasi->status_class }}">
+                                        {{ $konsultasi->status_label }}
+                                    </span>
+                                    <span class="text-xs font-mono text-gray-400">#{{ $konsultasi->kode_konsultasi }}</span>
+                                </div>
+                                <h3 class="text-2xl font-bold text-gray-800 mb-2">{{ $konsultasi->topik }}</h3>
+                                <div class="flex flex-wrap gap-4 text-sm text-gray-600">
+                                    <span class="flex items-center bg-gray-50 px-3 py-1 rounded-full"><i class="fas fa-paw mr-2 text-teal-500"></i>{{ $konsultasi->jenis_hewan }}</span>
+                                    <span class="flex items-center bg-gray-50 px-3 py-1 rounded-full"><i class="fas fa-calendar mr-2 text-teal-500"></i>{{ $konsultasi->tanggal_janji->translatedFormat('d F Y') }}</span>
+                                    <span class="flex items-center bg-gray-50 px-3 py-1 rounded-full"><i class="fas fa-clock mr-2 text-teal-500"></i>{{ date('H:i', strtotime($konsultasi->jam_janji)) }} WIB</span>
+                                </div>
+                            </div>
+                            
+                            @if($konsultasi->status === 'diterima')
+                            <div class="flex items-center">
+                                <div class="bg-teal-50 border border-teal-100 p-4 rounded-2xl flex items-center gap-3">
+                                    <div class="bg-teal-500 text-white p-2 rounded-xl ring-4 ring-teal-100">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-teal-600 font-bold uppercase">Lokasi Klinik</p>
+                                        <p class="text-sm font-semibold text-teal-900 leading-tight text-nowrap">Datang Tepat Waktu</p>
+                                    </div>
+                                </div>
+                            </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            @empty
+                @include('user.konsultasi.partials.empty-ongoing')
+            @endforelse
+        </div>
+
+        <div x-show="activeTab === 'history'" x-transition x-cloak>
+            @php $history = $consultations->where('status', 'selesai'); @endphp
+            
+            @forelse($history as $konsultasi)
+                <div class="bg-white rounded-3xl shadow-sm border border-gray-100 mb-6 card-history overflow-hidden grayscale hover:grayscale-0 transition-all opacity-80 hover:opacity-100">
+                    <div class="p-6 md:p-8">
+                        <div class="flex justify-between items-start mb-6">
+                            <div>
+                                <h3 class="text-xl font-bold text-gray-700">{{ $konsultasi->topik }}</h3>
+                                <p class="text-sm text-gray-500">Selesai pada {{ $konsultasi->updated_at->format('d M Y') }}</p>
+                            </div>
+                            <span class="bg-emerald-100 text-emerald-700 px-4 py-1 rounded-full text-xs font-bold uppercase">Selesai</span>
+                        </div>
+
+                        <div class="bg-gray-50 rounded-2xl p-5 border border-dashed border-gray-200">
+                            <h4 class="text-sm font-black text-gray-400 uppercase tracking-widest mb-3 flex items-center">
+                                <i class="fas fa-file-prescription mr-2 text-lg"></i> Hasil Rekam Medis
+                            </h4>
+                            <p class="text-gray-700 leading-relaxed italic">
+                                "{{ $konsultasi->balasan_dokter ?? 'Tidak ada catatan tambahan dari dokter.' }}"
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            @empty
+                <div class="text-center py-20 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200">
+                    <i class="fas fa-folder-open text-5xl text-gray-200 mb-4"></i>
+                    <p class="text-gray-400 font-medium">Belum ada riwayat konsultasi yang selesai.</p>
+                </div>
+            @endforelse
         </div>
     </div>
 </div>

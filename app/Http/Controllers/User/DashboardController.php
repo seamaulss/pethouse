@@ -27,7 +27,7 @@ class DashboardController extends Controller
         // Ambil notifikasi untuk user - PASTIKAN INI DIPANGGIL!
         $notifications = Notification::where('user_id', $user->id)
             ->orderBy('created_at', 'desc')
-            ->take(5)
+            ->take(2)
             ->get();
             
         $unreadCount = Notification::where('user_id', $user->id)

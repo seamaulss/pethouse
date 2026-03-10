@@ -70,14 +70,14 @@
                         <p class="text-xs text-gray-500 uppercase font-bold mb-1">Tanggal Masuk</p>
                         <p class="text-gray-800 font-semibold italic">
                             <i class="far fa-calendar-check mr-2 text-teal-500"></i>
-                            {{ \Carbon\Carbon::parse($booking->tanggal_masuk)->format('d F Y') }}
+                            {{ \Carbon\Carbon::parse($booking->tanggal_masuk)->translatedFormat('d F Y') }}
                         </p>
                     </div>
                     <div class="p-4 bg-gray-50 rounded-2xl">
                         <p class="text-xs text-gray-500 uppercase font-bold mb-1">Tanggal Keluar</p>
                         <p class="text-gray-800 font-semibold italic">
                             <i class="far fa-calendar-times mr-2 text-pink-500"></i>
-                            {{ \Carbon\Carbon::parse($booking->tanggal_keluar)->format('d F Y') }}
+                            {{ \Carbon\Carbon::parse($booking->tanggal_keluar)->translatedFormat('d F Y') }}
                         </p>
                     </div>
                 </div>

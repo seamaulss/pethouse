@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Konsultasi;
@@ -71,14 +72,29 @@ class KonsultasiController extends Controller
                 'status' => 'pending',
             ]);
 
-            // --- TAMBAHKAN NOTIFIKASI UNTUK DOKTER DI SINI ---
-            Notification::createForAdmin(
-                'Konsultasi Baru Masuk! 🩺',
-                "Pemilik {$konsultasi->nama_pemilik} telah melakukan booking untuk {$konsultasi->jenis_hewan} pada " . date('d M Y', strtotime($konsultasi->tanggal_janji)) . " jam {$konsultasi->jam_janji} WIB.",
-                null, // booking_id
-                'warning'
-            );
-            // ------------------------------------------------
+            try {
+                // 1. Ambil data dokter secara dinamis dari tabel users
+                // Berdasarkan SQL Anda, Dokter memiliki role 'dokter'
+                $dokter = \App\Models\User::where('role', 'dokter')->first();
+
+                if ($dokter) {
+                    // 2. Gunakan Notification::create agar kita bisa mengatur user_id dan role_target secara manual
+                    \App\Models\Notification::create([
+                        'user_id'     => $dokter->id,      // Ini akan mengisi ID 4 (ID Dokter Anda)
+                        'role_target' => 'dokter',         // Sesuai enum 'dokter' di tabel notifications
+                        'title'       => 'Konsultasi Baru Masuk! 🩺',
+                        'message'     => "Pemilik {$konsultasi->nama_pemilik} telah melakukan booking untuk {$konsultasi->jenis_hewan} pada " . date('d M Y', strtotime($konsultasi->tanggal_janji)) . " jam {$konsultasi->jam_janji} WIB.",
+                        'type'        => 'warning',        // Menentukan warna/ikon notifikasi
+                        'is_read'     => 0,                // Set belum dibaca
+                        'booking_id'  => null,             // Karena ini konsultasi, bukan booking hotel
+                    ]);
+                }
+
+                return redirect()->route('user.konsultasi.index')
+                    ->with('success', "Booking Berhasil! Kode: <strong>{$konsultasi->kode_konsultasi}</strong>.");
+            } catch (\Exception $e) {
+                // ...
+            }
 
             return redirect()->route('user.konsultasi.index')
                 ->with('success', "Booking Berhasil! Kode: <strong>{$konsultasi->kode_konsultasi}</strong>. Silakan datang sesuai jadwal.");
@@ -111,7 +127,20 @@ class KonsultasiController extends Controller
     private function generateKodeKonsultasi()
     {
         $prefix = 'KONS-' . date('Y');
-        $count = Konsultasi::where('kode_konsultasi', 'like', "$prefix%")->count();
-        return $prefix . '-' . sprintf('%04d', $count + 1);
+
+        // Cari nomor terakhir berdasarkan kode_konsultasi, bukan jumlah data (count)
+        $lastRecord = Konsultasi::where('kode_konsultasi', 'like', "$prefix%")
+            ->orderBy('kode_konsultasi', 'desc')
+            ->first();
+
+        if (!$lastRecord) {
+            $nextNumber = 1;
+        } else {
+            // Ambil 4 angka terakhir dari kode (misal: 0007 jadi 7) dan tambah 1
+            $lastNumber = (int) substr($lastRecord->kode_konsultasi, -4);
+            $nextNumber = $lastNumber + 1;
+        }
+
+        return $prefix . '-' . sprintf('%04d', $nextNumber);
     }
 }

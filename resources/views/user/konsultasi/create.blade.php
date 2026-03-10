@@ -109,7 +109,7 @@
                     <input type="text" name="topik" required 
                            value="{{ old('topik') }}"
                            class="w-full px-5 py-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-teal-200 focus:border-teal-500 text-base"
-                           placeholder="Contoh: demam">
+                           placeholder="Contoh: demam" autocomplete="off">
                 </div>
             </div>
 

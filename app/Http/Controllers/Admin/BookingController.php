@@ -149,9 +149,16 @@ class BookingController extends Controller
                     break;
 
                 case 'pembatalan':
-                    $alasan = $request->alasan_cancel ?? 'tidak disebutkan';
-                    $message = "Booking #{$booking->kode_booking} untuk {$booking->nama_hewan} telah DIBATALKAN. Alasan: {$alasan}";
-                    $type = 'warning';
+                    // Ambil alasan dan tambahkan prefix [DISETUJUI]
+                    $alasanAsli = $request->alasan_cancel ?? $booking->alasan_cancel ?? 'Permintaan Pelanggan';
+                    $alasanFinal = "[DISETUJUI] " . $alasanAsli;
+
+                    // Update alasan di database agar tombol hilang di view
+                    $booking->update(['alasan_cancel' => $alasanFinal]);
+
+                    $title = "Pembatalan Booking Disetujui";
+                    $message = "Booking #{$booking->kode_booking} ({$booking->nama_hewan}) telah DIBATALKAN oleh Admin. Alasan: {$alasanAsli}";
+                    $type = 'danger';
                     break;
 
                 default:

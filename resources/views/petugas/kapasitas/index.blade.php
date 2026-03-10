@@ -4,7 +4,7 @@
 <div class="p-6 max-w-7xl mx-auto">
     <div class="mb-8">
         <h1 class="text-2xl font-bold text-gray-800">Status Ketersediaan Kandang</h1>
-        <p class="text-gray-500">Data real-time kondisi kandang hari ini ({{ date('d M Y') }})</p>
+        <p class="text-gray-500">Data real-time kondisi kandang hari ini ({{ date('d F Y') }})</p>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

@@ -11,8 +11,14 @@ class NotificationController extends Controller
 {
     private function konsultasiQuery()
     {
-        return Notification::where('user_id', Auth::id())
+        return Notification::where(function ($query) {
+            // Mencari notifikasi yang ditujukan khusus untuk ID dokter ini
+            // ATAU yang role_targetnya adalah 'dokter' (sebagai cadangan)
+            $query->where('user_id', Auth::id())
+                ->orWhere('role_target', 'dokter');
+        })
             ->where(function ($q) {
+                // Tetap pertahankan filter kata "Konsultasi" agar tidak bercampur dengan notifikasi lain
                 $q->where('title', 'like', '%Konsultasi%')
                     ->orWhere('message', 'like', '%Konsultasi%');
             });
@@ -38,13 +44,10 @@ class NotificationController extends Controller
         try {
             $this->konsultasiQuery()->where('is_read', 0)->update(['is_read' => 1]);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Semua notifikasi telah ditandai terbaca',
-                'unread_count' => 0
-            ]);
+            // Gunakan back() untuk otomatis refresh halaman sebelumnya
+            return back()->with('success', 'Semua notifikasi telah dibaca');
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return back()->with('error', 'Gagal memperbarui notifikasi');
         }
     }
 

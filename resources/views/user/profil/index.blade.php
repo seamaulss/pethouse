@@ -109,7 +109,8 @@
                         <input type="text" name="nomor_wa"
                             value="{{ old('nomor_wa', $user->nomor_wa) }}"
                             placeholder="08xxxxxxxxxx"
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                            autocomplete="off">
                     </div>
 
                     <!-- Password Section -->
@@ -206,13 +207,6 @@
             <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl shadow-lg p-6 border border-purple-100" data-aos="fade-up">
                 <h2 class="text-xl font-bold text-gray-800 mb-4">Info Akun</h2>
                 <div class="space-y-3">
-                    <div class="flex items-center">
-                        <i class="fas fa-user-circle text-purple-500 mr-3 text-xl"></i>
-                        <div>
-                            <p class="text-sm text-gray-500">ID Member</p>
-                            <p class="font-medium">{{ $user->id }}</p>
-                        </div>
-                    </div>
                     <div class="flex items-center">
                         <i class="fas fa-calendar-alt text-purple-500 mr-3 text-xl"></i>
                         <div>
@@ -312,7 +306,7 @@
                         </div>
                         <div>
                             <p class="font-medium text-gray-800">Email</p>
-                            <p class="text-sm text-gray-600">support@LARAPetHouse.com</p>
+                            <p class="text-sm text-gray-600">larapethouse@gmail.com</p>
                         </div>
                     </div>
                 </div>

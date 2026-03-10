@@ -81,7 +81,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::resource('kapasitas', AdminKapasitas::class)->except(['show', 'create', 'edit']);
     Route::resource('konsultasi', AdminKonsultasi::class);
     Route::post('konsultasi/{id}/add-balasan', [AdminKonsultasi::class, 'updateBalasan'])->name('konsultasi.add-balasan');
-    
+
     Route::resource('jenis-hewan', AdminJenisHewan::class);
     Route::resource('galeri', AdminGaleri::class);
     Route::resource('testimoni', AdminTestimoni::class);
@@ -128,10 +128,14 @@ Route::middleware(['auth', 'petugas'])->prefix('petugas')->name('petugas.')->gro
     });
 
     // Notifikasi
-    Route::controller(PetugasNotification::class)->prefix('notifications')->name('notifications.')->group(function () {
-        Route::get('/', 'index')->name('index');
-        Route::get('/{id}/read', 'markAsRead')->name('markAsRead');
-    });
+    Route::controller(PetugasNotification::class)
+        ->prefix('notifications')
+        ->name('notifications.')
+        ->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/get-new', 'getNew')->name('get-new');
+            Route::get('/{id}/read', 'markAsRead')->name('markAsRead');
+        });
 });
 
 // ======================================================
@@ -151,7 +155,12 @@ Route::middleware(['auth', 'user'])->prefix('user')->name('user.')->group(functi
         Route::get('/', 'create')->name('create');
         Route::post('/', 'store')->name('store');
         Route::get('/riwayat', 'riwayat')->name('riwayat');
+
+        // Gunakan nama 'pdf' saja karena sudah terbungkus prefix 'user.booking.'
+        Route::get('/{id}/pdf', 'downloadPdf')->name('pdf');
+        // Route ini akan menjadi: user.booking.get-harga
         Route::get('/get-harga', 'getHarga')->name('get-harga');
+
         Route::get('/{id}/extend', 'showExtendForm')->name('extend.form');
         Route::post('/{id}/extend', 'extend')->name('extend');
         Route::post('/{id}/cancel', 'cancel')->name('cancel');
@@ -204,13 +213,17 @@ Route::middleware(['auth', 'dokter'])->prefix('dokter')->name('dokter.')->group(
         Route::put('/update', 'update')->name('update');
     });
 
-    // Notifikasi Dokter (Menggunakan UserNotification controller agar reusable)
-    Route::controller(UserNotification::class)->prefix('notifikasi')->name('notifikasi.')->group(function () {
-        Route::get('/', 'index')->name('index');
-        Route::post('/{id}/read', 'markAsRead')->name('read');
-        Route::post('/read-all', 'markAllAsRead')->name('read-all');
-        Route::get('/get-notifications', 'getNewNotifications')->name('get-new');
-    });
+    // Sesuaikan name agar sesuai dengan pemanggilan di Blade
+    // Hapus 'dokter.notifications.' jika sudah ada di luar, cukup gunakan 'notifikasi.'
+    Route::controller(UserNotification::class)
+        ->prefix('notifikasi')
+        ->name('notifikasi.')
+        ->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::post('/{id}/read', 'markAsRead')->name('read');
+            Route::post('/read-all', 'markAllAsRead')->name('read-all');
+            Route::get('/get-notifications', 'getNewNotifications')->name('get-new');
+        });
 });
 
 require __DIR__ . '/auth.php';

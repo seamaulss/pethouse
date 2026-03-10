@@ -19,10 +19,10 @@
             <div class="flex items-center gap-3 sm:gap-6 bg-white px-4 py-2 sm:px-8 sm:py-4 rounded-full sm:rounded-3xl shadow-lg border border-gray-100">
                 <span class="text-gray-600 font-medium hidden sm:inline">Notifikasi</span>
                 <div class="relative">
-                    <button id="notification-button" class="relative focus:outline-none flex items-center">
-                        <i class="fas fa-bell text-2xl sm:text-4xl text-teal cursor-pointer hover:text-teal-600 transition-colors"></i>
+                    <button id="notification-button" class="relative focus:outline-none flex items-center group">
+                        <i class="fas fa-bell text-2xl sm:text-4xl text-teal-700 cursor-pointer group-hover:text-teal-600 transition-colors"></i>
                         @if($unreadCount > 0)
-                        <span id="notification-badge" class="absolute -top-2 -right-2 bg-pink text-white text-[10px] sm:text-xs font-bold rounded-full w-5 h-5 sm:w-7 sm:h-7 flex items-center justify-center shadow-lg animate-pulse">
+                        <span id="notification-badge" class="absolute -top-2 -right-2 bg-red-600 text-white text-[10px] sm:text-xs font-bold rounded-full w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center shadow-lg animate-bounce border-2 border-white">
                             {{ $unreadCount }}
                         </span>
                         @endif
@@ -42,28 +42,35 @@
 
                         <div id="notification-list">
                             @forelse($notifications as $notification)
+                            @php
+                            // Logika Ikon Spesifik
+                            $isKonsultasi = str_contains($notification->title, 'Konsultasi');
+                            $isBooking = str_contains($notification->title, 'Booking');
+
+                            $icon = match(true) {
+                            $isBooking && str_contains($notification->title, 'Batal') => 'fa-calendar-times text-pink',
+                            $isBooking => 'fa-calendar-check text-teal',
+                            $isKonsultasi => 'fa-stethoscope text-blue-500',
+                            default => 'fa-bell text-gray-500'
+                            };
+
+                            // Tentukan link tujuan otomatis
+                            $targetUrl = $isKonsultasi ? route('user.konsultasi.index') : ($notification->booking_id ? route('user.booking.show', $notification->booking_id) : '#');
+                            @endphp
+
                             <div class="notification-item p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors duration-200 
-                            {{ !$notification->is_read ? 'bg-blue-50' : '' }} cursor-pointer"
-                                data-id="{{ $notification->id }}"
-                                data-url="{{ $notification->booking_id ? route('user.booking.show', $notification->booking_id) : '#' }}"
+        {{ !$notification->is_read ? 'bg-blue-50' : '' }} cursor-pointer"
+                                onclick="markSingleAsRead('{{ $notification->id }}', this, '{{ $targetUrl }}')"
                                 id="notif-{{ $notification->id }}">
 
                                 <div class="flex items-start gap-3">
                                     <div class="flex-shrink-0 mt-1">
-                                        @php
-                                        $icon = match(true) {
-                                        str_contains($notification->title, 'Booking Baru') => 'fa-calendar-plus text-teal',
-                                        str_contains($notification->title, 'Dibatalkan') => 'fa-calendar-times text-pink',
-                                        str_contains($notification->title, 'Diperpanjang') => 'fa-calendar-plus text-teal',
-                                        str_contains($notification->title, 'Konsultasi') => 'fa-comments text-blue-500',
-                                        str_contains($notification->title, 'Status') => 'fa-info-circle text-teal',
-                                        default => 'fa-bell text-gray-500'
-                                        };
-                                        @endphp
                                         <i class="fas {{ $icon }} text-base sm:text-lg"></i>
                                     </div>
                                     <div class="flex-1">
-                                        <h4 class="text-sm sm:text-base font-semibold text-gray-800 leading-tight">{{ $notification->title }}</h4>
+                                        <h4 class="text-sm sm:text-base font-semibold text-gray-800 leading-tight">
+                                            {{ $notification->title }}
+                                        </h4>
                                         <p class="text-xs sm:text-sm text-gray-600 mt-1">{{ $notification->message }}</p>
                                         <p class="text-[10px] text-gray-400 mt-2">
                                             <i class="far fa-clock mr-1"></i>{{ $notification->created_at->diffForHumans() }}
@@ -75,10 +82,6 @@
                                 </div>
                             </div>
                             @empty
-                            <div class="p-8 text-center">
-                                <i class="fas fa-bell-slash text-3xl text-gray-300 mb-3"></i>
-                                <p class="text-sm text-gray-500">Belum ada notifikasi</p>
-                            </div>
                             @endforelse
                         </div>
 
@@ -145,211 +148,133 @@
 
 <!-- JavaScript untuk Notifikasi -->
 <script>
-    // Global variables
-    let notificationDropdownOpen = false;
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
 
-    // Fungsi untuk toggle dropdown
-    document.addEventListener('DOMContentLoaded', function() {
-        // Button click handler
-        const notificationButton = document.getElementById('notification-button');
-        if (notificationButton) {
-            notificationButton.addEventListener('click', function(e) {
-                e.stopPropagation();
-                toggleNotificationDropdown();
-            });
-        }
-
-        // Close dropdown when clicking outside
-        document.addEventListener('click', function(e) {
-            const container = document.getElementById('notification-container');
-            const dropdown = document.getElementById('notification-dropdown');
-
-            if (container && dropdown && !container.contains(e.target) && notificationDropdownOpen) {
-                dropdown.classList.add('hidden');
-                notificationDropdownOpen = false;
-            }
-        });
-
-        // Prevent dropdown close when clicking inside dropdown
-        const dropdown = document.getElementById('notification-dropdown');
-        if (dropdown) {
-            dropdown.addEventListener('click', function(e) {
-                e.stopPropagation();
-            });
-        }
-
-        // Polling untuk notifikasi baru setiap 30 detik
-        setInterval(checkNewNotifications, 30000);
-    });
-
-    function toggleNotificationDropdown() {
-        const dropdown = document.getElementById('notification-dropdown');
-
-        if (!dropdown) return;
-
-        if (notificationDropdownOpen) {
-            dropdown.classList.add('hidden');
-            notificationDropdownOpen = false;
-        } else {
-            dropdown.classList.remove('hidden');
-            notificationDropdownOpen = true;
-        }
-    }
-
-    // Fungsi untuk menandai satu notifikasi sebagai terbaca
-    async function markSingleAsRead(notificationId, element, redirectUrl = '#') {
+    // 1. Fungsi Polling Notifikasi Baru
+    async function updateUserNotificationDropdown() {
         try {
-            const url = `/user/notifikasi/${notificationId}/read`;
-
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken,
-                    'Accept': 'application/json'
-                }
-            });
-
+            const response = await fetch("{{ route('user.notifikasi.get-new') }}");
             const data = await response.json();
 
             if (data.success) {
-                // Hapus background biru
-                element.classList.remove('bg-blue-50');
-
-                // Hapus titik merah
-                const dot = element.querySelector('.unread-dot');
-                if (dot) {
-                    dot.remove();
-                }
-
-                // Update badge count
-                updateBadgeCount();
-
-                // Jika ada redirect URL dan bukan #, redirect setelah delay
-                if (redirectUrl && redirectUrl !== '#') {
-                    setTimeout(() => {
-                        window.location.href = redirectUrl;
-                    }, 300);
-                }
-            }
-
-        } catch (error) {
-            console.error('Error marking as read:', error);
-        }
-    }
-
-    // Fungsi untuk menandai semua notifikasi sebagai terbaca
-    async function markAllAsRead() {
-        const button = document.getElementById('mark-all-read-btn');
-        if (!button) return;
-
-        const originalText = button.innerHTML;
-
-        // Tampilkan loading
-        button.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Memproses...';
-        button.disabled = true;
-
-        try {
-            const response = await fetch('{{ route("user.notifikasi.read-all") }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken,
-                    'Accept': 'application/json'
-                }
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                // 1. Hilangkan badge notifikasi
+                // Update Badge Angka
                 const badge = document.getElementById('notification-badge');
-                if (badge) {
+                const bellIconContainer = document.getElementById('notification-button');
+
+                if (data.unreadCount > 0) {
+                    if (badge) {
+                        badge.innerText = data.unreadCount;
+                    } else {
+                        const newBadge = `<span id="notification-badge" class="absolute -top-2 -right-2 bg-red-600 text-white text-[10px] sm:text-xs font-bold rounded-full w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center shadow-lg animate-bounce border-2 border-white">${data.unreadCount}</span>`;
+                        bellIconContainer.insertAdjacentHTML('beforeend', newBadge);
+                    }
+                    // Tampilkan tombol "Tandai terbaca" jika sebelumnya sembunyi
+                    const markAllBtn = document.getElementById('mark-all-read-btn');
+                    if (markAllBtn) markAllBtn.classList.remove('hidden');
+                } else if (badge) {
                     badge.remove();
                 }
 
-                // 2. Hapus background biru dari semua notifikasi
-                document.querySelectorAll('.notification-item').forEach(item => {
-                    item.classList.remove('bg-blue-50');
-                });
+                // Update List Notifikasi di Dropdown secara dinamis
+                const listContainer = document.getElementById('notification-list');
+                if (data.notifications && data.notifications.length > 0) {
+                    let html = '';
+                    data.notifications.forEach(notif => {
+                        const isUnread = notif.is_read == 0 ? 'bg-blue-50' : '';
+                        const unreadDot = notif.is_read == 0 ? '<span class="unread-dot w-2 h-2 bg-red-500 rounded-full flex-shrink-0 mt-2"></span>' : '';
 
-                // 3. Hapus titik merah dari semua notifikasi
-                document.querySelectorAll('.unread-dot').forEach(dot => {
-                    dot.remove();
-                });
+                        // Logika Icon (Bisa disesuaikan dengan helper JS jika perlu)
+                        let iconClass = 'fa-bell text-gray-500';
+                        if (notif.title.includes('Konsultasi')) iconClass = 'fa-stethoscope text-blue-500';
+                        if (notif.title.includes('Booking')) iconClass = 'fa-calendar-check text-teal-600';
 
-                // 4. Sembunyikan tombol "Tandai semua terbaca"
-                button.style.display = 'none';
-
-            } else {
-                console.error('Failed to mark all as read:', data.message);
-            }
-
-        } catch (error) {
-            console.error('Error:', error);
-        } finally {
-            // Kembalikan teks tombol
-            button.innerHTML = originalText;
-            button.disabled = false;
-        }
-    }
-
-    // Fungsi untuk update badge count (mengambil dari server)
-    async function updateBadgeCount() {
-        try {
-            const response = await fetch('{{ route("user.notifikasi.get-new") }}');
-            const data = await response.json();
-
-            if (data.success) {
-                const unreadCount = data.unreadCount;
-                const badge = document.getElementById('notification-badge');
-
-                if (unreadCount > 0) {
-                    if (badge) {
-                        badge.textContent = unreadCount;
-                    } else {
-                        // Buat badge baru jika belum ada
-                        const button = document.getElementById('notification-button');
-                        if (button) {
-                            const newBadge = document.createElement('span');
-                            newBadge.id = 'notification-badge';
-                            newBadge.className = 'absolute -top-2 -right-2 bg-pink text-white text-xs font-bold rounded-full w-7 h-7 flex items-center justify-center shadow-lg animate-pulse';
-                            newBadge.textContent = unreadCount;
-                            button.appendChild(newBadge);
-                        }
-                    }
-                } else {
-                    // Hapus badge jika tidak ada notifikasi yang belum dibaca
-                    if (badge) {
-                        badge.remove();
-                    }
-                    // Sembunyikan tombol "Tandai semua terbaca"
-                    const markAllBtn = document.getElementById('mark-all-read-btn');
-                    if (markAllBtn) {
-                        markAllBtn.style.display = 'none';
-                    }
+                        html += `
+                            <div class="notification-item p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors duration-200 ${isUnread} cursor-pointer"
+                                 onclick="markSingleAsRead('${notif.id}', this, '#')" id="notif-${notif.id}">
+                                <div class="flex items-start gap-3">
+                                    <div class="flex-shrink-0 mt-1">
+                                        <i class="fas ${iconClass} text-base sm:text-lg"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <h4 class="text-sm sm:text-base font-semibold text-gray-800 leading-tight">${notif.title}</h4>
+                                        <p class="text-xs sm:text-sm text-gray-600 mt-1">${notif.message}</p>
+                                        <p class="text-[10px] text-gray-400 mt-2"><i class="far fa-clock mr-1"></i>Baru saja</p>
+                                    </div>
+                                    ${unreadDot}
+                                </div>
+                            </div>`;
+                    });
+                    listContainer.innerHTML = html;
                 }
             }
         } catch (error) {
-            console.error('Error updating badge count:', error);
+            console.error('Error fetching notifications:', error);
         }
     }
 
-    // Fungsi untuk memeriksa notifikasi baru (polling)
-    async function checkNewNotifications() {
-        try {
-            const response = await fetch('{{ route("user.notifikasi.get-new") }}');
-            const data = await response.json();
+    // Jalankan polling setiap 30 detik
+    setInterval(updateUserNotificationDropdown, 30000);
 
-            if (data.success && data.unreadCount > 0) {
-                // Update badge count
-                updateBadgeCount();
+    // 2. Fungsi Tandai Satu Sebagai Baca
+    async function markSingleAsRead(id, element, redirectUrl) {
+        try {
+            const response = await fetch(`/user/notifikasi/${id}/read`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+            });
+            const data = await response.json();
+            if (data.success) {
+                // Jika ingin responsif instan tanpa reload:
+                element.classList.remove('bg-blue-50');
+                const dot = element.querySelector('.unread-dot');
+                if (dot) dot.remove();
+                // Opsional: reload jika ingin sinkron total
+                window.location.reload();
             }
         } catch (error) {
-            console.error('Error checking new notifications:', error);
+            console.error('Error:', error);
         }
     }
+
+    // 3. Fungsi Tandai Semua Sebagai Baca
+    async function markAllAsRead() {
+        const btn = document.getElementById('mark-all-read-btn');
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+        try {
+            const response = await fetch("{{ route('user.notifikasi.read-all') }}", {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json'
+                }
+            });
+            const data = await response.json();
+            if (data.success) {
+                window.location.reload();
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            window.location.reload();
+        }
+    }
+
+    // Toggle Dropdown Logic
+    document.getElementById('notification-button').addEventListener('click', function(e) {
+        e.stopPropagation();
+        document.getElementById('notification-dropdown').classList.toggle('hidden');
+    });
+
+    document.addEventListener('click', function(e) {
+        const dropdown = document.getElementById('notification-dropdown');
+        if (!e.target.closest('#notification-container')) {
+            dropdown.classList.add('hidden');
+        }
+    });
 </script>
 
 <style>

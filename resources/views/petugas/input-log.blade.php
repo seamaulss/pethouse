@@ -141,15 +141,15 @@
                 <div>
                     <label class="font-semibold block mb-2">Jumlah</label>
                     <input type="text" name="jumlah" 
-                           class="w-full border rounded-lg px-4 py-3" 
-                           placeholder="Contoh: 1 mangkuk, 2 tablet">
+                           class="w-full border rounded-lg px-4 py-3" autocomplete="off"
+                           placeholder="Contoh: 1">
                 </div>
                 
                 <div>
                     <label class="font-semibold block mb-2">Satuan</label>
                     <input type="text" name="satuan" 
-                           class="w-full border rounded-lg px-4 py-3" 
-                           placeholder="Contoh: mangkuk, tablet, ml">
+                           class="w-full border rounded-lg px-4 py-3" autocomplete="off"
+                           placeholder="Contoh: mangkuk, ml">
                 </div>
             </div>
             

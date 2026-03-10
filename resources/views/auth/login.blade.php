@@ -18,22 +18,22 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
-    .bg-login {
-        background-image: url('{{ asset('images/login-1.jpg') }}');
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-    }
+        .bg-login {
+            background-image: url('{{ asset("/images/login-1.jpg") }}');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
 
-    /* Optional: overlay biar teks lebih kebaca */
-    .bg-login::before {
-        content: "";
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.45);
-        z-index: -1;
-    }
-</style>
+        /* Optional: overlay biar teks lebih kebaca */
+        .bg-login::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+            z-index: -1;
+        }
+    </style>
 
 
 </head>
@@ -62,10 +62,15 @@
 
 
         <!-- Session Status -->
-        @if (session('status'))
-        <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded">
-            <i class="fas fa-check-circle mr-2"></i>
-            {{ session('status') }}
+        @if (session('success'))
+        <div x-data="{ show: true }" x-show="show" class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded relative shadow-sm">
+            <div class="flex items-center">
+                <i class="fas fa-check-circle mr-2"></i>
+                <p>{{ session('success') }}</p>
+            </div>
+            <button @click="show = false" class="absolute top-0 bottom-0 right-0 px-4">
+                <i class="fas fa-times text-green-500"></i>
+            </button>
         </div>
         @endif
 

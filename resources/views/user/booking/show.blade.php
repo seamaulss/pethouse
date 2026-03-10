@@ -91,9 +91,9 @@
                     default => ucfirst($booking->status)
                     };
                     @endphp
-                    <span class="status-badge {{ $statusClass }}">
-                        {{ $statusText }}
-                    </span>
+                    <span class="{{ $booking->status_class }} px-2 py-1 rounded border text-xs font-bold">
+                        {{ $booking->status_text }}
+                    </span>`
                 </div>
             </div>
         </div>
@@ -153,7 +153,7 @@
                             </div>
                             <div>
                                 <span class="text-gray-600 text-sm">WhatsApp:</span>
-                                <p class="font-medium">{{ $booking->nomor_wa ?? '-' }}</p>
+                                <p class="font-medium">{{ !blank($booking->nomor_wa) ? $booking->nomor_wa : '-' }}</p>
                             </div>
                         </div>
                     </div>
@@ -271,6 +271,11 @@
 
                 <!-- Tombol Aksi -->
                 <div class="flex flex-wrap gap-3 pt-6 border-t border-gray-200">
+
+                    <a href="{{ route('user.booking.pdf', $booking->id) }}" class="inline-flex items-center px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg font-medium transition-colors">
+                        <i class="fas fa-file-pdf mr-2"></i> Cetak PDF
+                    </a>
+
                     <!-- Tombol WhatsApp -->
                     @if($booking->nomor_wa)
                     @php
@@ -304,7 +309,7 @@
                     <!-- Tombol Batalkan -->
                     @if(in_array($booking->status, ['pending', 'diterima']))
                     <button type="button"
-                        onclick="openCancelModal({{ $booking->id }}, '{{ $booking->kode_booking }}', '{{ $booking->nama_hewan }}')"
+                        onclick="openCancelModal('{{ $booking->id }}', '{{ $booking->kode_booking }}', '{{ addslashes($booking->nama_hewan) }}')"
                         class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium">
                         <i class="fas fa-times mr-2"></i> Batalkan Booking
                     </button>
@@ -312,90 +317,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- Informasi Log Harian (jika ada) -->
-        @if($booking->dailyLogs && $booking->dailyLogs->count() > 0)
-        <div class="bg-white rounded-2xl shadow-lg p-6 mb-8">
-            <h3 class="font-bold text-gray-800 mb-4 flex items-center">
-                <i class="fas fa-clipboard-list text-teal-600 mr-2"></i>
-                Log Harian Perawatan
-            </h3>
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm">
-                    <thead class="bg-teal-50">
-                        <tr>
-                            <th class="px-4 py-2 text-left">Tanggal</th>
-                            <th class="px-4 py-2 text-center">Makan Pagi</th>
-                            <th class="px-4 py-2 text-center">Makan Siang</th>
-                            <th class="px-4 py-2 text-center">Makan Malam</th>
-                            <th class="px-4 py-2 text-center">Minum</th>
-                            <th class="px-4 py-2 text-center">Jalan-jalan</th>
-                            <th class="px-4 py-2 text-left">Buang Air</th>
-                            <th class="px-4 py-2 text-left">Catatan</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($booking->dailyLogs as $log)
-                        <tr class="border-b hover:bg-gray-50">
-                            <td class="px-4 py-2">{{ \Carbon\Carbon::parse($log->tanggal)->format('d/m/Y') }}</td>
-                            <td class="px-4 py-2 text-center">
-                                @if($log->makan_pagi)
-                                <i class="fas fa-check text-green-500"></i>
-                                @else
-                                <i class="fas fa-times text-red-500"></i>
-                                @endif
-                            </td>
-                            <td class="px-4 py-2 text-center">
-                                @if($log->makan_siang)
-                                <i class="fas fa-check text-green-500"></i>
-                                @else
-                                <i class="fas fa-times text-red-500"></i>
-                                @endif
-                            </td>
-                            <td class="px-4 py-2 text-center">
-                                @if($log->makan_malam)
-                                <i class="fas fa-check text-green-500"></i>
-                                @else
-                                <i class="fas fa-times text-red-500"></i>
-                                @endif
-                            </td>
-                            <td class="px-4 py-2 text-center">
-                                @if($log->minum)
-                                <i class="fas fa-check text-green-500"></i>
-                                @else
-                                <i class="fas fa-times text-red-500"></i>
-                                @endif
-                            </td>
-                            <td class="px-4 py-2 text-center">
-                                @if($log->jalan_jalan)
-                                <i class="fas fa-check text-green-500"></i>
-                                @else
-                                <i class="fas fa-times text-red-500"></i>
-                                @endif
-                            </td>
-                            <td class="px-4 py-2">
-                                @switch($log->buang_air)
-                                @case('normal')
-                                <span class="text-green-600">Normal</span>
-                                @break
-                                @case('diare')
-                                <span class="text-red-600">Diare</span>
-                                @break
-                                @case('sembelit')
-                                <span class="text-yellow-600">Sembelit</span>
-                                @break
-                                @default
-                                <span class="text-gray-500">Belum</span>
-                                @endswitch
-                            </td>
-                            <td class="px-4 py-2">{{ $log->catatan ?? '-' }}</td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        @endif
     </div>
 
     <!-- Modal Pembatalan -->
@@ -479,9 +400,12 @@
     </div>
 
     <script>
-        // Script modal
         let currentBookingId = null;
         let currentBookingCode = null;
+
+        // Simpan template URL dari Laravel ke dalam variable JS agar dinamis
+        // Kita gunakan placeholder 'ID_PLACEHOLDER' untuk diganti nanti
+        const cancelUrlTemplate = "{{ route('user.booking.cancel', ':id') }}";
 
         function openCancelModal(bookingId, bookingCode, petName) {
             currentBookingId = bookingId;
@@ -489,79 +413,77 @@
 
             document.getElementById('cancel-booking-code').textContent = bookingCode;
             document.getElementById('cancel-pet-name').textContent = petName;
-            document.getElementById('cancelForm').action = `/user/booking/${bookingId}/cancel`;
 
-            document.getElementById('cancel-reason-textarea').value = '';
+            // Ganti placeholder dengan ID yang asli
+            const actionUrl = cancelUrlTemplate.replace(':id', bookingId);
+            document.getElementById('cancelForm').action = actionUrl;
+
+            // Reset state modal
+            const reasonTextarea = document.getElementById('cancel-reason-textarea');
+            reasonTextarea.value = '';
             document.getElementById('char-count').textContent = '0/500 karakter';
+            document.getElementById('char-count').classList.replace('text-red-600', 'text-gray-500');
 
             document.getElementById('cancelModal').classList.remove('hidden');
             document.body.style.overflow = 'hidden';
 
-            setTimeout(() => {
-                document.getElementById('cancel-reason-textarea').focus();
-            }, 100);
+            setTimeout(() => reasonTextarea.focus(), 100);
         }
 
         function closeCancelModal() {
             document.getElementById('cancelModal').classList.add('hidden');
             document.body.style.overflow = 'auto';
-            currentBookingId = null;
-            currentBookingCode = null;
-
             document.getElementById('cancelForm').reset();
-            document.getElementById('char-count').textContent = '0/500 karakter';
         }
 
+        // Menangani penutupan modal saat klik area luar
         document.getElementById('cancelModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeCancelModal();
-            }
+            if (e.target === this) closeCancelModal();
         });
 
+        // Validasi karakter real-time
         document.getElementById('cancel-reason-textarea').addEventListener('input', function(e) {
             const count = e.target.value.length;
-            document.getElementById('char-count').textContent = `${count}/500 karakter`;
+            const countDisplay = document.getElementById('char-count');
+            countDisplay.textContent = `${count}/500 karakter`;
 
             if (count > 450) {
-                document.getElementById('char-count').classList.add('text-red-600');
-                document.getElementById('char-count').classList.remove('text-gray-500');
+                countDisplay.classList.add('text-red-600');
+                countDisplay.classList.remove('text-gray-500');
             } else {
-                document.getElementById('char-count').classList.remove('text-red-600');
-                document.getElementById('char-count').classList.add('text-gray-500');
+                countDisplay.classList.remove('text-red-600');
+                countDisplay.classList.add('text-gray-500');
             }
         });
 
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                closeCancelModal();
-            }
-        });
-
+        // Submit handler dengan proteksi double-click
         document.getElementById('cancelForm').addEventListener('submit', function(e) {
             const reasonTextarea = document.getElementById('cancel-reason-textarea');
             const submitBtn = document.getElementById('cancel-submit-btn');
+            const reason = reasonTextarea.value.trim();
 
-            if (!reasonTextarea.value.trim()) {
-                e.preventDefault();
-                alert('Harap isi alasan pembatalan.');
-                reasonTextarea.focus();
-                return;
-            }
-
-            if (reasonTextarea.value.trim().length < 10) {
+            if (!reason || reason.length < 10) {
                 e.preventDefault();
                 alert('Alasan pembatalan minimal 10 karakter.');
                 reasonTextarea.focus();
                 return;
             }
 
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Memproses...';
-
             if (!confirm(`Anda yakin ingin membatalkan booking ${currentBookingCode}?`)) {
                 e.preventDefault();
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = '<i class="fas fa-times mr-2"></i> Ya, Batalkan';
+                return;
+            }
+
+            // Efek loading
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Memproses...';
+        });
+
+        // ESC key untuk tutup modal
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && !document.getElementById('cancelModal').classList.contains('hidden')) {
+                closeCancelModal();
             }
         });
     </script>

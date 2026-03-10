@@ -33,7 +33,7 @@ class DashboardController extends Controller
             ->where('role_target', 'petugas')
             ->orderBy('is_read', 'asc')
             ->orderBy('created_at', 'desc')
-            ->limit(5)
+            ->limit(3)
             ->get();
 
         // Booking aktif (sudah ada)

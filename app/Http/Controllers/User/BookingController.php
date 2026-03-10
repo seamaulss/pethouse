@@ -3,9 +3,10 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\Request;
 use App\Models\Booking;
 use App\Models\Layanan;
 use App\Models\JenisHewan;
@@ -189,13 +190,56 @@ class BookingController extends Controller
 
     public function cancel(Request $request, $id)
     {
-        $booking = Booking::where('user_id', Auth::id())->where('id', $id)->firstOrFail();
-        if (!in_array($booking->status, ['pending', 'diterima'])) return redirect()->route('user.booking.riwayat')->with('error', 'Booking Dibatalkan.');
+        // 1. Cari data dan pastikan milik user yang login
+        $booking = Booking::where('user_id', Auth::id())
+            ->where('id', $id)
+            ->firstOrFail();
 
-        $request->validate(['alasan_cancel' => 'required|string|max:500']);
-        $booking->update(['status' => 'pembatalan', 'alasan_cancel' => $request->alasan_cancel]);
+        // 2. Cek apakah status saat ini valid untuk dibatalkan
+        // Jika status sudah 'selesai' atau 'batal', tidak boleh cancel lagi
+        if (!in_array($booking->status, ['pending', 'diterima'])) {
+            return redirect()->route('user.booking.riwayat')
+                ->with('error', 'Status booking saat ini tidak memungkinkan untuk pembatalan.');
+        }
 
-        return redirect()->route('user.booking.riwayat')->with('success', 'Booking dibatalkan.');
+        // 3. Validasi input alasan
+        $request->validate([
+            'alasan_cancel' => 'required|string|min:10|max:500'
+        ], [
+            'alasan_cancel.required' => 'Alasan pembatalan wajib diisi.',
+            'alasan_cancel.min' => 'Alasan pembatalan terlalu singkat (minimal 10 karakter).',
+        ]);
+
+        try {
+            // 4. Update status dan alasan
+            $booking->update([
+                'status' => 'pembatalan', // Pastikan kolom 'status' di DB menerima value ini
+                'alasan_cancel' => $request->alasan_cancel,
+            ]);
+
+            // 5. Kirim Notifikasi (Gunakan logic Notification yang sudah Anda punya)
+            Notification::create([
+                'user_id' => Auth::id(),
+                'role_target' => 'user',
+                'title' => 'Permintaan Pembatalan',
+                'message' => "Permintaan pembatalan untuk booking #{$booking->kode_booking} sedang diproses.",
+                'booking_id' => $booking->id,
+                'type' => 'info'
+            ]);
+
+            Notification::create([
+                'role_target' => 'admin',
+                'title' => 'Request Pembatalan',
+                'message' => "User " . Auth::user()->username . " mengajukan pembatalan untuk #{$booking->kode_booking}.",
+                'booking_id' => $booking->id,
+                'type' => 'warning'
+            ]);
+
+            return redirect()->route('user.booking.riwayat')
+                ->with('success', '✅ Permintaan pembatalan berhasil diajukan dan akan segera ditinjau oleh admin.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
     }
 
     public function show($id)
@@ -219,10 +263,51 @@ class BookingController extends Controller
         return view('user.booking.show', compact('booking', 'durasi', 'hargaPerHari', 'totalBiaya'));
     }
 
+    public function downloadPdf($id)
+    {
+        // Load booking beserta relasi layanannya
+        $booking = Booking::with(['layanan'])->findOrFail($id);
+
+        // Hitung Durasi (Selisih Hari)
+        $masuk = \Carbon\Carbon::parse($booking->tanggal_masuk);
+        $keluar = \Carbon\Carbon::parse($booking->tanggal_keluar);
+        $durasi = $masuk->diffInDays($keluar) ?: 1; // Minimal 1 hari
+
+        // Ambil total biaya
+        // Prioritas 1: Gunakan kolom total_harga dari database (jika sudah terisi)
+        // Prioritas 2: Hitung manual jika kolom database kosong
+        if ($booking->total_harga > 0) {
+            $totalBiaya = $booking->total_harga;
+        } else {
+            // Jika total_harga di DB kosong, kita ambil dari tabel layanan_harga
+            $hargaLayanan = DB::table('layanan_harga')
+                ->where('layanan_id', $booking->layanan_id)
+                ->where('jenis_hewan_id', ($booking->jenis_hewan == 'Kucing' ? 1 : 2))
+                ->value('harga_per_hari') ?? 0;
+
+            $totalBiaya = $durasi * $hargaLayanan;
+        }
+
+        $pdf = Pdf::loadView('user.booking.booking_invoice_pdf', compact('booking', 'durasi', 'totalBiaya'));
+        return $pdf->download('Invoice-' . $booking->kode_booking . '.pdf');
+    }
+
     private function normalizeWhatsApp($nomor)
     {
+        if (!$nomor) return null; // Pastikan jika kosong kembali NULL agar terdeteksi ?? '-' di Blade
+
+        // Hapus semua karakter selain angka
         $nomor = preg_replace('/[^\d]/', '', $nomor);
-        if (str_starts_with($nomor, '0')) $nomor = '62' . substr($nomor, 1);
+
+        // Jika diawali '0', ubah jadi '62'
+        if (str_starts_with($nomor, '0')) {
+            $nomor = '62' . substr($nomor, 1);
+        }
+        // Jika diawali '8' (langsung angka 8), tambahkan '62'
+        elseif (str_starts_with($nomor, '8')) {
+            $nomor = '62' . $nomor;
+        }
+
         return $nomor;
     }
 

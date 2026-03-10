@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Dokter;
 
 use App\Http\Controllers\Controller;
 use App\Models\Konsultasi;
+use App\Models\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -56,10 +57,28 @@ class KonsultasiController extends Controller
                         'status' => 'diterima',
                         'dokter_id' => auth()->id(),
                     ]);
+
+                    // KIRIM NOTIFIKASI KE USER
+                    Notification::create([
+                        'user_id' => $konsultasi->user_id,
+                        'title' => 'Konsultasi Diterima',
+                        'message' => "Konsultasi #{$konsultasi->kode_konsultasi} telah diterima oleh dokter. Silakan cek detailnya.",
+                        'role_target' => 'user',
+                        'is_read' => 0,
+                    ]);
                 } else {
                     $konsultasi->update([
                         'status' => 'selesai',
                         'balasan_dokter' => $request->balasan_dokter,
+                    ]);
+
+                    // KIRIM NOTIFIKASI KE USER
+                    Notification::create([
+                        'user_id' => $konsultasi->user_id,
+                        'title' => 'Konsultasi Selesai',
+                        'message' => "Dokter telah memberikan balasan untuk konsultasi #{$konsultasi->kode_konsultasi}.",
+                        'role_target' => 'user',
+                        'is_read' => 0,
                     ]);
                 }
             });
@@ -73,7 +92,7 @@ class KonsultasiController extends Controller
     }
 
     /**
-     * Method tambahan sesuai dengan Route::post('/{id}/balas')
+     * Kirim Balasan (Status otomatis selesai)
      */
     public function kirimBalasan(Request $request, $id)
     {
@@ -86,6 +105,15 @@ class KonsultasiController extends Controller
         $konsultasi->update([
             'balasan_dokter' => $request->balasan_dokter,
             'status' => 'selesai'
+        ]);
+
+        // KIRIM NOTIFIKASI KE USER
+        Notification::create([
+            'user_id' => $konsultasi->user_id,
+            'title' => 'Balasan Baru dari Dokter',
+            'message' => "Konsultasi #{$konsultasi->kode_konsultasi} Anda telah dijawab.",
+            'role_target' => 'user',
+            'is_read' => 0,
         ]);
 
         return redirect()->route('dokter.konsultasi.show', $id)

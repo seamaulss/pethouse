@@ -203,27 +203,39 @@ class Booking extends Model
     // Accessors
     public function getStatusTextAttribute()
     {
+        if ($this->status === 'pembatalan') {
+            // Cek apakah alasan_cancel mengandung kata [DISETUJUI]
+            return str_contains($this->alasan_cancel, '[DISETUJUI]')
+                ? 'Pembatalan Diterima'
+                : 'Menunggu Pembatalan';
+        }
+
         return match ($this->status) {
-            'pending' => 'Menunggu',
-            'diterima' => 'Diterima',
-            'in_progress' => 'Dititipkan',
-            'selesai' => 'Selesai',
-            'pembatalan' => 'Dibatalkan',
+            'pending'      => 'Menunggu',
+            'diterima'     => 'Diterima',
+            'in_progress'  => 'Dititipkan',
+            'selesai'      => 'Selesai',
             'perpanjangan' => 'Perpanjangan Diajukan',
-            default => ucfirst($this->status)
+            default        => ucfirst($this->status)
         };
     }
 
     public function getStatusClassAttribute()
     {
+        if ($this->status === 'pembatalan') {
+            // Jika sudah disetujui, gunakan border yang lebih tegas atau teks yang lebih gelap
+            return str_contains($this->alasan_cancel, '[DISETUJUI]')
+                ? 'bg-red-100 text-red-800 border-red-300'
+                : 'bg-red-50 text-red-700 border-red-100';
+        }
+
         return match ($this->status) {
-            'pending' => 'bg-yellow-100 text-yellow-800',
-            'diterima' => 'bg-blue-100 text-blue-800',
-            'in_progress' => 'bg-teal-100 text-teal-800',
-            'selesai' => 'bg-green-100 text-green-800',
-            'pembatalan' => 'bg-red-100 text-red-800',
-            'perpanjangan' => 'bg-purple-100 text-purple-800',
-            default => 'bg-gray-100 text-gray-800'
+            'pending'      => 'bg-amber-50 text-amber-700 border-amber-100',
+            'diterima'     => 'bg-blue-50 text-blue-700 border-blue-100',
+            'in_progress'  => 'bg-teal-50 text-teal-700 border-teal-100',
+            'selesai'      => 'bg-emerald-50 text-emerald-700 border-emerald-100',
+            'perpanjangan' => 'bg-purple-50 text-purple-700 border-purple-100',
+            default        => 'bg-gray-50 text-gray-700 border-gray-100',
         };
     }
 

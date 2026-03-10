@@ -51,7 +51,7 @@
                     </li>
                     <li class="flex items-center gap-4">
                         <div class="bg-teal-600 p-3 rounded-xl"><i class="fas fa-envelope"></i></div>
-                        <a href="mailto:hello@laraLARAPetHouse.com" class="text-teal-100 hover:text-white transition">hello@laraLARAPetHouse.com</a>
+                        <a href="mailto:larapethouse@gmail.com" class="text-teal-100 hover:text-white transition">larapethouse@gmail.com</a>
                     </li>
                 </ul>
             </div>

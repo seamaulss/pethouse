@@ -265,30 +265,24 @@ class BookingController extends Controller
 
     public function downloadPdf($id)
     {
-        // Load booking beserta relasi layanannya
+        // 1. Load booking beserta relasi layanannya
         $booking = Booking::with(['layanan'])->findOrFail($id);
 
-        // Hitung Durasi (Selisih Hari)
+        // 2. Hitung Durasi (Selisih Hari)
         $masuk = \Carbon\Carbon::parse($booking->tanggal_masuk);
         $keluar = \Carbon\Carbon::parse($booking->tanggal_keluar);
-        $durasi = $masuk->diffInDays($keluar) ?: 1; // Minimal 1 hari
+        $durasi = $masuk->diffInDays($keluar) ?: 1;
 
-        // Ambil total biaya
-        // Prioritas 1: Gunakan kolom total_harga dari database (jika sudah terisi)
-        // Prioritas 2: Hitung manual jika kolom database kosong
-        if ($booking->total_harga > 0) {
-            $totalBiaya = $booking->total_harga;
-        } else {
-            // Jika total_harga di DB kosong, kita ambil dari tabel layanan_harga
-            $hargaLayanan = DB::table('layanan_harga')
-                ->where('layanan_id', $booking->layanan_id)
-                ->where('jenis_hewan_id', ($booking->jenis_hewan == 'Kucing' ? 1 : 2))
-                ->value('harga_per_hari') ?? 0;
+        // 3. Ambil total biaya dari DB
+        $totalBiaya = $booking->total_harga > 0 ? $booking->total_harga : 0;
 
-            $totalBiaya = $durasi * $hargaLayanan;
-        }
+        // 4. Load View dengan opsi REMOTE agar gambar muncul
+        $pdf = Pdf::loadView('user.booking.booking_invoice_pdf', compact('booking', 'durasi', 'totalBiaya'))
+            ->setOption([
+                'isRemoteEnabled' => true, // WAJIB agar QR API muncul
+                'chroot' => public_path(), // Agar file lokal di public/ bisa diakses
+            ]);
 
-        $pdf = Pdf::loadView('user.booking.booking_invoice_pdf', compact('booking', 'durasi', 'totalBiaya'));
         return $pdf->download('Invoice-' . $booking->kode_booking . '.pdf');
     }
 

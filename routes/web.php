@@ -105,12 +105,17 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 });
 
 // ======================================================
-// PETUGAS ROUTES
+// PETUGAS ROUTES (VERSI BERSIH)
 // ======================================================
 Route::middleware(['auth', 'petugas'])->prefix('petugas')->name('petugas.')->group(function () {
+
     Route::get('/dashboard', [PetugasDashboard::class, 'index'])->name('dashboard');
 
+    // Ganti dari /booking/verifikasi menjadi /verifikasi-booking
+Route::get('/verifikasi-booking', [PetugasBooking::class, 'search'])->name('booking.search');
+
     Route::resource('booking', PetugasBooking::class)->only(['index', 'show']);
+
     Route::get('/kapasitas', [PetugasKapasitas::class, 'index'])->name('kapasitas.index');
 
     // Log Kegiatan
@@ -128,14 +133,11 @@ Route::middleware(['auth', 'petugas'])->prefix('petugas')->name('petugas.')->gro
     });
 
     // Notifikasi
-    Route::controller(PetugasNotification::class)
-        ->prefix('notifications')
-        ->name('notifications.')
-        ->group(function () {
-            Route::get('/', 'index')->name('index');
-            Route::get('/get-new', 'getNew')->name('get-new');
-            Route::get('/{id}/read', 'markAsRead')->name('markAsRead');
-        });
+    Route::controller(PetugasNotification::class)->prefix('notifications')->name('notifications.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/get-new', 'getNew')->name('get-new');
+        Route::get('/{id}/read', 'markAsRead')->name('markAsRead');
+    });
 });
 
 // ======================================================

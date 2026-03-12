@@ -17,6 +17,48 @@
             </p>
         </div>
 
+        {{-- PETUGAS ACTION BOX: Untuk Check-in User Baru --}}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8" data-aos="fade-up">
+            <div class="bg-gradient-to-br from-teal-500 to-teal-700 p-6 rounded-[2rem] shadow-lg shadow-teal-200 text-white flex items-center justify-between group cursor-pointer overflow-hidden relative">
+                <div class="relative z-10">
+                    <h3 class="text-lg font-bold">Check-in Tamu</h3>
+                    <p class="text-xs text-teal-100 opacity-80">Scan QR Code Invoice dari pelanggan</p>
+                    <button onclick="openScanner()" class="mt-3 bg-white text-teal-600 px-6 py-2 rounded-xl text-xs font-black uppercase hover:bg-teal-50 transition-all shadow-md">
+                        <i class="fas fa-qrcode mr-2"></i> Mulai Scan
+                    </button>
+                </div>
+                <i class="fas fa-camera text-6xl opacity-20 absolute -right-4 -bottom-4 transform group-hover:scale-110 transition-transform"></i>
+            </div>
+
+            <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 flex flex-col justify-center">
+                <label class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Cari Kode Booking</label>
+                <form action="{{ route('petugas.booking.search') }}" method="GET" class="relative">
+                    <input type="text" name="kode_booking" placeholder="Contoh: BK-2024..."
+                        class="w-full bg-gray-50 border-none rounded-2xl py-4 pl-6 pr-12 focus:ring-2 focus:ring-teal-500 font-bold text-gray-700">
+                    <button type="submit" class="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-teal-600 text-white rounded-xl hover:bg-teal-700 transition shadow-sm">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div id="scannerModal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+            <div class="bg-white rounded-[2rem] w-full max-w-lg overflow-hidden shadow-2xl">
+                <div class="p-6 border-b flex justify-between items-center">
+                    <h3 class="font-bold text-gray-800">Scan QR Code Invoice</h3>
+                    <button onclick="closeScanner()" class="text-gray-400 hover:text-red-500 transition">
+                        <i class="fas fa-times-circle text-2xl"></i>
+                    </button>
+                </div>
+                <div class="p-4">
+                    <div id="reader" class="overflow-hidden rounded-2xl bg-gray-100"></div>
+                </div>
+                <div class="p-6 bg-gray-50 text-center">
+                    <p class="text-xs text-gray-500 font-medium">Arahkan kamera ke QR Code yang ada di Invoice pelanggan</p>
+                </div>
+            </div>
+        </div>
+
         {{-- Dropdown Notifikasi --}}
         <div class="relative" x-data="{ open: false }">
             <button @click="open = !open"
@@ -49,42 +91,42 @@
 
                 <div class="max-h-96 overflow-y-auto divide-y divide-gray-50 bg-white">
                     @if(isset($recentNotifications) && $recentNotifications->count() > 0)
-                        @foreach($recentNotifications as $notif)
-                        @php
-                            $config = match($notif->type) {
-                                'assignment' => ['bg' => 'bg-purple-50', 'text' => 'text-purple-600', 'fa' => 'fa-user-plus'],
-                                'status'     => ['bg' => 'bg-blue-50', 'text' => 'text-blue-600', 'fa' => 'fa-sync-alt'],
-                                'extend'     => ['bg' => 'bg-amber-50', 'text' => 'text-amber-600', 'fa' => 'fa-clock'],
-                                'completed'  => ['bg' => 'bg-green-50', 'text' => 'text-green-600', 'fa' => 'fa-check-double'],
-                                'cancel'     => ['bg' => 'bg-red-50', 'text' => 'text-red-600', 'fa' => 'fa-calendar-times'],
-                                default      => ['bg' => 'bg-gray-50', 'text' => 'text-gray-600', 'fa' => 'fa-bell'],
-                            };
-                        @endphp
-                        <div class="p-4 hover:bg-gray-50 transition flex items-start {{ !$notif->is_read ? 'bg-blue-50/50 border-l-4 border-teal-500' : '' }}">
-                            <div class="flex-shrink-0 mr-3">
-                                <span class="w-10 h-10 rounded-xl flex items-center justify-center {{ $config['bg'] }} {{ $config['text'] }} shadow-sm">
-                                    <i class="fas {{ $config['fa'] }}"></i>
-                                </span>
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <div class="flex justify-between items-start gap-1">
-                                    <h4 class="text-xs sm:text-sm font-bold text-gray-800 truncate">{{ $notif->title }}</h4>
-                                    <span class="text-[9px] text-gray-400 font-medium italic">{{ $notif->created_at->diffForHumans() }}</span>
-                                </div>
-                                <p class="text-[11px] sm:text-[12px] text-gray-600 mt-1 line-clamp-2">{{ $notif->message }}</p>
-                                @if(!$notif->is_read)
-                                <a href="{{ route('petugas.notifications.markAsRead', $notif->id) }}" class="inline-block mt-2 text-[10px] font-bold text-teal-600 hover:underline">
-                                    Tandai telah dibaca
-                                </a>
-                                @endif
-                            </div>
+                    @foreach($recentNotifications as $notif)
+                    @php
+                    $config = match($notif->type) {
+                    'assignment' => ['bg' => 'bg-purple-50', 'text' => 'text-purple-600', 'fa' => 'fa-user-plus'],
+                    'status' => ['bg' => 'bg-blue-50', 'text' => 'text-blue-600', 'fa' => 'fa-sync-alt'],
+                    'extend' => ['bg' => 'bg-amber-50', 'text' => 'text-amber-600', 'fa' => 'fa-clock'],
+                    'completed' => ['bg' => 'bg-green-50', 'text' => 'text-green-600', 'fa' => 'fa-check-double'],
+                    'cancel' => ['bg' => 'bg-red-50', 'text' => 'text-red-600', 'fa' => 'fa-calendar-times'],
+                    default => ['bg' => 'bg-gray-50', 'text' => 'text-gray-600', 'fa' => 'fa-bell'],
+                    };
+                    @endphp
+                    <div class="p-4 hover:bg-gray-50 transition flex items-start {{ !$notif->is_read ? 'bg-blue-50/50 border-l-4 border-teal-500' : '' }}">
+                        <div class="flex-shrink-0 mr-3">
+                            <span class="w-10 h-10 rounded-xl flex items-center justify-center {{ $config['bg'] }} {{ $config['text'] }} shadow-sm">
+                                <i class="fas {{ $config['fa'] }}"></i>
+                            </span>
                         </div>
-                        @endforeach
+                        <div class="flex-1 min-w-0">
+                            <div class="flex justify-between items-start gap-1">
+                                <h4 class="text-xs sm:text-sm font-bold text-gray-800 truncate">{{ $notif->title }}</h4>
+                                <span class="text-[9px] text-gray-400 font-medium italic">{{ $notif->created_at->diffForHumans() }}</span>
+                            </div>
+                            <p class="text-[11px] sm:text-[12px] text-gray-600 mt-1 line-clamp-2">{{ $notif->message }}</p>
+                            @if(!$notif->is_read)
+                            <a href="{{ route('petugas.notifications.markAsRead', $notif->id) }}" class="inline-block mt-2 text-[10px] font-bold text-teal-600 hover:underline">
+                                Tandai telah dibaca
+                            </a>
+                            @endif
+                        </div>
+                    </div>
+                    @endforeach
                     @else
-                        <div class="py-12 text-center">
-                            <i class="fas fa-bell-slash text-gray-200 text-5xl mb-3"></i>
-                            <p class="text-gray-400 text-sm italic font-medium">Belum ada tugas baru.</p>
-                        </div>
+                    <div class="py-12 text-center">
+                        <i class="fas fa-bell-slash text-gray-200 text-5xl mb-3"></i>
+                        <p class="text-gray-400 text-sm italic font-medium">Belum ada tugas baru.</p>
+                    </div>
                     @endif
                 </div>
             </div>
@@ -102,18 +144,27 @@
     @if($bookings->count() > 0)
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         @foreach($bookings as $index => $booking)
-        <div class="group bg-white rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300" 
-             data-aos="fade-up" 
-             data-aos-delay="{{ 100 * ($index + 1) }}">
-            
+        <div class="group bg-white rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+            data-aos="fade-up"
+            data-aos-delay="{{ 100 * ($index + 1) }}">
+
             <div class="p-6 sm:p-8">
+                {{-- GANTI BAGIAN ATAS CARD (Di dalam foreach bookings) --}}
                 <div class="flex justify-between items-start mb-6">
                     <div class="p-4 bg-teal-50 rounded-2xl group-hover:bg-teal-600 transition-colors">
                         <i class="fas fa-paw text-2xl text-teal-600 group-hover:text-white"></i>
                     </div>
-                    <span class="bg-gray-50 text-gray-500 px-3 py-1 rounded-full text-[10px] font-bold border border-gray-100 tracking-widest uppercase">
-                        {{ $booking->kode_booking }}
-                    </span>
+                    <div class="flex flex-col items-end gap-2">
+                        <span class="bg-gray-50 text-gray-500 px-3 py-1 rounded-full text-[10px] font-bold border border-gray-100 tracking-widest uppercase">
+                            {{ $booking->kode_booking }}
+                        </span>
+                        {{-- Status DP --}}
+                        @if($booking->dp_dibayar == 'Ya')
+                        <span class="bg-green-100 text-green-600 text-[9px] px-2 py-0.5 rounded-md font-black italic">LUNAS</span>
+                        @else
+                        <span class="bg-red-100 text-red-600 text-[9px] px-2 py-0.5 rounded-md font-black italic">BELUM BAYAR</span>
+                        @endif
+                    </div>
                 </div>
 
                 <div class="mb-6">
@@ -138,12 +189,12 @@
 
                 <div class="grid grid-cols-2 gap-3">
                     @php
-                        $wa_clean = preg_replace('/[^\d]/', '', $booking->nomor_wa);
-                        if (str_starts_with($wa_clean, '0')) {
-                            $wa_clean = '62' . substr($wa_clean, 1);
-                        } elseif (!str_starts_with($wa_clean, '62')) {
-                            $wa_clean = '62' . $wa_clean;
-                        }
+                    $wa_clean = preg_replace('/[^\d]/', '', $booking->nomor_wa);
+                    if (str_starts_with($wa_clean, '0')) {
+                    $wa_clean = '62' . substr($wa_clean, 1);
+                    } elseif (!str_starts_with($wa_clean, '62')) {
+                    $wa_clean = '62' . $wa_clean;
+                    }
                     @endphp
                     <a href="https://wa.me/{{ $wa_clean }}?text=Halo%20Bapak/Ibu%20{{ urlencode($booking->nama_pemilik) }},%20ini%20update%20dari%20PetHouse%20untuk%20{{ urlencode($booking->nama_hewan) }}"
                         target="_blank"
@@ -198,14 +249,82 @@
             console.error('Notification Error:', error);
         }
     }
+
+    let html5QrCode;
+
+    function openScanner() {
+        // Tampilkan Modal
+        document.getElementById('scannerModal').classList.remove('hidden');
+        document.getElementById('scannerModal').classList.add('flex');
+
+        // Inisialisasi Scanner
+        html5QrCode = new Html5Qrcode("reader");
+
+        const config = {
+            fps: 10,
+            qrbox: {
+                width: 250,
+                height: 250
+            },
+            aspectRatio: 1.0
+        };
+
+        // Mulai Kamera (Facing Mode Environment = Kamera Belakang)
+        html5QrCode.start({
+                facingMode: "environment"
+            },
+            config,
+            // ... di dalam callback html5QrCode.start ...
+            (decodedText) => {
+                stopScanner();
+
+                // Gunakan helper route() agar Laravel memberikan URL: /petugas/verifikasi-checkin
+                const targetUrl = "{{ route('petugas.booking.search') }}";
+
+                // Redirect ke URL verifikasi
+                window.location.href = `${targetUrl}?kode_booking=${encodeURIComponent(decodedText)}`;
+            },
+            (errorMessage) => {
+                // Abaikan error saat mencari QR
+            }
+        ).catch((err) => {
+            alert("Gagal mengakses kamera: " + err);
+        });
+    }
+
+    function stopScanner() {
+        if (html5QrCode) {
+            html5QrCode.stop().then(() => {
+                closeScanner();
+            }).catch((err) => console.error("Gagal stop scanner", err));
+        }
+    }
+
+    function closeScanner() {
+        document.getElementById('scannerModal').classList.add('hidden');
+        document.getElementById('scannerModal').classList.remove('flex');
+        if (html5QrCode && html5QrCode.isScanning) {
+            html5QrCode.stop();
+        }
+    }
 </script>
+<script src="https://unpkg.com/html5-qrcode"></script>
 
 <style>
     /* Custom Scrollbar for Dropdown */
-    .max-h-96::-webkit-scrollbar { width: 5px; }
-    .max-h-96::-webkit-scrollbar-track { background: #f1f1f1; }
-    .max-h-96::-webkit-scrollbar-thumb { background: #0d9488; border-radius: 10px; }
-    
+    .max-h-96::-webkit-scrollbar {
+        width: 5px;
+    }
+
+    .max-h-96::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+
+    .max-h-96::-webkit-scrollbar-thumb {
+        background: #0d9488;
+        border-radius: 10px;
+    }
+
     .card-hewan:hover .fa-paw {
         transform: rotate(20deg) scale(1.2);
         transition: all 0.3s ease;

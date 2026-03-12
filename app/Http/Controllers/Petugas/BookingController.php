@@ -24,4 +24,22 @@ class BookingController extends Controller
         $booking = Booking::with(['layanan', 'user', 'dailyLogs'])->findOrFail($id);
         return view('petugas.booking.show', compact('booking'));
     }
+
+    public function search(Request $request)
+    {
+        $kode = $request->query('kode_booking');
+
+        // Ambil data booking berdasarkan kode
+        $booking = Booking::where('kode_booking', $kode)->first();
+
+        // Jika data tidak ditemukan
+        if (!$booking) {
+            return redirect()->route('petugas.dashboard')
+                ->with('error', 'Booking dengan kode ' . $kode . ' tidak ditemukan.');
+        }
+
+        // Jika ditemukan, tampilkan view verifikasi
+        // Pastikan file ini ada: resources/views/petugas/booking/checkin_verifikasi.blade.php
+        return view('petugas.booking.checkin_verifikasi', compact('booking'));
+    }
 }

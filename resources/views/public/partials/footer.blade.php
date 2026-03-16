@@ -61,12 +61,8 @@
                 <div class="bg-teal-800/50 p-6 rounded-2xl border border-teal-600">
                     <ul class="space-y-3">
                         <li class="flex justify-between text-sm">
-                            <span class="text-teal-300">Senin - Sabtu</span>
+                            <span class="text-teal-300">Senin - Minggu</span>
                             <span class="font-bold">08:00 - 18:00</span>
-                        </li>
-                        <li class="flex justify-between text-sm">
-                            <span class="text-teal-300">Minggu</span>
-                            <span class="text-pink-400 font-bold uppercase italic">Tutup</span>
                         </li>
                     </ul>
                     <hr class="my-4 border-teal-600">

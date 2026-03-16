@@ -4,253 +4,171 @@
 
 @section('content')
 
-<div class="mb-12 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6" data-aos="fade-down" data-aos-duration="1000">
-    <div>
-        <h1 class="text-4xl lg:text-5xl font-bold text-gray-800 mb-2">
+{{-- Header Section --}}
+<div class="mb-10 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+    <div class="space-y-1">
+        <h1 class="text-3xl md:text-4xl lg:text-5xl font-extrabold text-gray-800 tracking-tight">
             Selamat datang, <span class="gradient-text">{{ $adminName }}!</span> 🐾
         </h1>
-        <p class="text-gray-500 text-lg flex items-center gap-2">
-            <i class="far fa-calendar-alt text-teal"></i>
+        <p class="text-gray-500 text-base md:text-lg flex items-center gap-2 font-medium">
+            <i class="far fa-calendar-alt text-teal-500"></i>
             {{ now()->locale('id')->translatedFormat('l, d F Y') }}
         </p>
     </div>
-    <div class="flex items-center gap-6 bg-white px-8 py-4 rounded-3xl shadow-lg relative" x-data="{ showNotifications: false }">
-        <span class="text-gray-600 font-medium">Notifikasi</span>
-        <div class="relative" @click.away="showNotifications = false">
-            <button @click="showNotifications = !showNotifications" class="relative focus:outline-none">
-                <i class="fas fa-bell text-4xl text-teal cursor-pointer hover:text-teal-600 transition-colors"></i>
-                @if($notifCount > 0)
-                <span id="notification-badge" class="notification-badge absolute -top-2 -right-2 bg-pink text-white text-xs font-bold rounded-full w-7 h-7 flex items-center justify-center shadow-lg animate-pulse">
-                    {{ $notifCount }}
-                </span>
-                @endif
-            </button>
 
-            <div x-show="showNotifications" x-transition
-                class="absolute right-0 mt-3 w-96 bg-white rounded-2xl shadow-2xl z-50 border border-gray-200 max-h-96 overflow-y-auto"
-                style="display: none;">
-                <div class="p-4 border-b border-gray-100 flex justify-between items-center">
-                    <h3 class="text-lg font-bold text-gray-800">Notifikasi Terbaru</h3>
+    <div class="flex items-center gap-4 w-full lg:w-auto" x-data="{ showNotifications: false }">
+        <div class="flex items-center justify-between bg-white px-6 py-3 rounded-2xl shadow-sm border border-gray-100 w-full lg:w-auto relative group transition-all hover:shadow-md">
+            <span class="text-gray-600 font-semibold mr-4 hidden sm:inline">Notifikasi</span>
+            <div class="relative" @click.away="showNotifications = false">
+                <button @click="showNotifications = !showNotifications" class="relative p-2 rounded-xl hover:bg-gray-50 transition-colors focus:outline-none">
+                    <i class="fas fa-bell text-2xl text-teal-600 cursor-pointer"></i>
                     @if($notifCount > 0)
-                    <button id="mark-all-read-btn"
-                        class="text-xs text-teal hover:text-teal-600 font-medium transition-colors duration-200"
-                        onclick="markAllAsRead()">
-                        <i class="fas fa-check-double mr-1"></i>Tandai semua terbaca
-                    </button>
+                    <span id="notification-badge" class="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center shadow-md ring-2 ring-white animate-bounce">
+                        {{ $notifCount }}
+                    </span>
                     @endif
-                </div>
-                <div id="notification-list">
-                    @forelse($recentNotifications as $notification)
-                    <div class="notification-item p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors duration-200 
-                            {{ !$notification->is_read ? 'bg-blue-50' : '' }}"
-                        data-id="{{ $notification->id }}"
-                        onclick="markSingleAsRead('{{ $notification->id }}', this)">
-                        <div class="flex items-start gap-3">
-                            <div class="flex-shrink-0 mt-1">
-                                @php
-                                $icon = match(true) {
-                                str_contains($notification->title, 'Baru') => 'fa-calendar-plus text-teal',
-                                str_contains($notification->title, 'Dibatalkan') => 'fa-calendar-times text-pink',
-                                str_contains($notification->title, 'Diperpanjang') => 'fa-calendar-plus text-teal',
-                                str_contains($notification->title, 'Konsultasi') => 'fa-comments text-blue-500',
-                                default => 'fa-bell text-gray-500'
-                                };
-                                @endphp
-                                <i class="fas {{ $icon }} text-lg"></i>
+                </button>
+
+                {{-- Notification Dropdown --}}
+                <div x-show="showNotifications"
+                    x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0 scale-95"
+                    x-transition:enter-end="opacity-100 scale-100"
+                    class="absolute right-0 mt-4 w-[calc(100vw-2rem)] sm:w-96 bg-white rounded-2xl shadow-2xl z-[60] border border-gray-100 overflow-hidden"
+                    style="display: none;">
+                    <div class="p-4 bg-gray-50/50 border-b border-gray-100 flex justify-between items-center">
+                        <h3 class="font-bold text-gray-800">Notifikasi Terbaru</h3>
+                        @if($notifCount > 0)
+                        <button class="text-xs text-teal-600 hover:underline font-semibold flex items-center gap-1" onclick="markAllAsRead()">
+                            <i class="fas fa-check-double text-[10px]"></i> Tandai semua
+                        </button>
+                        @endif
+                    </div>
+                    <div id="notification-list" class="max-h-[400px] overflow-y-auto">
+                        @forelse($recentNotifications as $notification)
+                        <div class="p-4 border-b border-gray-50 hover:bg-teal-50/30 transition-all cursor-pointer {{ !$notification->is_read ? 'bg-blue-50/40' : '' }}"
+                            onclick="markSingleAsRead('{{ $notification->id }}', this)">
+                            <div class="flex items-start gap-3">
+                                <div class="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center flex-shrink-0 border border-gray-100">
+                                    <i class="fas fa-bell text-teal-500"></i>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <h4 class="font-bold text-sm text-gray-800 truncate">{{ $notification->title }}</h4>
+                                    <p class="text-xs text-gray-600 line-clamp-2 mt-0.5">{{ $notification->message }}</p>
+                                    <p class="text-[10px] text-gray-400 mt-2"><i class="far fa-clock"></i> {{ $notification->created_at->diffForHumans() }}</p>
+                                </div>
                             </div>
-                            <div class="flex-1">
-                                <h4 class="font-semibold text-gray-800">{{ $notification->title }}</h4>
-                                <p class="text-sm text-gray-600 mt-1">{{ $notification->message }}</p>
-                                @if($notification->booking)
-                                <p class="text-xs text-gray-500 mt-1">
-                                    Kode: {{ $notification->booking->kode_booking }}
-                                </p>
-                                @endif
-                                <p class="text-xs text-gray-400 mt-2">
-                                    <i class="far fa-clock mr-1"></i>{{ $notification->created_at->diffForHumans() }}
-                                </p>
-                            </div>
-                            @if(!$notification->is_read)
-                            <span class="unread-dot w-2 h-2 bg-pink rounded-full flex-shrink-0 mt-2"></span>
-                            @endif
                         </div>
+                        @empty
+                        <div class="py-12 text-center text-gray-400 text-sm">Belum ada notifikasi</div>
+                        @endforelse
                     </div>
-                    @empty
-                    <div class="p-8 text-center">
-                        <i class="fas fa-bell-slash text-4xl text-gray-300 mb-3"></i>
-                        <p class="text-gray-500">Belum ada notifikasi</p>
-                    </div>
-                    @endforelse
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-12">
+{{-- Stats Grid --}}
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-5 mb-10">
     @php
     $stats = [
-    [
-    'icon' => 'fa-calendar-check',
-    'title' => 'Booking Bulan Ini',
-    'value' => $totalBookingBulanIni,
-    'color' => 'teal',
-    'bg' => 'from-teal-500 to-teal-600'
-    ],
-    [
-    'icon' => 'fa-paw',
-    'title' => 'Hewan Dititipkan',
-    'value' => $hewanDititipkanSekarang,
-    'color' => 'pink',
-    'bg' => 'from-pink-500 to-pink-600'
-    ],
-    [
-    'icon' => 'fa-stethoscope',
-    'title' => 'Konsultasi Selesai',
-    'value' => $selesaiKonsultasi,
-    'color' => 'amber',
-    'bg' => 'from-amber-400 to-amber-500'
-    ],
-    [
-    'icon' => 'fa-sack-dollar',
-    'title' => 'Pendapatan Bulan Ini',
-    'value' => 'Rp ' . number_format($pendapatanBulanIni, 0, ',', '.'),
-    'color' => 'teal',
-    'bg' => 'from-teal-600 to-teal-700',
-    'large' => true
-    ],
-    [
-    'icon' => 'fa-chart-pie',
-    'title' => 'Occupancy Rate',
-    'value' => $occupancyRate . '%',
-    'color' => 'pink',
-    'bg' => 'from-pink-600 to-pink-700'
-    ],
-    [
-    'icon' => 'fa-comment-dots',
-    'title' => 'Testimoni Baru',
-    'value' => $testimoniBaru,
-    'color' => 'amber',
-    'bg' => 'from-amber-500 to-amber-600'
-    ],
+    ['icon' => 'fa-calendar-check', 'title' => 'Booking Bln Ini', 'value' => $totalBookingBulanIni, 'bg' => 'from-teal-500 to-emerald-600'],
+    ['icon' => 'fa-paw', 'title' => 'Hewan Inap', 'value' => $hewanDititipkanSekarang, 'bg' => 'from-rose-500 to-pink-600'],
+    ['icon' => 'fa-stethoscope', 'title' => 'Konsultasi Selesai', 'value' => $selesaiKonsultasi, 'bg' => 'from-amber-400 to-orange-500'],
+    ['icon' => 'fa-sack-dollar', 'title' => 'Pendapatan Bln Ini', 'value' => 'Rp ' . number_format($pendapatanBulanIni, 0, ',', '.'), 'bg' => 'from-indigo-500 to-blue-600', 'is_price' => true],
+    ['icon' => 'fa-chart-pie', 'title' => 'Occupancy Rate', 'value' => $occupancyRate . '%', 'bg' => 'from-fuchsia-500 to-purple-600'],
+    ['icon' => 'fa-comment-dots', 'title' => 'Testimoni Baru', 'value' => $testimoniBaru, 'bg' => 'from-sky-400 to-cyan-500'],
     ];
     @endphp
 
-    @foreach($stats as $i => $stat)
-    <div class="stat-card bg-gradient-to-br {{ $stat['bg'] }} text-white rounded-3xl shadow-xl p-6 card-hover" data-aos="zoom-in" data-aos-delay="{{ $i * 80 }}" data-aos-duration="800">
-        <div class="flex flex-col h-full justify-between">
-            <div class="flex items-start justify-between mb-4">
-                <div class="bg-white bg-opacity-20 backdrop-blur-sm rounded-2xl p-3">
-                    <i class="fas {{ $stat['icon'] }} text-3xl"></i>
-                </div>
+    @foreach($stats as $stat)
+    <div class="group bg-gradient-to-br {{ $stat['bg'] }} p-5 rounded-[2rem] shadow-lg transition-all duration-300 hover:-translate-y-2 relative overflow-hidden">
+        <div class="relative z-10 flex flex-col h-full">
+            <div class="w-10 h-10 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center mb-4 ring-1 ring-white/30">
+                <i class="fas {{ $stat['icon'] }} text-white text-lg"></i>
             </div>
-            <div>
-                <p class="text-sm font-medium opacity-90 mb-2">{{ $stat['title'] }}</p>
-                <p class="text-3xl font-bold tracking-tight {{ isset($stat['large']) ? 'text-2xl' : '' }}">
-                    {{ $stat['value'] }}
-                </p>
-            </div>
+            <p class="text-white/80 text-[10px] font-bold uppercase tracking-wider mb-1">{{ $stat['title'] }}</p>
+            <p class="text-white font-black {{ isset($stat['is_price']) ? 'text-base' : 'text-2xl' }} truncate">
+                {{ $stat['value'] }}
+            </p>
         </div>
     </div>
     @endforeach
 </div>
 
-<div class="bg-white rounded-3xl shadow-2xl p-8 lg:p-10 mb-12 card-hover" data-aos="fade-up" data-aos-duration="1000">
-    <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-8">
-        <div>
-            <h2 class="text-3xl font-bold text-gray-800 mb-2">Revenue Analytics</h2>
-            <p class="text-gray-500 text-sm">Grafik performa pendapatan berdasarkan filter</p>
+{{-- Chart Section --}}
+<div class="grid grid-cols-1 gap-8 mb-10">
+    <div class="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 p-6 md:p-10">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800">Revenue Analytics</h2>
+                <p class="text-gray-400 text-sm mt-1">Monitoring performa berdasarkan periode</p>
+            </div>
+
+            <form action="{{ url()->current() }}" method="GET" class="flex flex-wrap items-center gap-2 p-1.5 bg-gray-50 rounded-2xl border border-gray-100 w-full md:w-auto">
+                <select name="type" class="text-xs font-bold border-none bg-white rounded-xl py-2.5 px-4 shadow-sm cursor-pointer">
+                    <option value="all" {{ request('type') == 'all' ? 'selected' : '' }}>Semua Layanan (Rp)</option>
+                    <option value="booking" {{ request('type') == 'booking' ? 'selected' : '' }}>Penitipan (Rp)</option>
+                    <option value="konsultasi" {{ request('type') == 'konsultasi' ? 'selected' : '' }}>Konsultasi (Data)</option>
+                </select>
+
+                <div class="flex items-center gap-2 bg-white px-3 py-1.5 rounded-xl border border-gray-100 shadow-sm">
+                    <input type="date" name="start_date" value="{{ request('start_date') }}" class="text-[10px] font-bold border-none p-0 focus:ring-0 text-gray-600">
+                    <span class="text-gray-300">-</span>
+                    <input type="date" name="end_date" value="{{ request('end_date') }}" class="text-[10px] font-bold border-none p-0 focus:ring-0 text-gray-600">
+                </div>
+
+                <button type="submit" class="bg-teal-600 text-white w-10 h-10 rounded-xl hover:bg-teal-700 flex items-center justify-center shadow-md shadow-teal-200">
+                    <i class="fas fa-filter text-xs"></i>
+                </button>
+            </form>
         </div>
 
-        <form action="{{ url()->current() }}" method="GET" class="flex flex-wrap items-center gap-3 bg-gray-50 p-2 rounded-2xl border border-gray-100">
-            <div class="flex items-center bg-white rounded-xl px-3 border border-gray-100 shadow-sm">
-                <i class="fas fa-tag text-teal text-xs"></i>
-                <select name="type" class="text-[12px] font-bold border-none bg-transparent focus:ring-0 text-gray-600 cursor-pointer py-2">
-                    <option value="all" {{ request('type') == 'all' ? 'selected' : '' }}>Semua Pendapatan</option>
-                    <option value="booking" {{ request('type') == 'booking' ? 'selected' : '' }}>Penitipan</option>
-                    <option value="konsultasi" {{ request('type') == 'konsultasi' ? 'selected' : '' }}>Konsultasi</option>
-                </select>
-            </div>
-            
-            <div class="flex items-center gap-3 bg-white px-4 py-2 rounded-xl border border-gray-100 shadow-sm">
-                <div class="flex items-center gap-2">
-                    <i class="far fa-calendar-alt text-teal text-xs"></i>
-                    <input type="date" name="start_date" value="{{ request('start_date') }}" class="text-[11px] font-bold bg-transparent border-none p-0 focus:ring-0 text-gray-600 uppercase cursor-pointer">
-                </div>
-                <span class="text-gray-300">|</span>
-                <div class="flex items-center gap-2">
-                    <input type="date" name="end_date" value="{{ request('end_date') }}" class="text-[11px] font-bold bg-transparent border-none p-0 focus:ring-0 text-gray-600 uppercase cursor-pointer">
-                </div>
-            </div>
-
-            <div class="flex items-center gap-2">
-                <button type="submit" class="bg-teal text-white w-10 h-10 rounded-xl hover:bg-teal-600 transition-all flex items-center justify-center shadow-lg shadow-teal-100 active:scale-90">
-                    <i class="fas fa-filter text-sm"></i>
-                </button>
-
-                @if(request('start_date') || request('type'))
-                <a href="{{ url()->current() }}" class="w-10 h-10 bg-rose-50 text-rose-500 rounded-xl flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all">
-                    <i class="fas fa-sync-alt text-sm"></i>
-                </a>
-                @endif
-            </div>
-        </form>
-    </div>
-
-    <div class="relative">
-        <canvas id="revenueChart" height="100"></canvas>
+        <div class="relative w-full overflow-hidden" style="height: 400px;">
+            {{-- DATA SINKRONISASI DENGAN CONTROLLER --}}
+            <canvas id="revenueChart"
+                data-unit="{{ $chartUnit }}"
+                data-labels='@json($revenueLabels)'
+                data-values='@json($revenueValues)'>
+            </canvas>
+        </div>
     </div>
 </div>
 
-<div class="bg-white rounded-3xl shadow-2xl p-8 lg:p-10 mb-12 card-hover" data-aos="fade-right" data-aos-duration="1000">
-    <div class="flex items-center justify-between mb-8">
-        <div>
-            <h2 class="text-3xl font-bold text-gray-800 mb-2">Aktivitas Terbaru</h2>
-            <p class="text-gray-500">10 transaksi terakhir dalam sistem</p>
-        </div>
-        <div class="bg-pink bg-opacity-10 rounded-2xl p-4">
-            <i class="fas fa-history text-4xl text-pink"></i>
-        </div>
+{{-- Recent Activity --}}
+<div class="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 overflow-hidden">
+    <div class="p-8 border-b border-gray-50">
+        <h2 class="text-2xl font-bold text-gray-800">Aktivitas Terbaru</h2>
     </div>
-    <div class="overflow-x-auto">
+    <div class="overflow-x-auto p-6">
         <table class="w-full text-left">
-            <thead class="border-b-2 border-gray-200">
-                <tr class="text-gray-600 text-sm font-semibold uppercase tracking-wider">
-                    <th class="py-5 px-4">Tipe</th>
-                    <th class="py-5 px-4">Kode</th>
-                    <th class="py-5 px-4">Pelanggan</th>
-                    <th class="py-5 px-4">Detail</th>
-                    <th class="py-5 px-4">Tanggal</th>
-                    <th class="py-5 px-4">Status</th>
+            <thead>
+                <tr class="text-gray-400 text-[11px] font-extrabold uppercase tracking-widest border-b border-gray-100">
+                    <th class="pb-6 px-4">Tipe</th>
+                    <th class="pb-6 px-4">Pelanggan</th>
+                    <th class="pb-6 px-4">Waktu</th>
+                    <th class="pb-6 px-4">Status</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="divide-y divide-gray-50">
                 @foreach($recentActivity as $row)
-                @php
-                $badgeClass = match ($row['status']) {
-                'selesai', 'diterima' => 'bg-teal-100 text-teal-700 border-teal-200',
-                'pending' => 'bg-amber-100 text-amber-700 border-amber-200',
-                'in_progress' => 'bg-blue-100 text-blue-700 border-blue-200',
-                default => 'bg-pink-100 text-pink-700 border-pink-200'
-                };
-                $statusText = ucwords(str_replace('_', ' ', $row['status']));
-                @endphp
-                <tr class="table-row border-b border-gray-100">
-                    <td class="py-5 px-4">
-                        <span class="px-4 py-2 rounded-full text-xs font-semibold border-2 {{ $row['tipe'] == 'booking' ? 'bg-teal-50 text-teal-600 border-teal-200' : 'bg-pink-50 text-pink-600 border-pink-200' }}">
-                            <i class="fas {{ $row['tipe'] == 'booking' ? 'fa-calendar' : 'fa-comments' }} mr-1"></i>
-                            {{ ucfirst($row['tipe']) }}
-                        </span>
+                <tr class="hover:bg-gray-50/50 transition-colors">
+                    <td class="py-6 px-4">
+                        <span class="text-[10px] font-bold px-2 py-1 rounded bg-gray-100 text-gray-600 uppercase">{{ $row['tipe'] }}</span>
                     </td>
-                    <td class="py-5 px-4 font-semibold text-gray-700">{{ $row['kode'] }}</td>
-                    <td class="py-5 px-4 text-gray-600">{{ $row['pelanggan'] }}</td>
-                    <td class="py-5 px-4 text-gray-600">{{ $row['detail'] }}</td>
-                    <td class="py-5 px-4 text-gray-500">
-                        <i class="far fa-clock mr-2"></i>{{ \Carbon\Carbon::parse($row['tanggal'])->locale('id')->translatedFormat('d F Y') }}
+                    <td class="py-6 px-4">
+                        <div class="flex flex-col">
+                            <span class="font-bold text-gray-800">{{ $row['pelanggan'] }}</span>
+                            <span class="text-xs text-gray-400">{{ $row['kode'] }}</span>
+                        </div>
                     </td>
-                    <td class="py-5 px-4">
-                        <span class="px-4 py-2 rounded-full text-xs font-bold border-2 {{ $badgeClass }}">
-                            {{ $statusText }}
+                    <td class="py-6 px-4 text-xs font-semibold text-gray-500">
+                        {{ \Carbon\Carbon::parse($row['tanggal'])->translatedFormat('d F Y') }}
+                    </td>
+                    <td class="py-6 px-4">
+                        <span class="px-3 py-1.5 rounded-lg text-[10px] font-black uppercase bg-teal-50 text-teal-600 ring-1 ring-teal-500/20">
+                            {{ $row['status'] }}
                         </span>
                     </td>
                 </tr>
@@ -263,130 +181,102 @@
 @endsection
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // Revenue Chart
-    const ctx = document.getElementById('revenueChart').getContext('2d');
-    const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-    gradient.addColorStop(0, 'rgba(13, 148, 136, 0.3)');
-    gradient.addColorStop(1, 'rgba(13, 148, 136, 0.01)');
+    document.addEventListener('DOMContentLoaded', function() {
+        const chartEl = document.getElementById('revenueChart');
+        if (!chartEl) return;
 
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: @json($revenueLabels),
-            datasets: [{
-                label: 'Pendapatan (Rp)',
-                data: @json($revenueValues),
-                borderColor: '#0d9488',
-                backgroundColor: gradient,
-                tension: 0.4,
-                fill: true,
-                pointBackgroundColor: '#0d9488',
-                pointBorderColor: '#fff',
-                pointBorderWidth: 3,
-                pointRadius: 6,
-                pointHoverRadius: 8,
-                pointHoverBackgroundColor: '#0d9488',
-                pointHoverBorderColor: '#fff',
-                pointHoverBorderWidth: 4
-            }]
-        },
-        options: {
-            locale: 'id-ID',
-            responsive: true,
-            maintainAspectRatio: true,
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                    padding: 12,
-                    callbacks: {
-                        label: function(context) {
-                            return 'Rp ' + context.parsed.y.toLocaleString('id-ID');
+        // Ambil data dari atribut data HTML yang diparsing oleh Laravel
+        const unit = chartEl.getAttribute('data-unit'); // 'Rupiah' atau 'Jumlah'
+        const labelsData = JSON.parse(chartEl.getAttribute('data-labels') || '[]');
+        const valuesData = JSON.parse(chartEl.getAttribute('data-values') || '[]');
+
+        const ctx = chartEl.getContext('2d');
+        const gradientFill = ctx.createLinearGradient(0, 0, 0, 400);
+        gradientFill.addColorStop(0, 'rgba(13, 148, 136, 0.25)');
+        gradientFill.addColorStop(1, 'rgba(13, 148, 136, 0)');
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labelsData,
+                datasets: [{
+                    label: unit === 'Rupiah' ? 'Total Pendapatan' : 'Jumlah Konsultasi',
+                    data: valuesData,
+                    borderColor: '#0d9488',
+                    borderWidth: 3,
+                    backgroundColor: gradientFill,
+                    tension: 0.4,
+                    fill: true,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    pointBackgroundColor: '#ffffff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: '#1e293b',
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (unit === 'Rupiah') {
+                                    return label + ': Rp ' + context.parsed.y.toLocaleString('id-ID');
+                                }
+                                return label + ': ' + context.parsed.y + ' data';
+                            }
                         }
                     }
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        callback: function(value) {
-                            return 'Rp ' + value.toLocaleString('id-ID');
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                if (unit === 'Rupiah') {
+                                    if (value >= 1000000) return 'Rp ' + (value / 1000000) + 'jt';
+                                    if (value >= 1000) return 'Rp ' + (value / 1000) + 'rb';
+                                    return 'Rp ' + value;
+                                }
+                                return value + ' data';
+                            }
                         }
                     }
                 }
             }
-        }
+        });
     });
 
-    // CSRF Token
-    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
-
-    // Notifications Functions
-    async function markAllAsRead() {
-        const button = document.getElementById('mark-all-read-btn');
-        if (!button) return;
-        button.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>';
-        try {
-            const response = await fetch('{{ route("admin.notifications.mark-all-read") }}', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }
-            });
-            const data = await response.json();
-            if (data.success) {
-                location.reload(); // Simple reload to refresh all states
+    function markAllAsRead() {
+        fetch('{{ route("admin.notifications.mark-all-read") }}', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
             }
-        } catch (error) { console.error('Error:', error); }
+        }).then(() => location.reload());
     }
 
-    async function markSingleAsRead(notificationId, element) {
-        try {
-            const response = await fetch(`/admin/notifications/${notificationId}/mark-as-read`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }
-            });
-            const data = await response.json();
-            if (data.success) {
-                element.classList.remove('bg-blue-50');
-                element.querySelector('.unread-dot')?.remove();
-                if(document.getElementById('notification-badge')) {
-                    const currentCount = parseInt(document.getElementById('notification-badge').textContent);
-                    if(currentCount <= 1) document.getElementById('notification-badge').remove();
-                    else document.getElementById('notification-badge').textContent = currentCount - 1;
-                }
+    function markSingleAsRead(id, el) {
+        fetch(`/admin/notifications/mark-read/${id}`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
             }
-        } catch (error) { console.error('Error:', error); }
+        }).then(() => location.reload());
     }
 </script>
 
 <style>
-    /* Gradient text */
     .gradient-text {
-        background: linear-gradient(135deg, #0d9488, #2dd4bf);
+        background: linear-gradient(90deg, #0d9488, #2dd4bf);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        background-clip: text;
     }
-    
-    .card-hover {
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    
-    .card-hover:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-    }
-
-    .notification-badge {
-        animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-        0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.1); }
-    }
-
-    .table-row:hover { background-color: #f9fafb; }
 </style>
 @endpush

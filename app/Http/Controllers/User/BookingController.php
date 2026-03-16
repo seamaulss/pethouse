@@ -263,6 +263,44 @@ class BookingController extends Controller
         return view('user.booking.show', compact('booking', 'durasi', 'hargaPerHari', 'totalBiaya'));
     }
 
+    /**
+     * FITUR TAMBAHAN UNTUK PRESENTASI: Simulasi Pembayaran QRIS
+     */
+    public function bayarSimulasi($id)
+    {
+        $booking = Booking::where('user_id', Auth::id())->findOrFail($id);
+
+        if ($booking->dp_dibayar === 'Ya') {
+            return redirect()->back()->with('info', 'Sudah lunas.');
+        }
+
+        try {
+            DB::beginTransaction();
+
+            // Update status pembayaran & status booking
+            $booking->update([
+                'dp_dibayar' => 'Ya',
+                'status' => 'diterima' // Otomatis diterima jika sudah bayar
+            ]);
+
+            // Kirim notifikasi user
+            Notification::create([
+                'user_id' => Auth::id(),
+                'role_target' => 'user',
+                'title' => 'Pembayaran Berhasil',
+                'message' => "Pembayaran untuk #{$booking->kode_booking} berhasil diverifikasi.",
+                'booking_id' => $booking->id,
+                'type' => 'success'
+            ]);
+
+            DB::commit();
+            return redirect()->route('user.booking.show', $id)->with('success', '✅ Pembayaran Berhasil!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Gagal: ' . $e->getMessage());
+        }
+    }
+
     public function downloadPdf($id)
     {
         // 1. Load booking beserta relasi layanannya

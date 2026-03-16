@@ -11,6 +11,7 @@ use App\Models\Booking;
 use App\Models\Konsultasi;
 use App\Models\Testimoni;
 use App\Models\Notification;
+use App\Models\Kapasitas;
 
 class DashboardController extends Controller
 {
@@ -27,7 +28,7 @@ class DashboardController extends Controller
         // 1. Total Booking Bulan Ini
         $totalBookingBulanIni = Booking::whereBetween('created_at', [$startOfMonth, $endOfMonth])->count();
 
-        // 2. Hewan Dititipkan Sekarang
+        // 2. Hewan Dititipkan Sekarang (Status in_progress atau diterima dalam rentang tanggal)
         $hewanDititipkanSekarang = Booking::where(function ($query) use ($now) {
             $query->where('status', 'in_progress')
                 ->orWhere(function ($q) use ($now) {
@@ -42,11 +43,11 @@ class DashboardController extends Controller
         // 3. Selesai Konsultasi
         $selesaiKonsultasi = Konsultasi::where('status', 'selesai')->count();
 
-        // 4. Pendapatan Bulan Ini
+        // 4. Pendapatan Bulan Ini (Hanya dari Booking)
         $pendapatanBulanIni = $this->hitungPendapatanBulanIni($startOfMonth, $endOfMonth);
 
         // 5. Occupancy Rate
-        $kapasitasTotal = \App\Models\Kapasitas::sum('max_kapasitas');
+        $kapasitasTotal = Kapasitas::sum('max_kapasitas');
         $occupancyRate = $kapasitasTotal > 0
             ? round(($hewanDititipkanSekarang / $kapasitasTotal) * 100, 1)
             : 0;
@@ -54,7 +55,7 @@ class DashboardController extends Controller
         // 6. Testimoni Baru
         $testimoniBaru = Testimoni::where('status', 'aktif')->count();
 
-        // 7. Recent Activity (Tetap 5 Transaksi Terakhir secara umum)
+        // 7. Recent Activity (Gabungan 5 Booking & 5 Konsultasi Terakhir)
         $recentBookings = Booking::with(['layanan'])->orderBy('created_at', 'desc')->limit(5)->get()
             ->map(fn($b) => [
                 'tipe' => 'booking',
@@ -77,15 +78,20 @@ class DashboardController extends Controller
 
         $recentActivity = collect()->merge($recentBookings)->merge($recentKonsultasi)->sortByDesc('tanggal')->take(10)->values();
 
-        // --- 8. REVENUE CHART DATA (DENGAN FILTER) ---
+        // 8. DATA CHART (Filter Dinamis)
         $revenueData = $this->hitungPendapatanChart($request);
 
         // 9. Statistik Tambahan
-        $totalHewanSelesaiBulanIni = Booking::whereBetween('tanggal_keluar', [$startOfMonth, $endOfMonth])->where('status', 'selesai')->count();
-        $rataRataLamaInap = Booking::where('status', 'selesai')->whereBetween('tanggal_keluar', [$startOfMonth, $endOfMonth])
-            ->select(DB::raw('AVG(DATEDIFF(tanggal_keluar, tanggal_masuk) + 1) as rata_rata'))->first()->rata_rata ?? 0;
+        $totalHewanSelesaiBulanIni = Booking::whereBetween('tanggal_keluar', [$startOfMonth, $endOfMonth])
+            ->where('status', 'selesai')
+            ->count();
 
-        // 10. Notifikasi Admin
+        $rataRataLamaInap = Booking::where('status', 'selesai')
+            ->whereBetween('tanggal_keluar', [$startOfMonth, $endOfMonth])
+            ->select(DB::raw('AVG(DATEDIFF(tanggal_keluar, tanggal_masuk) + 1) as rata_rata'))
+            ->first()->rata_rata ?? 0;
+
+        // 10. Notifikasi Count
         $notifCount = Notification::where('role_target', 'admin')
             ->whereIn('type', $this->userActivityTypes)
             ->where('is_read', false)
@@ -95,7 +101,9 @@ class DashboardController extends Controller
         $jenisHewanStats = DB::table('booking')
             ->join('jenis_hewan', 'booking.jenis_hewan_id', '=', 'jenis_hewan.id')
             ->whereBetween('booking.created_at', [$startOfMonth, $endOfMonth])
-            ->select('jenis_hewan.nama', DB::raw('COUNT(*) as total'))->groupBy('jenis_hewan.nama')->get();
+            ->select('jenis_hewan.nama', DB::raw('COUNT(*) as total'))
+            ->groupBy('jenis_hewan.nama')
+            ->get();
 
         // 12. Notifikasi Dropdown
         $recentNotifications = Notification::with('booking')
@@ -120,10 +128,13 @@ class DashboardController extends Controller
             'jenisHewanStats',
             'kapasitasTotal',
             'recentNotifications'
-        ) + ['revenueLabels' => $revenueData['labels'], 'revenueValues' => $revenueData['values']]);
+        ) + [
+            'revenueLabels' => $revenueData['labels'],
+            'revenueValues' => $revenueData['values'],
+            'chartUnit' => $revenueData['unit']
+        ]);
     }
 
-    // --- Private Methods untuk Hitung Pendapatan ---
     private function hitungPendapatanBulanIni($start, $end)
     {
         return Booking::whereBetween('tanggal_masuk', [$start, $end])
@@ -132,61 +143,56 @@ class DashboardController extends Controller
             ->sum('total_harga');
     }
 
-    /**
-     * Logika Filter Chart Pendapatan Dinamis
-     */
     private function hitungPendapatanChart(Request $request)
     {
         $labels = [];
         $values = [];
-
-        // 1. Logika Penentuan Tanggal
-        $startDate = $request->start_date ? Carbon::parse($request->start_date) : Carbon::now()->startOfWeek(Carbon::MONDAY);
-        $endDate = $request->end_date ? Carbon::parse($request->end_date) : $startDate->copy()->addDays(6);
         $tipe = $request->type ?? 'all';
 
-        // Hitung selisih hari untuk looping
+        // Tentukan unit untuk tooltip di frontend
+        $unit = ($tipe === 'konsultasi') ? 'Jumlah' : 'Rupiah';
+
+        $startDate = $request->start_date ? Carbon::parse($request->start_date) : Carbon::now()->startOfWeek(Carbon::MONDAY);
+        $endDate = $request->end_date ? Carbon::parse($request->end_date) : $startDate->copy()->addDays(6);
+
         $diffInDays = $startDate->diffInDays($endDate);
-        
-        // Batasi maksimal 31 hari agar chart tidak hancur/terlalu rapat
         $limit = ($diffInDays > 31) ? 31 : $diffInDays;
 
         for ($i = 0; $i <= $limit; $i++) {
             $date = $startDate->copy()->addDays($i);
-            $labels[] = $date->locale('id')->translatedFormat('d M'); // Format: 10 Mar
+            $labels[] = $date->locale('id')->translatedFormat('d M');
+            $dateString = $date->toDateString();
 
-            $income = 0;
+            $val = 0;
 
-            // Jika filter "Semua" atau "Booking"
+            // Jika filter "Semua" atau "Booking", hitung nominal Rupiah
             if ($tipe == 'all' || $tipe == 'booking') {
-                $income += (int) Booking::whereDate('tanggal_masuk', $date->toDateString())
+                $val += (int) Booking::whereDate('tanggal_masuk', $dateString)
                     ->where('dp_dibayar', 'Ya')
                     ->whereIn('status', ['diterima', 'in_progress', 'selesai'])
                     ->sum('total_harga');
             }
 
-            // Jika filter "Semua" atau "Konsultasi"
-            // Catatan: Pastikan tabel konsultasi punya kolom biaya/total_harga jika ingin dihitung
-            if ($tipe == 'all' || $tipe == 'konsultasi') {
-                // Contoh jika konsultasi ada biaya (asumsi kolom 'harga' di tabel Konsultasi)
-                // $income += (int) Konsultasi::whereDate('created_at', $date->toDateString())
-                //     ->where('status', 'selesai')
-                //     ->sum('harga');
+            // Jika filter "Konsultasi", hitung jumlah orang (frekuensi)
+            if ($tipe == 'konsultasi') {
+                $val = Konsultasi::whereDate('created_at', $dateString)->count();
             }
 
-            $values[] = $income;
+            $values[] = $val;
         }
 
-        return ['labels' => $labels, 'values' => $values];
+        return ['labels' => $labels, 'values' => $values, 'unit' => $unit];
     }
 
-    // --- Notification Actions ---
     public function markAsRead($id)
     {
-        $notification = Notification::find($id);
-        if ($notification && $notification->role_target === 'admin') {
+        $notification = Notification::where('id', $id)->where('role_target', 'admin')->first();
+        if ($notification) {
             $notification->update(['is_read' => true]);
-            $count = Notification::where('role_target', 'admin')->whereIn('type', $this->userActivityTypes)->where('is_read', false)->count();
+            $count = Notification::where('role_target', 'admin')
+                ->whereIn('type', $this->userActivityTypes)
+                ->where('is_read', false)
+                ->count();
             return response()->json(['success' => true, 'unread_count' => $count]);
         }
         return response()->json(['success' => false], 404);
@@ -194,7 +200,9 @@ class DashboardController extends Controller
 
     public function markAllAsRead()
     {
-        Notification::where('role_target', 'admin')->whereIn('type', $this->userActivityTypes)->update(['is_read' => true]);
+        Notification::where('role_target', 'admin')
+            ->whereIn('type', $this->userActivityTypes)
+            ->update(['is_read' => true]);
         return response()->json(['success' => true]);
     }
 }

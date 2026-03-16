@@ -39,14 +39,14 @@
                         class="flex items-center gap-3 pl-2 pr-3 py-1.5 rounded-2xl hover:bg-white/10 transition duration-300 group">
                         <div class="w-9 h-9 lg:w-10 lg:h-10 rounded-full overflow-hidden border-2 border-white/50 shadow-sm flex-shrink-0 bg-teal-800">
                             @if(Auth::user()->foto)
-                                <img src="{{ asset('storage/foto_user/' . Auth::user()->foto) }}" alt="Profile" class="w-full h-full object-cover">
+                            <img src="{{ asset('storage/foto_user/' . Auth::user()->foto) }}" alt="Profile" class="w-full h-full object-cover">
                             @else
-                                <div class="w-full h-full flex items-center justify-center bg-teal-500 text-white">
-                                    <i class="fas fa-user text-lg"></i>
-                                </div>
+                            <div class="w-full h-full flex items-center justify-center bg-teal-500 text-white">
+                                <i class="fas fa-user text-lg"></i>
+                            </div>
                             @endif
                         </div>
-                        
+
                         <div class="hidden lg:block text-left">
                             <p class="text-sm font-bold leading-none">{{ Auth::user()->username }}</p>
                             <p class="text-[10px] text-teal-100 mt-1 opacity-70 italic">Online</p>
@@ -54,12 +54,13 @@
                         <i class="fas fa-chevron-down text-[10px] transition-transform duration-300" :class="{ 'rotate-180': open }"></i>
                     </button>
 
-                    <div x-show="open" 
+                    <div x-show="open"
                         x-transition:enter="transition ease-out duration-200"
                         x-transition:enter-start="opacity-0 scale-95 translate-y-2"
                         x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                        style="display: none;"
                         class="absolute right-0 mt-3 w-60 bg-white rounded-2xl shadow-2xl py-2 z-[110] border border-gray-100">
-                        
+
                         <a href="{{ route('user.profil') }}" class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-teal-50 group transition">
                             <i class="fas fa-user-circle text-teal-500 group-hover:scale-110 transition"></i>
                             <span class="font-medium text-sm">Profil Saya</span>
@@ -67,7 +68,7 @@
 
                         <div class="border-t border-gray-50 my-1"></div>
 
-                        <button onclick="confirmLogout()" class="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-red-50 group transition">
+                        <button type="button" onclick="confirmLogout()" class="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-red-50 group transition">
                             <i class="fas fa-power-off text-red-500 group-hover:rotate-12 transition"></i>
                             <span class="font-medium text-sm text-red-600">Keluar Sesi</span>
                         </button>
@@ -102,7 +103,7 @@
                 <span class="font-medium">Profil</span>
             </a>
             <div class="pt-4 border-t border-white/10">
-                <button onclick="confirmLogout()" class="w-full flex items-center gap-4 px-4 py-4 rounded-2xl bg-red-500/20 text-red-200 hover:bg-red-500/30 transition">
+                <button type="button" onclick="confirmLogout()" class="w-full flex items-center gap-4 px-4 py-4 rounded-2xl bg-red-500/20 text-red-200 hover:bg-red-500/30 transition">
                     <i class="fas fa-sign-out-alt w-5"></i>
                     <span class="font-bold">Logout</span>
                 </button>
@@ -111,24 +112,37 @@
     </div>
 </nav>
 
-<!-- JavaScript untuk Logout Confirmation -->
+<form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+    @csrf
+</form>
+
 <script>
     function confirmLogout() {
-        Swal.fire({
-            title: 'Yakin ingin keluar?',
-            text: "Anda akan diarahkan ke halaman login",
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Ya, logout',
-            cancelButtonText: 'Batal'
-        }).then((result) => {
-            if (result.isConfirmed) {
+        // Cek apakah SweetAlert terpasang
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                title: 'Yakin ingin keluar?',
+                text: "Anda akan diarahkan ke halaman login",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, logout',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const form = document.getElementById('logout-form');
+                    if (form) {
+                        form.submit();
+                    }
+                }
+            });
+        } else {
+            // Fallback jika SweetAlert gagal load
+            if (confirm('Yakin ingin keluar?')) {
                 document.getElementById('logout-form').submit();
             }
-        });
-
+        }
     }
 
     // Toggle mobile menu
@@ -144,14 +158,5 @@
     });
 </script>
 
-
-
-<!-- Required: Alpine.js untuk dropdown (jika belum ada) -->
-
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-
-
-
-<!-- Required: SweetAlert2 untuk konfirmasi logout (jika belum ada) -->
-
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

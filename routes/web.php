@@ -77,6 +77,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Route khusus untuk Export PDF
     Route::get('booking-export-pdf', [BookingController::class, 'exportPdf'])->name('booking.export-pdf');
 
+    // PINDAHKAN KE SINI (Di atas Resource Konsultasi)
+    Route::get('konsultasi/export-pdf', [AdminKonsultasi::class, 'exportPdf'])->name('konsultasi.export-pdf');
+
     // Master Data Resources
     Route::resource('kapasitas', AdminKapasitas::class)->except(['show', 'create', 'edit']);
     Route::resource('konsultasi', AdminKonsultasi::class);
@@ -105,14 +108,14 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 });
 
 // ======================================================
-// PETUGAS ROUTES (VERSI BERSIH)
+// PETUGAS ROUTES
 // ======================================================
 Route::middleware(['auth', 'petugas'])->prefix('petugas')->name('petugas.')->group(function () {
 
     Route::get('/dashboard', [PetugasDashboard::class, 'index'])->name('dashboard');
 
     // Ganti dari /booking/verifikasi menjadi /verifikasi-booking
-Route::get('/verifikasi-booking', [PetugasBooking::class, 'search'])->name('booking.search');
+    Route::get('/verifikasi-booking', [PetugasBooking::class, 'search'])->name('booking.search');
 
     Route::resource('booking', PetugasBooking::class)->only(['index', 'show']);
 
@@ -135,7 +138,10 @@ Route::get('/verifikasi-booking', [PetugasBooking::class, 'search'])->name('book
     // Notifikasi
     Route::controller(PetugasNotification::class)->prefix('notifications')->name('notifications.')->group(function () {
         Route::get('/', 'index')->name('index');
-        Route::get('/get-new', 'getNew')->name('get-new');
+
+        // Pastikan 'getNewNotifications' sesuai dengan nama function di Controller
+        Route::get('/get-new', 'getNewNotifications')->name('get-new');
+
         Route::get('/{id}/read', 'markAsRead')->name('markAsRead');
     });
 });
@@ -158,11 +164,11 @@ Route::middleware(['auth', 'user'])->prefix('user')->name('user.')->group(functi
         Route::post('/', 'store')->name('store');
         Route::get('/riwayat', 'riwayat')->name('riwayat');
 
-        // Gunakan nama 'pdf' saja karena sudah terbungkus prefix 'user.booking.'
-        Route::get('/{id}/pdf', 'downloadPdf')->name('pdf');
-        // Route ini akan menjadi: user.booking.get-harga
-        Route::get('/get-harga', 'getHarga')->name('get-harga');
+        // TAMBAHKAN DI SINI (Tanpa prefix /user/booking lagi)
+        Route::get('/bayar-simulasi/{id}', 'bayarSimulasi')->name('bayar_simulasi');
 
+        Route::get('/{id}/pdf', 'downloadPdf')->name('pdf');
+        Route::get('/get-harga', 'getHarga')->name('get-harga');
         Route::get('/{id}/extend', 'showExtendForm')->name('extend.form');
         Route::post('/{id}/extend', 'extend')->name('extend');
         Route::post('/{id}/cancel', 'cancel')->name('cancel');

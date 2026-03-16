@@ -19,9 +19,10 @@ class LayananController extends Controller
      */
     public function index()
     {
+        // MENGGUNAKAN paginate() alih-alih get() agar sinkron dengan Blade
         $layanan = Layanan::with(['hargas' => function ($query) {
             $query->with('jenisHewan');
-        }])->latest()->get();
+        }])->latest()->paginate(10); // Sekarang currentPage() akan berfungsi
 
         $jenisHewan = JenisHewan::where('aktif', 'ya')
             ->orderBy('nama')
@@ -50,46 +51,35 @@ class LayananController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
+            return redirect()->back()->withErrors($validator)->withInput();
         }
 
         try {
-            // Upload gambar
             $gambarName = null;
             if ($request->hasFile('gambar')) {
                 $gambar = $request->file('gambar');
                 $gambarName = time() . '_' . uniqid() . '.' . $gambar->getClientOriginalExtension();
-                
-                // Simpan ke public/storage/layanan
                 $destinationPath = public_path('storage/layanan');
-                
-                // Buat folder jika belum ada
+
                 if (!File::exists($destinationPath)) {
                     File::makeDirectory($destinationPath, 0755, true);
                 }
-                
-                // Pindahkan file
+
                 $gambar->move($destinationPath, $gambarName);
-                
-                Log::info("File uploaded to: " . $destinationPath . '/' . $gambarName);
             }
 
-            // Simpan layanan
             $layanan = Layanan::create([
                 'nama_layanan' => $request->nama_layanan,
                 'gambar' => $gambarName,
                 'deskripsi' => $request->deskripsi,
             ]);
 
+            // Dialihkan ke atur-harga agar admin langsung mengisi nominal harganya
             return redirect()->route('admin.layanan.atur-harga', $layanan->id)
-                ->with('success', 'Layanan berhasil ditambahkan.');
+                ->with('success', 'Layanan berhasil dibuat. Silakan tentukan harga untuk setiap hewan.');
         } catch (\Exception $e) {
             Log::error('Store error: ' . $e->getMessage());
-            return redirect()->back()
-                ->with('error', 'Gagal menambahkan layanan: ' . $e->getMessage())
-                ->withInput();
+            return redirect()->back()->with('error', 'Gagal: ' . $e->getMessage())->withInput();
         }
     }
 
@@ -144,7 +134,7 @@ class LayananController extends Controller
             // Update gambar jika ada
             if ($request->hasFile('gambar')) {
                 $destinationPath = public_path('storage/layanan');
-                
+
                 // Hapus gambar lama
                 if ($layanan->gambar && file_exists($destinationPath . '/' . $layanan->gambar)) {
                     unlink($destinationPath . '/' . $layanan->gambar);
@@ -154,15 +144,15 @@ class LayananController extends Controller
                 // Upload gambar baru
                 $gambar = $request->file('gambar');
                 $gambarName = time() . '_' . uniqid() . '.' . $gambar->getClientOriginalExtension();
-                
+
                 // Pastikan folder ada
                 if (!File::exists($destinationPath)) {
                     File::makeDirectory($destinationPath, 0755, true);
                 }
-                
+
                 $gambar->move($destinationPath, $gambarName);
                 $data['gambar'] = $gambarName;
-                
+
                 Log::info("New image uploaded to: " . $destinationPath . '/' . $gambarName);
             }
 
@@ -223,19 +213,16 @@ class LayananController extends Controller
     {
         try {
             $layanan = Layanan::findOrFail($id);
-            $jenisHewan = JenisHewan::where('aktif', 'ya')
-                ->orderBy('nama')
-                ->get();
+            $jenisHewan = JenisHewan::where('aktif', 'ya')->orderBy('nama')->get();
 
-            // Ambil harga yang sudah ada
+            // Mapping harga yang sudah ada berdasarkan jenis_hewan_id
             $hargas = LayananHarga::where('layanan_id', $id)
                 ->get()
                 ->keyBy('jenis_hewan_id');
 
             return view('admin.layanan.atur-harga', compact('layanan', 'jenisHewan', 'hargas'));
         } catch (\Exception $e) {
-            return redirect()->route('admin.layanan.index')
-                ->with('error', 'Gagal memuat halaman: ' . $e->getMessage());
+            return redirect()->route('admin.layanan.index')->with('error', 'Data tidak ditemukan.');
         }
     }
 
@@ -251,25 +238,18 @@ class LayananController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
+            return redirect()->back()->withErrors($validator)->withInput();
         }
 
         try {
             foreach ($request->harga as $jenis_hewan_id => $harga) {
                 if ($harga !== null && $harga > 0) {
                     LayananHarga::updateOrCreate(
-                        [
-                            'layanan_id' => $layanan->id,
-                            'jenis_hewan_id' => $jenis_hewan_id,
-                        ],
-                        [
-                            'harga_per_hari' => $harga,
-                        ]
+                        ['layanan_id' => $layanan->id, 'jenis_hewan_id' => $jenis_hewan_id],
+                        ['harga_per_hari' => $harga]
                     );
                 } else {
-                    // Hapus jika harga kosong
+                    // Jika input dikosongkan, hapus settingan harga tersebut
                     LayananHarga::where('layanan_id', $layanan->id)
                         ->where('jenis_hewan_id', $jenis_hewan_id)
                         ->delete();
@@ -277,11 +257,9 @@ class LayananController extends Controller
             }
 
             return redirect()->route('admin.layanan.index')
-                ->with('success', 'Harga layanan berhasil disimpan.');
+                ->with('success', 'Daftar harga berhasil diperbarui.');
         } catch (\Exception $e) {
-            return redirect()->back()
-                ->with('error', 'Gagal menyimpan harga: ' . $e->getMessage())
-                ->withInput();
+            return redirect()->back()->with('error', 'Gagal menyimpan: ' . $e->getMessage());
         }
     }
 }

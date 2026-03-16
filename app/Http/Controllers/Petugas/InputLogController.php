@@ -13,79 +13,64 @@ use Carbon\Carbon;
 class InputLogController extends Controller
 {
     /**
-     * Tampilkan form input log fleksibel
+     * Tampilkan form input log
+     * Parameter menggunakan $booking sesuai dengan {booking} di route
      */
-    public function show($id, Request $request)
+    public function show(Booking $booking, Request $request)
     {
         $petugas = Auth::user();
-        
-        // Validasi booking
-        $booking = Booking::where('id', $id)
-            ->where('status', 'in_progress')
-            ->with(['user', 'layanan'])
-            ->firstOrFail();
-        
-        // Tanggal yang dipilih (default: hari ini)
+
+        // Otomatis update ke in_progress jika sebelumnya masih confirmed (Logika Check-in)
+        if ($booking->status === 'confirmed') {
+            $booking->update(['status' => 'in_progress']);
+        }
+
         $selectedDate = $request->get('tanggal', now()->toDateString());
-        
-        // Validasi tanggal harus dalam range booking
+
         $masuk = Carbon::parse($booking->tanggal_masuk);
         $keluar = Carbon::parse($booking->tanggal_keluar);
         $selected = Carbon::parse($selectedDate);
-        
+
         if ($selected->lt($masuk) || $selected->gt($keluar)) {
-            abort(400, 'Tanggal tidak valid untuk booking ini.');
+            return redirect()->route('petugas.input-log.show', ['booking' => $booking->id, 'tanggal' => $booking->tanggal_masuk]);
         }
-        
-        // Ambil semua log untuk tanggal yang dipilih
-        $logs = DailyLog::where('booking_id', $id)
+
+        $logs = DailyLog::where('booking_id', $booking->id)
             ->where('tanggal', $selectedDate)
             ->with('kegiatan')
             ->orderBy('waktu', 'asc')
             ->get();
-        
-        // Ambil semua master kegiatan yang aktif
+
         $masterKegiatan = MasterKegiatan::where('aktif', 'ya')
             ->orderBy('urutan')
             ->get();
-        
-        // Ambil semua tanggal booking untuk dropdown
+
         $dates = [];
         $current = $masuk->copy();
         while ($current->lte($keluar)) {
             $dates[] = $current->toDateString();
             $current->addDay();
         }
-        
-        // Cek tanggal mana yang sudah ada log
-        $filledDates = DailyLog::where('booking_id', $id)
+
+        $filledDates = DailyLog::where('booking_id', $booking->id)
             ->selectRaw('DATE(tanggal) as date')
             ->distinct()
             ->pluck('date')
             ->toArray();
-        
+
         return view('petugas.input-log', compact(
-            'booking', 
-            'logs',
-            'masterKegiatan',
-            'selectedDate',
-            'dates',
-            'filledDates'
+            'booking', 'logs', 'masterKegiatan', 'selectedDate', 'dates', 'filledDates'
         ));
     }
-    
+
     /**
-     * Simpan log kegiatan fleksibel
+     * Simpan log kegiatan
+     * PERBAIKAN: Parameter kedua HARUS bernama $booking agar sinkron dengan Route
      */
-    public function store(Request $request, $id)
+    public function store(Request $request, Booking $booking)
     {
         $petugasId = Auth::id();
-        
-        // Validasi booking
-        $booking = Booking::where('id', $id)
-            ->where('status', 'in_progress')
-            ->firstOrFail();
-        
+
         // Validasi input
         $validated = $request->validate([
             'tanggal' => 'required|date|after_or_equal:' . $booking->tanggal_masuk . '|before_or_equal:' . $booking->tanggal_keluar,
@@ -96,10 +81,10 @@ class InputLogController extends Controller
             'satuan' => 'nullable|string|max:20',
             'catatan' => 'nullable|string|max:1000',
         ]);
-        
-        // Simpan log
-        $log = DailyLog::create([
-            'booking_id' => $id,
+
+        // Simpan log menggunakan ID dari objek $booking yang sudah di-binding
+        DailyLog::create([
+            'booking_id' => $booking->id,
             'petugas_id' => $petugasId,
             'kegiatan_id' => $validated['kegiatan_id'],
             'tanggal' => $validated['tanggal'],
@@ -110,26 +95,21 @@ class InputLogController extends Controller
             'catatan' => $validated['catatan'] ?? null,
             'status_pelaksanaan' => 'selesai',
         ]);
-        
-        // Redirect kembali dengan parameter tanggal
-        return redirect()->route('petugas.input-log.show', ['booking' => $id, 'tanggal' => $validated['tanggal']])
+
+        return redirect()->route('petugas.input-log.show', ['booking' => $booking->id, 'tanggal' => $validated['tanggal']])
             ->with('success', 'Log kegiatan berhasil ditambahkan!');
     }
-    
+
     /**
      * Hapus log kegiatan
      */
-    public function destroyLog($id)
+    public function destroyLog(DailyLog $log)
     {
-        $log = DailyLog::where('id', $id)
-            ->where('petugas_id', Auth::id())
-            ->firstOrFail();
-            
         $bookingId = $log->booking_id;
         $tanggal = $log->tanggal;
-        
+
         $log->delete();
-        
+
         return redirect()->route('petugas.input-log.show', ['booking' => $bookingId, 'tanggal' => $tanggal])
             ->with('success', 'Log kegiatan berhasil dihapus!');
     }

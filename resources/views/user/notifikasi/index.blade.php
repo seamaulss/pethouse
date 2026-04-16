@@ -4,13 +4,11 @@
 
 @section('content')
 <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <!-- Header -->
     <div class="mb-8">
         <h1 class="text-3xl font-bold text-gray-800 mb-2">Notifikasi Saya</h1>
         <p class="text-gray-600">Semua notifikasi yang Anda terima</p>
     </div>
 
-    <!-- Actions -->
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div class="flex items-center gap-4">
             <button id="mark-all-read-btn" 
@@ -31,15 +29,16 @@
         </div>
     </div>
 
-    <!-- Notifications List -->
     <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
         @if($notifications->count() > 0)
         <div class="divide-y divide-gray-100">
             @foreach($notifications as $notification)
-            <div class="notification-item p-6 hover:bg-gray-50 transition-colors duration-200 
+            {{-- Bagian ini diubah: markSingleAsRead dipindah ke Event Listener JS di bawah --}}
+            <div class="notification-item p-6 hover:bg-gray-50 transition-colors duration-200 cursor-pointer
                     {{ !$notification->is_read ? 'bg-blue-50 border-l-4 border-teal-600' : '' }}"
                  data-id="{{ $notification->id }}"
-                 onclick="markSingleAsRead({{ $notification->id }}, this, '{{ $notification->booking_id ? route('user.booking.show', $notification->booking_id) : '#' }}')">
+                 data-url="{{ $notification->booking_id ? route('user.booking.show', $notification->booking_id) : '#' }}">
+                
                 <div class="flex items-start justify-between">
                     <div class="flex items-start gap-4 flex-1">
                         <div class="flex-shrink-0 mt-1">
@@ -89,8 +88,7 @@
                         </div>
                     </div>
                     
-                    <!-- Delete Button -->
-                    <button onclick="deleteNotification(event, {{ $notification->id }})" 
+                    <button onclick="deleteNotification(event, '{{ $notification->id }}')" 
                             class="ml-4 text-gray-400 hover:text-red-500 transition-colors"
                             title="Hapus notifikasi">
                         <i class="fas fa-trash-alt"></i>
@@ -100,7 +98,6 @@
             @endforeach
         </div>
         
-        <!-- Pagination -->
         <div class="px-6 py-4 border-t border-gray-100">
             {{ $notifications->links() }}
         </div>
@@ -115,12 +112,25 @@
     </div>
 </div>
 
-<!-- JavaScript -->
 <script>
-// CSRF Token
 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
 
-// Fungsi untuk menandai satu notifikasi sebagai terbaca
+// Inisialisasi Event Click untuk Notifikasi (Menghilangkan Error Linter)
+document.addEventListener('DOMContentLoaded', function() {
+    // Tangani klik pada item notifikasi
+    document.querySelectorAll('.notification-item').forEach(item => {
+        item.addEventListener('click', function() {
+            const id = this.getAttribute('data-id');
+            const url = this.getAttribute('data-url');
+            markSingleAsRead(id, this, url);
+        });
+    });
+
+    // Update unread count awal
+    const initialCount = "{{ $notifications->where('is_read', false)->count() }}";
+    updateUnreadCount(initialCount);
+});
+
 async function markSingleAsRead(notificationId, element, redirectUrl = '#') {
     try {
         const response = await fetch(`/user/notifikasi/${notificationId}/read`, {
@@ -135,35 +145,24 @@ async function markSingleAsRead(notificationId, element, redirectUrl = '#') {
         const data = await response.json();
         
         if (data.success) {
-            // Update UI
             element.classList.remove('bg-blue-50', 'border-l-4', 'border-teal-600');
-            
-            // Update unread count
             updateUnreadCount(data.unread_count);
             
-            // Jika ada redirect URL dan bukan #, redirect
             if (redirectUrl && redirectUrl !== '#') {
                 setTimeout(() => {
                     window.location.href = redirectUrl;
-                }, 300);
+                }, 200);
             }
-            
-            showToast('success', 'Notifikasi ditandai sebagai dibaca');
         }
-        
     } catch (error) {
         console.error('Error:', error);
-        showToast('error', 'Gagal menandai notifikasi');
     }
 }
 
-// Fungsi untuk menandai semua notifikasi sebagai terbaca
 async function markAllAsRead() {
     const button = document.getElementById('mark-all-read-btn');
     const originalText = button.innerHTML;
-    
-    // Tampilkan loading
-    button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Memproses...';
+    button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>...';
     button.disabled = true;
     
     try {
@@ -177,38 +176,24 @@ async function markAllAsRead() {
         });
         
         const data = await response.json();
-        
         if (data.success) {
-            // Hapus semua styling notifikasi baru
             document.querySelectorAll('.notification-item').forEach(item => {
                 item.classList.remove('bg-blue-50', 'border-l-4', 'border-teal-600');
             });
-            
-            // Update unread count
             updateUnreadCount(0);
-            
-            showToast('success', 'Semua notifikasi telah ditandai sebagai dibaca');
-        } else {
-            showToast('error', data.message || 'Terjadi kesalahan');
+            showToast('success', 'Semua ditandai dibaca');
         }
-        
     } catch (error) {
         console.error('Error:', error);
-        showToast('error', 'Gagal menghubungi server');
     } finally {
-        // Kembalikan teks tombol
         button.innerHTML = originalText;
         button.disabled = false;
     }
 }
 
-// Fungsi untuk menghapus notifikasi
 async function deleteNotification(event, notificationId) {
-    event.stopPropagation(); // Mencegah trigger click pada parent
-    
-    if (!confirm('Apakah Anda yakin ingin menghapus notifikasi ini?')) {
-        return;
-    }
+    event.stopPropagation();
+    if (!confirm('Hapus notifikasi ini?')) return;
     
     try {
         const response = await fetch(`/user/notifikasi/${notificationId}`, {
@@ -221,160 +206,44 @@ async function deleteNotification(event, notificationId) {
         });
         
         const data = await response.json();
-        
         if (data.success) {
-            // Hapus elemen dari DOM
             const element = document.querySelector(`.notification-item[data-id="${notificationId}"]`);
             if (element) {
                 element.style.opacity = '0';
-                element.style.transform = 'translateX(-20px)';
-                
                 setTimeout(() => {
                     element.remove();
-                    
-                    // Jika tidak ada notifikasi lagi, reload halaman
-                    if (document.querySelectorAll('.notification-item').length === 0) {
-                        location.reload();
-                    }
+                    if (document.querySelectorAll('.notification-item').length === 0) location.reload();
                 }, 300);
             }
-            
-            showToast('success', 'Notifikasi berhasil dihapus');
-        } else {
-            showToast('error', data.message || 'Gagal menghapus notifikasi');
         }
-        
     } catch (error) {
         console.error('Error:', error);
-        showToast('error', 'Gagal menghapus notifikasi');
     }
 }
 
-// Fungsi untuk refresh halaman
 function refreshNotifications() {
-    const button = document.getElementById('refresh-btn');
-    const originalText = button.innerHTML;
-    
-    button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Memuat...';
-    
-    setTimeout(() => {
-        location.reload();
-    }, 500);
+    location.reload();
 }
 
-// Fungsi untuk update unread count
 function updateUnreadCount(count) {
     const unreadElement = document.getElementById('unread-count');
     if (unreadElement) {
         unreadElement.textContent = count;
-        
-        if (count === 0) {
-            unreadElement.classList.add('text-green-600');
-            unreadElement.classList.remove('text-red-600');
-        } else {
-            unreadElement.classList.add('text-red-600');
-            unreadElement.classList.remove('text-green-600');
-        }
+        unreadElement.className = parseInt(count) === 0 ? 'text-green-600' : 'text-red-600';
     }
 }
 
-// Fungsi untuk menampilkan toast notification
 function showToast(type, message) {
-    // Hapus toast sebelumnya jika ada
-    const existingToast = document.getElementById('toast-notification');
-    if (existingToast) {
-        existingToast.remove();
-    }
-    
     const toast = document.createElement('div');
-    toast.id = 'toast-notification';
-    toast.className = `fixed top-6 right-6 z-50 px-6 py-4 rounded-xl shadow-2xl transform transition-all duration-300 translate-y-0 opacity-100 ${
-        type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
-    }`;
-    
-    toast.innerHTML = `
-        <div class="flex items-center gap-3">
-            <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} text-xl"></i>
-            <div>
-                <p class="font-medium">${message}</p>
-            </div>
-            <button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-white hover:text-gray-200">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-    `;
-    
+    toast.className = `fixed top-6 right-6 z-50 px-6 py-4 rounded-xl shadow-2xl ${type === 'success' ? 'bg-green-500' : 'bg-red-500'} text-white`;
+    toast.innerHTML = `<p>${message}</p>`;
     document.body.appendChild(toast);
-    
-    // Auto remove setelah 3 detik
-    setTimeout(() => {
-        if (toast.parentElement) {
-            toast.style.opacity = '0';
-            toast.style.transform = 'translateY(-20px)';
-            setTimeout(() => toast.remove(), 300);
-        }
-    }, 3000);
+    setTimeout(() => toast.remove(), 3000);
 }
-
-// Inisialisasi
-document.addEventListener('DOMContentLoaded', function() {
-    // Update unread count awal
-    const unreadCount = {{ $notifications->where('is_read', false)->count() }};
-    updateUnreadCount(unreadCount);
-});
 </script>
 
 <style>
-.notification-item {
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.notification-item:hover {
-    background-color: #f9fafb;
-    transform: translateX(5px);
-}
-
-/* Animasi untuk pagination */
-.pagination {
-    display: flex;
-    justify-content: center;
-    list-style: none;
-    padding: 0;
-}
-
-.pagination li {
-    margin: 0 2px;
-}
-
-.pagination li a,
-.pagination li span {
-    display: inline-block;
-    padding: 8px 16px;
-    border-radius: 8px;
-    text-decoration: none;
-    transition: all 0.3s ease;
-}
-
-.pagination li a {
-    color: #4b5563;
-    background-color: #f3f4f6;
-}
-
-.pagination li a:hover {
-    background-color: #0d9488;
-    color: white;
-}
-
-.pagination li.active span {
-    background-color: #0d9488;
-    color: white;
-    font-weight: 600;
-}
-
-.pagination li.disabled span {
-    color: #9ca3af;
-    cursor: not-allowed;
-}
+.notification-item { transition: all 0.3s ease; }
+.notification-item:hover { background-color: #f9fafb; transform: translateX(5px); }
 </style>
 @endsection

@@ -44,7 +44,7 @@
                                name="nama" 
                                value="{{ old('nama', $jenisHewan->nama) }}"
                                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 focus:outline-none transition"
-                               placeholder="Contoh: Kucing, Anjing, Kelinci" 
+                               placeholder="Contoh: Kucing, Anjing, Kelinci, Sapi" 
                                required>
                         @error('nama')
                             <p class="mt-2 text-sm text-red-600">{{ $message }}</p>

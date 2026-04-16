@@ -32,22 +32,22 @@
                     <span>Terisi: {{ $item->terisi }}</span>
                     <span>Kapasitas: {{ $item->max_kapasitas }}</span>
                 </div>
-                <div class="w-full bg-gray-100 rounded-full h-3">
-                    <div class="h-3 rounded-full transition-all duration-500 {{ $item->persentase >= 90 ? 'bg-red-500' : ($item->persentase >= 70 ? 'bg-orange-400' : 'bg-teal-500') }}" 
-                         style="width: {{ $item->persentase }}%">
+                <div class="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
+                    <div class="h-3 rounded-full transition-all duration-500 {{ $item->persentase >= 90 ? 'bg-red-500' : ($item->persentase >= 70 ? 'bg-orange-400' : 'bg-teal-500') }}"
+                        style="--progress: {{ $item->persentase }}%; width: var(--progress);">
                     </div>
                 </div>
             </div>
 
             <div class="mt-6 pt-4 border-t border-gray-50 flex items-center justify-between">
                 @if($item->sisa > 0)
-                    <span class="flex items-center text-xs text-green-600 font-bold">
-                        <i class="fas fa-check-circle mr-1"></i> TERSEDIA
-                    </span>
+                <span class="flex items-center text-xs text-green-600 font-bold">
+                    <i class="fas fa-check-circle mr-1"></i> TERSEDIA
+                </span>
                 @else
-                    <span class="flex items-center text-xs text-red-600 font-bold">
-                        <i class="fas fa-times-circle mr-1"></i> PENUH
-                    </span>
+                <span class="flex items-center text-xs text-red-600 font-bold">
+                    <i class="fas fa-times-circle mr-1"></i> PENUH
+                </span>
                 @endif
                 <a href="{{ route('petugas.booking.index') }}" class="text-xs text-blue-600 hover:underline">Lihat Detail Hewan &rarr;</a>
             </div>

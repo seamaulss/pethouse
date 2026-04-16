@@ -140,6 +140,7 @@
 @endpush
 
 @section('content')
+<!-- Hero Section -->
 <section class="py-12 bg-teal-50">
     <div class="container mx-auto px-4 text-center">
         <h1 class="text-3xl md:text-5xl font-bold text-gray-800 mb-2" data-aos="fade-down">Galeri Kita</h1>

@@ -134,42 +134,52 @@
         <div class="text-center mb-10 md:mb-16" data-aos="fade-up">
             <h2 class="text-2xl md:text-4xl font-bold text-gray-800 mb-3">Apa Kata Pelanggan Kami</h2>
             <p class="text-gray-600 text-sm md:text-base max-w-2xl mx-auto">
-                Testimoni dari pelanggan yang puas dengan layanan LARAPetHouse
+                Testimoni dari pelanggan yang puas dengan layanan LARAPetHouse 🐾
             </p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             @foreach($testimonis as $index => $testimoni)
-            <div class="bg-white rounded-xl p-6 shadow-md border border-gray-100 flex flex-col justify-between"
+            {{-- Menggunakan gradien yang sama persis dengan card-modern di layanan.blade --}}
+            <div class="rounded-3xl p-6 shadow-sm border border-gray-100 flex flex-col justify-between transition-all duration-300 hover:shadow-xl bg-gradient-to-br from-pink-50 to-teal-50"
                 data-aos="fade-up" data-aos-delay="{{ $index * 100 }}">
+
                 <div>
                     <div class="flex items-center mb-4">
                         <div class="flex-shrink-0 mr-3">
                             @if($testimoni->foto_hewan && file_exists(public_path('storage/testimoni/' . $testimoni->foto_hewan)))
                             <img src="{{ asset('storage/testimoni/' . $testimoni->foto_hewan) }}"
                                 alt="{{ $testimoni->nama_hewan }}"
-                                class="w-14 h-14 rounded-full object-cover border-2 border-teal-100" loading="lazy">
+                                class="w-14 h-14 rounded-full object-cover border-2 border-white shadow-sm" loading="lazy">
                             @else
-                            <div class="w-14 h-14 bg-teal-50 rounded-full flex items-center justify-center border border-teal-100">
-                                <i class="fas fa-paw text-teal-600"></i>
+                            <div class="w-14 h-14 bg-white rounded-full flex items-center justify-center border border-teal-100 shadow-sm">
+                                <i class="fas fa-paw text-pink-500"></i>
                             </div>
                             @endif
                         </div>
                         <div>
-                            <h4 class="font-bold text-gray-800">{{ $testimoni->nama_pemilik }}</h4>
-                            <p class="text-teal-600 text-xs font-medium">{{ $testimoni->nama_hewan }} ({{ $testimoni->jenis_hewan }})</p>
+                            {{-- Nama pemilik menggunakan warna teal-600 agar senada dengan judul layanan --}}
+                            <h4 class="font-bold text-teal-600 text-lg">{{ $testimoni->nama_pemilik }}</h4>
+                            <p class="text-pink-500 text-xs font-bold uppercase tracking-wider">
+                                {{ $testimoni->nama_hewan }} <span class="text-gray-400">({{ $testimoni->jenis_hewan }})</span>
+                            </p>
                         </div>
                     </div>
+
+                    {{-- Isi Testimoni menggunakan gray-600 --}}
                     <p class="text-gray-600 italic text-sm md:text-base leading-relaxed mb-4">
                         "{{ Str::limit($testimoni->isi_testimoni, 150) }}"
                     </p>
                 </div>
-                <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-50">
-                    <div class="flex text-yellow-400 text-sm">
+
+                <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-200/50">
+                    {{-- Rating menggunakan warna kuning cerah --}}
+                    <div class="flex text-yellow-400 text-xs">
                         @for($i = 1; $i <= 5; $i++)
                             <i class="{{ $i <= ($testimoni->rating ?? 5) ? 'fas' : 'far' }} fa-star"></i>
                             @endfor
                     </div>
+                    {{-- Tanggal --}}
                     <span class="text-xs text-gray-400">{{ $testimoni->created_at->translatedFormat('d F Y') }}</span>
                 </div>
             </div>
@@ -240,7 +250,7 @@
 </section>
 
 <!-- Galeri Section  -->
-<section class="py-12 md:py-20 bg-white">a
+<section class="py-12 md:py-20 bg-white">
     <div class="container mx-auto px-4">
         <h2 class="text-2xl md:text-4xl font-bold text-center mb-10 text-gray-800">Galeri LARAPetHouse</h2>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">

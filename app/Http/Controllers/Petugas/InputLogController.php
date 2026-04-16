@@ -18,22 +18,31 @@ class InputLogController extends Controller
      */
     public function show(Booking $booking, Request $request)
     {
-        $petugas = Auth::user();
-
-        // Otomatis update ke in_progress jika sebelumnya masih confirmed (Logika Check-in)
+        // 1. Logika Check-in otomatis
         if ($booking->status === 'confirmed') {
             $booking->update(['status' => 'in_progress']);
         }
 
-        $selectedDate = $request->get('tanggal', now()->toDateString());
+        // 2. Ambil tanggal hari ini dan tanggal dari request
+        $today = now()->toDateString();
+        $requestedDate = $request->get('tanggal');
 
-        $masuk = Carbon::parse($booking->tanggal_masuk);
-        $keluar = Carbon::parse($booking->tanggal_keluar);
-        $selected = Carbon::parse($selectedDate);
-
-        if ($selected->lt($masuk) || $selected->gt($keluar)) {
-            return redirect()->route('petugas.input-log.show', ['booking' => $booking->id, 'tanggal' => $booking->tanggal_masuk]);
+        // 3. LOGIKA FALLBACK (Anti-Loop): 
+        // Jika tidak ada request tanggal, cek apakah hari ini masuk dalam range booking.
+        // Jika hari ini di luar range, paksa pakai tanggal_masuk.
+        if (!$requestedDate) {
+            $selectedDate = ($today >= $booking->tanggal_masuk && $today <= $booking->tanggal_keluar)
+                ? $today
+                : $booking->tanggal_masuk;
+        } else {
+            $selectedDate = $requestedDate;
         }
+
+        // 4. VALIDASI RANGE (Kunci mati agar tidak bisa input tanggal sembarangan di URL)
+        if ($selectedDate < $booking->tanggal_masuk) $selectedDate = $booking->tanggal_masuk;
+        if ($selectedDate > $booking->tanggal_keluar) $selectedDate = $booking->tanggal_keluar;
+
+        // --- SELESAI, LANJUT AMBIL DATA ---
 
         $logs = DailyLog::where('booking_id', $booking->id)
             ->where('tanggal', $selectedDate)
@@ -41,25 +50,27 @@ class InputLogController extends Controller
             ->orderBy('waktu', 'asc')
             ->get();
 
-        $masterKegiatan = MasterKegiatan::where('aktif', 'ya')
-            ->orderBy('urutan')
-            ->get();
+        $masterKegiatan = MasterKegiatan::where('aktif', 'ya')->orderBy('urutan')->get();
 
+        // Buat list tanggal untuk navigasi di view
         $dates = [];
-        $current = $masuk->copy();
+        $current = \Carbon\Carbon::parse($booking->tanggal_masuk);
+        $keluar = \Carbon\Carbon::parse($booking->tanggal_keluar);
         while ($current->lte($keluar)) {
             $dates[] = $current->toDateString();
             $current->addDay();
         }
 
         $filledDates = DailyLog::where('booking_id', $booking->id)
-            ->selectRaw('DATE(tanggal) as date')
-            ->distinct()
-            ->pluck('date')
-            ->toArray();
+            ->distinct()->pluck('tanggal')->toArray();
 
         return view('petugas.input-log', compact(
-            'booking', 'logs', 'masterKegiatan', 'selectedDate', 'dates', 'filledDates'
+            'booking',
+            'logs',
+            'masterKegiatan',
+            'selectedDate',
+            'dates',
+            'filledDates'
         ));
     }
 

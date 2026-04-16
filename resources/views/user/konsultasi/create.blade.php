@@ -165,22 +165,29 @@
 
 @push('scripts')
 <script>
+    // 1. Inisialisasi Data & Elemen
     const slotJam = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00'];
     const tanggalInput = document.getElementById('tanggal');
     const jamSelect = document.getElementById('jam');
 
+    // Ambil data lama dari Laravel Blade ke variabel JS (Mencegah Linter Error)
+    const oldTanggal = "{{ old('tanggal_janji') }}";
+    const oldJam = "{{ old('jam_janji') }}";
+
+    // 2. Fungsi Utama: Ambil Jam Tersedia (Fetch)
     tanggalInput.addEventListener('change', async () => {
         if (!tanggalInput.value) return;
 
         jamSelect.innerHTML = '<option>Loading jam tersedia...</option>';
         
         try {
-            const res = await fetch("{{ route('user.konsultasi.get-jam') }}?tanggal=" + tanggalInput.value);
+            const url = "{{ route('user.konsultasi.get-jam') }}?tanggal=" + tanggalInput.value;
+            const res = await fetch(url);
             const jamTerpakai = await res.json();
 
             jamSelect.innerHTML = '<option value="">Pilih Jam</option>';
 
-            // Menggunakan Waktu Lokal Indonesia/Server
+            // Logika Waktu Lokal
             const now = new Date();
             const today = now.toISOString().split('T')[0];
             const nowHour = now.getHours();
@@ -191,37 +198,40 @@
                 opt.value = jam;
                 opt.textContent = jam;
 
-                // Perbaikan Pencocokan: Cek apakah jam ada di array jamTerpakai
+                // Cek apakah jam sudah dibooking
                 const isBooked = jamTerpakai.includes(jam);
 
                 if (isBooked) {
                     opt.disabled = true;
                     opt.textContent = jam + ' (Sudah dibooking)';
-                    opt.style.color = 'red'; // Memberi tanda visual
+                    opt.style.color = 'red';
                 } else if (tanggalInput.value === today && jamInt <= nowHour) {
+                    // Cek apakah jam sudah lewat (untuk hari ini)
                     opt.disabled = true;
                     opt.textContent = jam + ' (Sudah lewat)';
                 }
 
                 jamSelect.appendChild(opt);
             });
+
+            // Handle set value jam jika ada data lama (setelah fetch selesai)
+            if (oldJam && tanggalInput.value === oldTanggal) {
+                jamSelect.value = oldJam;
+            }
+
         } catch (error) {
             jamSelect.innerHTML = '<option value="">Gagal memuat jam</option>';
             console.error('Error loading jam:', error);
         }
     });
 
-    // Handle data lama (Old Input)
-    @if(!empty(old('tanggal_janji')))
-        document.addEventListener('DOMContentLoaded', () => {
-            tanggalInput.value = '{{ old('tanggal_janji') }}';
+    // 3. Handle Data Lama (Old Input) saat Halaman Dimuat
+    document.addEventListener('DOMContentLoaded', () => {
+        if (oldTanggal) {
+            tanggalInput.value = oldTanggal;
+            // Memicu event change agar fetch jam berjalan otomatis
             tanggalInput.dispatchEvent(new Event('change'));
-            
-            // Tunggu fetch selesai baru set value jam
-            setTimeout(() => {
-                jamSelect.value = '{{ old('jam_janji') }}';
-            }, 1000);
-        });
-    @endif
+        }
+    });
 </script>
 @endpush

@@ -85,6 +85,10 @@
             <form method="POST" action="{{ route('user.booking.extend', $booking->id) }}" class="space-y-8">
                 @csrf
                 
+                {{-- Data Hidden untuk JavaScript agar editor tidak error --}}
+                <input type="hidden" id="harga_per_hari_val" value="{{ $hargaPerHari }}">
+                <input type="hidden" id="tgl_keluar_lama_val" value="{{ \Carbon\Carbon::parse($booking->tanggal_keluar)->format('Y-m-d') }}">
+
                 <div class="space-y-6">
                     <div class="group">
                         <label class="block text-sm font-semibold text-gray-700 mb-2 transition-colors group-focus-within:text-teal-600">
@@ -97,8 +101,9 @@
                             <input type="date" 
                                    name="tanggal_keluar_baru" 
                                    id="tanggal_keluar_baru"
-                                   min="{{ $minDate ?? \Carbon\Carbon::parse($booking->tanggal_keluar)->addDay()->translatedFormat('Y-F-d') }}"
-                                   max="{{ $maxDate ?? \Carbon\Carbon::parse($booking->tanggal_keluar)->addDays(30)->translatedFormat('Y-F-d') }}"
+                                   {{-- Diperbaiki ke format Y-m-d agar kalender muncul --}}
+                                   min="{{ \Carbon\Carbon::parse($booking->tanggal_keluar)->addDay()->format('Y-m-d') }}"
+                                   max="{{ \Carbon\Carbon::parse($booking->tanggal_keluar)->addDays(30)->format('Y-m-d') }}"
                                    class="w-full pl-11 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all"
                                    required>
                         </div>
@@ -118,7 +123,7 @@
                                   placeholder="Contoh: Masih ada urusan mendadak di luar kota...">{{ old('alasan_perpanjangan') }}</textarea>
                     </div>
 
-                    <div id="harga-info" class="hidden transform transition-all duration-500">
+                    <div id="harga-info" class="hidden transform transition-all duration-500 opacity-0">
                         <div class="bg-gradient-to-br from-teal-50 to-white border border-teal-100 rounded-2xl p-6 shadow-sm">
                             <h4 class="text-teal-800 font-bold flex items-center mb-4">
                                 <i class="fas fa-file-invoice-dollar mr-2"></i> Estimasi Biaya Tambahan
@@ -154,7 +159,8 @@
                 <div class="flex flex-col sm:flex-row gap-4">
                     <button type="submit"
                             id="submit-btn"
-                            class="flex-[2] order-1 sm:order-2 bg-teal-600 hover:bg-teal-700 active:scale-[0.98] text-white px-8 py-4 rounded-xl font-bold shadow-lg shadow-teal-200 transition-all flex items-center justify-center">
+                            disabled
+                            class="flex-[2] order-1 sm:order-2 bg-teal-600 hover:bg-teal-700 active:scale-[0.98] text-white px-8 py-4 rounded-xl font-bold shadow-lg shadow-teal-200 transition-all flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed">
                         <i class="fas fa-paper-plane mr-2"></i> Ajukan Sekarang
                     </button>
                     <a href="{{ route('user.booking.riwayat') }}"
@@ -188,16 +194,19 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // 1. Inisialisasi Element
     const tanggalKeluarBaru = document.getElementById('tanggal_keluar_baru');
     const hargaInfo = document.getElementById('harga-info');
     const durasiSpan = document.getElementById('durasi');
     const biayaSpan = document.getElementById('biaya');
     const submitBtn = document.getElementById('submit-btn');
     
-    const hargaPerHari = {{ $hargaPerHari }};
+    // Mengambil data dari input hidden (Menghindari error Decorators)
+    const hargaPerHari = parseInt(document.getElementById('harga_per_hari_val').value) || 0;
+    const tglLamaStr = document.getElementById('tgl_keluar_lama_val').value;
     
     function hitungPerpanjangan() {
-        const tanggalKeluarLama = new Date('{{ \Carbon\Carbon::parse($booking->tanggal_keluar)->format("Y-m-d") }}');
+        const tanggalKeluarLama = new Date(tglLamaStr);
         const tanggalKeluarBaruValue = tanggalKeluarBaru.value;
         
         if (!tanggalKeluarBaruValue) {
@@ -217,23 +226,35 @@ document.addEventListener('DOMContentLoaded', function() {
             biayaSpan.textContent = 'Rp ' + biaya.toLocaleString('id-ID');
             
             hargaInfo.classList.remove('hidden');
+            // Sedikit delay agar transisi Tailwind berjalan
             setTimeout(() => hargaInfo.classList.remove('opacity-0'), 10);
             submitBtn.disabled = false;
         } else {
-            hargaInfo.classList.add('hidden');
+            hargaInfo.classList.add('hidden', 'opacity-0');
             submitBtn.disabled = true;
-            if (durasi > 30) alert('Maksimal perpanjangan adalah 30 hari');
+            if (durasi > 30) {
+                alert('Maksimal perpanjangan adalah 30 hari');
+                tanggalKeluarBaru.value = '';
+            } else if (durasi <= 0 && tanggalKeluarBaruValue !== "") {
+                alert('Tanggal baru harus setelah tanggal keluar saat ini');
+                tanggalKeluarBaru.value = '';
+            }
         }
     }
     
+    // Event Listener
     tanggalKeluarBaru.addEventListener('change', hitungPerpanjangan);
     
-    document.querySelector('form').addEventListener('submit', function(e) {
-        if (!confirm('Apakah Anda yakin data perpanjangan sudah benar?')) {
-            e.preventDefault();
-        }
-    });
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            if (!confirm('Apakah Anda yakin data perpanjangan sudah benar?')) {
+                e.preventDefault();
+            }
+        });
+    }
 
+    // Jalankan pengecekan awal jika sudah ada value (misal saat redirect back)
     if (tanggalKeluarBaru.value) hitungPerpanjangan();
 });
 </script>

@@ -16,10 +16,10 @@
     // Logika Status Operasional (Buka/Tutup)
     $now = now()->timezone('Asia/Jakarta');
     $time = $now->format('H:i');
-    $day = $now->dayOfWeek; // 0 (Minggu) - 6 (Sabtu)
     
-    // Sesuai jadwal di footer: Senin-Sabtu 08:00 - 18:00
-    $isOpen = ($time >= '08:00' && $time <= '18:00') && ($day != 0);
+    // Perbaikan: Hapus pengecekan hari agar Senin-Minggu tetap buka
+    // Sesuai jadwal: 08:00 - 18:00 setiap hari
+    $isOpen = ($time >= '08:00' && $time <= '18:00');
 @endphp
 
 <nav id="navbar" class="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-lg shadow-lg transition-all duration-300">
@@ -28,7 +28,7 @@
 
             <a href="{{ route('home') }}" class="flex items-center text-2xl font-bold text-gray-800 shrink-0">
                 <span class="text-3xl mr-2">🐾</span>
-                Pet<span class="font-normal text-teal-500">House</span>
+                LARAPet<span class="font-normal text-teal-500">House</span>
             </a>
 
             <div class="hidden md:flex items-center space-x-4 lg:space-x-8 flex-wrap">
@@ -93,6 +93,7 @@
 
             <div class="pt-6 border-t border-gray-100 space-y-4">
                 @auth
+                    @php $dashboardRoute = auth()->user()->role === 'admin' ? 'admin.dashboard' : 'user.dashboard'; @endphp
                     <a href="{{ route($dashboardRoute) }}" class="block w-full py-4 bg-teal-500 text-white text-center rounded-2xl font-bold shadow-lg shadow-teal-200">
                         Ke Dashboard
                     </a>

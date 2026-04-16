@@ -92,7 +92,8 @@
                 </div>
                 <div class="max-h-96 overflow-y-auto divide-y divide-gray-50">
                     @forelse($notifications as $notif)
-                    <div class="p-4 hover:bg-teal-50/30 transition cursor-pointer {{ !$notif->is_read ? 'bg-teal-50/50' : '' }}" onclick="markSingleAsRead({{ $notif->id }}, this)">
+                    <div class="p-4 hover:bg-teal-50/30 transition cursor-pointer {{ !$notif->is_read ? 'bg-teal-50/50' : '' }}"
+                        onclick="markSingleAsRead('{{ $notif->id }}', this)">
                         <div class="flex gap-3">
                             <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm flex-shrink-0">
                                 <i class="fas fa-file-alt text-teal-500 text-xs"></i>
@@ -204,7 +205,7 @@
 
 <script>
     function updateNotificationDropdown() {
-        // Ganti pemanggilan routenya
+        // Menggunakan template literal yang bersih untuk URL
         fetch("{{ route('dokter.notifikasi.get-new') }}")
             .then(response => response.json())
             .then(data => {
@@ -215,7 +216,6 @@
                         if (badge) {
                             badge.innerText = data.unreadCount;
                         } else {
-                            // Jika badge belum ada, buat elemennya secara dinamis
                             const bellIcon = document.querySelector('.fa-bell').parentElement;
                             const newBadge = `<span class="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] h-4 w-4 rounded-full flex items-center justify-center animate-bounce">${data.unreadCount}</span>`;
                             bellIcon.insertAdjacentHTML('beforeend', newBadge);
@@ -224,9 +224,9 @@
                         badge.remove();
                     }
 
-                    // 2. Update List Notifikasi di dalam Dropdown
+                    // 2. Update List Notifikasi
                     const container = document.querySelector('.max-h-96.overflow-y-auto');
-                    if (data.notifications.length > 0) {
+                    if (data.notifications && data.notifications.length > 0) {
                         let html = '';
                         data.notifications.forEach(notif => {
                             const isUnread = notif.is_read == 0 ? 'bg-teal-50/50' : '';
@@ -254,16 +254,16 @@
     // Jalankan polling setiap 30 detik
     setInterval(updateNotificationDropdown, 30000);
 
-    // 1. Fungsi Tandai Satu Notifikasi Sebagai Baca
-    // Fungsi untuk satu notifikasi
+    // 1. Fungsi Tandai Satu Notifikasi
     function markSingleAsRead(id, element) {
+        // Perbaikan: Gunakan backticks untuk variabel ID di dalam URL
         fetch(`/dokter/notifikasi/${id}/read`, {
                 method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': '{{ csrf_token() }}',
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
-                },
+                }
             })
             .then(response => response.json())
             .then(data => {
@@ -274,31 +274,29 @@
             .catch(error => console.error('Error:', error));
     }
 
-    // Fungsi untuk semua notifikasi
+    // 2. Fungsi Tandai Semua
     function markAllAsRead(event) {
         if (event) {
-            event.preventDefault(); // Mencegah form submit tradisional
-            event.stopPropagation(); // Mencegah dropdown tertutup seketika
+            event.preventDefault();
+            event.stopPropagation();
         }
 
         fetch("{{ route('dokter.notifikasi.read-all') }}", {
                 method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Content-Type': 'application/json', // Tambahkan ini
+                    'Content-Type': 'application/json',
                     'Accept': 'application/json'
                 }
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // REFRESH HALAMAN agar angka notif di badge merah hilang
                     window.location.reload();
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                // Tetap refresh jika terjadi error untuk sinkronisasi ulang data
                 window.location.reload();
             });
     }
